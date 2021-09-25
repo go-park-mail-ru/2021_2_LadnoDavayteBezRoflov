@@ -41,8 +41,23 @@ func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
 	}
 
 	boardHandler.Data.Mu.RLock()
-	boards := boardHandler.Data.Boards[userID]
+	users := boardHandler.Data.Users
+	allTeams := boardHandler.Data.Teams
 	boardHandler.Data.Mu.RUnlock()
 
-	c.IndentedJSON(http.StatusOK, boards)
+	var teamsID []uint
+
+	for _, user := range users {
+		if user.ID == userID {
+			teamsID = user.Teams
+			break
+		}
+	}
+
+	var teams []models.Team
+	for _, teamID := range teamsID {
+		teams = append(teams, allTeams[teamID])
+	}
+
+	c.IndentedJSON(http.StatusOK, teams)
 }

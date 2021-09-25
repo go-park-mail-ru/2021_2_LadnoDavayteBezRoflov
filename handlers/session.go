@@ -23,6 +23,7 @@ func CreateSessionHandler(router *gin.RouterGroup, sessionURL string, data *mode
 	sessions := router.Group(handler.SessionURL)
 	{
 		sessions.POST("", handler.Create)
+		sessions.GET("", handler.Get)
 		sessions.DELETE("", handler.Delete)
 	}
 }
@@ -61,6 +62,34 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 
 	http.SetCookie(c.Writer, cookie)
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
+}
+
+func (sessionHandler *SessionHandler) Get(c *gin.Context) {
+	session, err := c.Request.Cookie("session_id")
+	if err == http.ErrNoCookie {
+		c.JSON(http.StatusUnauthorized, gin.H{"status": "you aren't logged in"})
+		return
+	}
+
+	sessionHandler.Data.Mu.RLock()
+	userID, ok := sessionHandler.Data.Sessions[session.Value]
+	sessionHandler.Data.Mu.RUnlock()
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"status": "you aren't logged in"})
+		return
+	}
+
+	sessionHandler.Data.Mu.RLock()
+	users := sessionHandler.Data.Users
+	sessionHandler.Data.Mu.RUnlock()
+
+	for _, user := range users {
+		if user.ID == userID {
+			c.IndentedJSON(http.StatusOK, user.Login)
+			return
+		}
+	}
 }
 
 func (sessionHandler *SessionHandler) Delete(c *gin.Context) {

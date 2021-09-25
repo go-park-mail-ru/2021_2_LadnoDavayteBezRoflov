@@ -17,7 +17,6 @@ type Settings struct {
 }
 
 func InitSettings() (settings Settings) {
-	//TODO
 	settings = Settings{
 		RootURL: "/api",
 		SessionURL: "/sessions",
@@ -28,7 +27,7 @@ func InitSettings() (settings Settings) {
 
 		Origins: []string{
 			"http://localhost:8080",
-			//"", //Адрес деплоя
+			//Адрес деплоя
 		},
 
 		corsConfig: cors.DefaultConfig(),

@@ -37,6 +37,7 @@ func (sessionHandler *UserHandler) Create(c *gin.Context) {
 
 	sessionHandler.Data.Mu.RLock()
 	_, userAlreadyCreated := sessionHandler.Data.Users[json.Login]
+	users := sessionHandler.Data.Users
 	sessionHandler.Data.Mu.RUnlock()
 
 	if userAlreadyCreated {
@@ -44,8 +45,15 @@ func (sessionHandler *UserHandler) Create(c *gin.Context) {
 		return
 	}
 
+	for _, user := range users {
+		if user.Email == json.Email {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Bad input data")}) //TODO заменить на уникальный тип ошибки
+			return
+		}
+	}
+
+	userID := uint(len(users))
 	sessionHandler.Data.Mu.Lock()
-	userID := uint(len(sessionHandler.Data.Users))
 	sessionHandler.Data.Users[json.Login] = &models.User{
 		ID: userID,
 		Login:    json.Login,

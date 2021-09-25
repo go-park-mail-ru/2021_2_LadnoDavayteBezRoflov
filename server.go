@@ -32,6 +32,10 @@ func (server *Server) Run() {
 				Login:    "Dima",
 				Email:    "dima@mail.ru",
 				Password: "ya_dima",
+				Teams: []uint {
+					0,
+					1,
+				},
 			},
 			"Tim": {
 				ID:       1,
@@ -44,49 +48,57 @@ func (server *Server) Run() {
 				Login:    "Tony",
 				Email:    "tony@mail.ru",
 				Password: "ya_tony",
+				Teams: []uint{
+					1,
+				},
 			},
 		},
-		Boards: map[uint][]models.Board {
+		Teams: map[uint]models.Team {
 			0: {
-				{
-					ID:    0,
-					Title: "Убийца Trello",
-					Tasks: []string {
-						"Начать делать",
-						"Закончить",
+				ID:     0,
+				Title:  "Убийца Trello",
+				Boards: []models.Board{
+					{
+						ID:    0,
+						Title: "Убийца Trello",
+						Tasks: []string {
+							"Начать делать",
+							"Закончить",
+						},
 					},
-				},
-				{
-					ID:    1,
-					Title: "Drello 2.0",
-					Tasks: []string{},
-				},
-				{
-					ID:    2,
-					Title: "Brrrello",
-					Tasks: []string {
-						"Придумать оригинальное название",
+					{
+						ID:    1,
+						Title: "Drello 2.0",
+						Tasks: []string{},
+					},
+					{
+						ID:    2,
+						Title: "Brrrello",
+						Tasks: []string {
+							"Придумать оригинальное название",
+						},
 					},
 				},
 			},
 			1: {
-
-			},
-			2: {
-				{
-					ID:    3,
-					Title: "Технопарк",
-					Tasks: []string {
-						"Не умереть",
-						"Написать бэкэнд сервер",
+				ID:     1,
+				Title:  "Сибирская корона 2021",
+				Boards: []models.Board{
+					{
+						ID:    3,
+						Title: "Технопарк",
+						Tasks: []string {
+							"Не умереть",
+							"Написать бэкэнд сервер",
+						},
 					},
-				},
-				{
-					ID:    4,
-					Title: "Почилить",
-					Tasks: []string {
-						"Даже не думай об этом",
-						"Закрыть все таски из первой доски",
+					{
+						ID:    4,
+						Title: "Почилить",
+						Tasks: []string {
+							"Даже не думай об этом",
+							"Закрыть все таски из первой доски",
+						},
 					},
 				},
 			},
