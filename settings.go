@@ -27,8 +27,8 @@ func InitSettings() (settings Settings) {
 		ServerAddress: "0.0.0.0:8080",
 
 		Origins: []string{
-			"localhost:8080",
-			"", //Адрес деплоя
+			"http://localhost:8080",
+			//"", //Адрес деплоя
 		},
 
 		corsConfig: cors.DefaultConfig(),
