@@ -1,5 +1,7 @@
 package main
 
+import "github.com/gin-contrib/cors"
+
 type Settings struct {
 	//TODO
 	RootURL			string
@@ -8,6 +10,10 @@ type Settings struct {
 	BoardsURL		string
 
 	ServerAddress	string
+
+	Origins			[]string
+
+	corsConfig		cors.Config
 }
 
 func InitSettings() (settings Settings) {
@@ -17,7 +23,17 @@ func InitSettings() (settings Settings) {
 		SessionURL: "/sessions",
 		ProfileURL: "/profile",
 		BoardsURL: "/boards",
+
 		ServerAddress: "0.0.0.0:8080",
+
+		Origins: []string{
+			"localhost:8080",
+			"", //Адрес деплоя
+		},
+
+		corsConfig: cors.DefaultConfig(),
 	}
+
+	settings.corsConfig.AllowOrigins = settings.Origins
 	return
 }

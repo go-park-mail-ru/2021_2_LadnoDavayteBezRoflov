@@ -3,6 +3,7 @@ package main
 import (
 	"backendServer/handlers"
 	"backendServer/models"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"sync"
 )
@@ -20,6 +21,7 @@ func (server *Server) Run() {
 	router := gin.New()
 	router.Use(gin.Logger()) //TODO возможно заменить на другой логгер
 	router.Use(gin.Recovery())
+	router.Use(cors.New(server.settings.corsConfig))
 
 	//TEMP DATA STORAGE
 	data := &models.Data {
