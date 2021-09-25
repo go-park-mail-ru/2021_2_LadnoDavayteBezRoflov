@@ -3,9 +3,10 @@ package models
 import "sync"
 
 type Board struct {
-	ID		uint `json:"id"`
-	Title	string `json:"board_name"`
-	Tasks	[]string `json:"tasks"` //TODO обернуть в нормальные задачи (позже)
+	ID			uint `json:"id"`
+	Title		string `json:"board_name"`
+	Description	string `json:"description"`
+	Tasks		[]string `json:"tasks"` //TODO обернуть в нормальные задачи (позже)
 }
 
 type Team struct {
@@ -26,7 +27,6 @@ type User struct {
 type Data struct {
 	Sessions	map[string]uint
 	Users		map[string]*User
-	//Boards		map[uint][]Board
 	Teams		map[uint]Team
 	Mu			*sync.RWMutex
 }

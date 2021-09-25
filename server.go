@@ -61,6 +61,7 @@ func (server *Server) Run() {
 					{
 						ID:    0,
 						Title: "Убийца Trello",
+						Description: "Неповторимый оригинал против жалкой пародии",
 						Tasks: []string {
 							"Начать делать",
 							"Закончить",
@@ -69,11 +70,13 @@ func (server *Server) Run() {
 					{
 						ID:    1,
 						Title: "Drello 2.0",
+						Description: "Вторая часть знаменитого проекта",
 						Tasks: []string{},
 					},
 					{
 						ID:    2,
 						Title: "Brrrello",
+						Description: "Полностью оригинальная разработка",
 						Tasks: []string {
 							"Придумать оригинальное название",
 						},
@@ -87,6 +90,7 @@ func (server *Server) Run() {
 					{
 						ID:    3,
 						Title: "Технопарк",
+						Description: "Здесь людей ...",
 						Tasks: []string {
 							"Не умереть",
 							"Написать бэкэнд сервер",
@@ -95,6 +99,7 @@ func (server *Server) Run() {
 					{
 						ID:    4,
 						Title: "Почилить",
+						Description: "Планы по становлению овощем",
 						Tasks: []string {
 							"Даже не думай об этом",
 							"Закрыть все таски из первой доски",
