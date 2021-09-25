@@ -35,5 +35,7 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings.corsConfig.AllowOrigins = settings.Origins
+	settings.corsConfig.AllowCredentials = true
+
 	return
 }
