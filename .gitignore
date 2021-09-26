@@ -16,3 +16,6 @@
 
 # MAC OSX
 *.DS_Store
+
+# Log files
+*.log

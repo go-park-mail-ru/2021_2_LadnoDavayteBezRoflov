@@ -2,22 +2,24 @@ package handlers
 
 import (
 	"backendServer/models"
-	"backendServer/utils"
+	"backendServer/repositories"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type SessionHandler struct {
-	SessionURL	string
-	Data		*models.Data
+	SessionURL        string
+	SessionRepository repositories.SessionRepository
+	// Data       *models.Data
 }
 
-func CreateSessionHandler(router *gin.RouterGroup, sessionURL string, data *models.Data) {
+func CreateSessionHandler(router *gin.RouterGroup, sessionURL string, sessionRepository repositories.SessionRepository) {
 	handler := &SessionHandler{
-		SessionURL: sessionURL,
-		Data:		data,
+		SessionURL:        sessionURL,
+		SessionRepository: sessionRepository,
 	}
 
 	sessions := router.Group(handler.SessionURL)
@@ -35,28 +37,19 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	//TODO валидация данных
+	// TODO валидация данных
 
-	sessionHandler.Data.Mu.RLock()
-	user, ok := sessionHandler.Data.Users[json.Login]
-	sessionHandler.Data.Mu.RUnlock()
-
-	if !ok || user.Password != json.Password {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Bad input data")})
+	SID, err := sessionHandler.SessionRepository.Create(json)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
 		return
 	}
 
-	SID := utils.RandStringRunes(32)
-
-	sessionHandler.Data.Mu.Lock()
-	sessionHandler.Data.Sessions[SID] = user.ID
-	sessionHandler.Data.Mu.Unlock()
-
 	cookie := &http.Cookie{
-		Name:    "session_id",
-		Value:   SID,
-		Expires: time.Now().Add(24 * time.Hour),
-		Secure: true,
+		Name:     "session_id",
+		Value:    SID,
+		Expires:  time.Now().Add(24 * time.Hour),
+		Secure:   true,
 		HttpOnly: true,
 	}
 
@@ -71,25 +64,15 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 		return
 	}
 
-	sessionHandler.Data.Mu.RLock()
-	userID, ok := sessionHandler.Data.Sessions[session.Value]
-	sessionHandler.Data.Mu.RUnlock()
+	user := sessionHandler.SessionRepository.Get(session.Value)
 
-	if !ok {
+	if user.Login == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"status": "you aren't logged in"})
 		return
 	}
 
-	sessionHandler.Data.Mu.RLock()
-	users := sessionHandler.Data.Users
-	sessionHandler.Data.Mu.RUnlock()
-
-	for _, user := range users {
-		if user.ID == userID {
-			c.IndentedJSON(http.StatusOK, user.Login)
-			return
-		}
-	}
+	c.IndentedJSON(http.StatusOK, user.Login)
+	return
 }
 
 func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
@@ -99,18 +82,11 @@ func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	sessionHandler.Data.Mu.RLock()
-	_, ok := sessionHandler.Data.Sessions[session.Value]
-	sessionHandler.Data.Mu.RUnlock()
-
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Not authorized")})
+	err = sessionHandler.SessionRepository.Delete(session.Value)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
 		return
 	}
-
-	sessionHandler.Data.Mu.Lock()
-	delete(sessionHandler.Data.Sessions, session.Value)
-	sessionHandler.Data.Mu.Unlock()
 
 	session.Expires = time.Now().AddDate(0, 0, -1)
 	http.SetCookie(c.Writer, session)

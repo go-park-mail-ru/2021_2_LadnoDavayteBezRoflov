@@ -1,21 +1,27 @@
 package handlers
 
 import (
-	"backendServer/models"
+	"backendServer/repositories"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type BoardHandler struct {
-	BoardURL	string
-	Data		*models.Data
+	BoardURL          string
+	BoardRepository   repositories.BoardRepository
+	SessionRepository repositories.SessionRepository
 }
 
-func CreateBoardHandler(router *gin.RouterGroup, boardURL string, data *models.Data) {
+func CreateBoardHandler(router *gin.RouterGroup,
+	boardURL string,
+	boardRepository repositories.BoardRepository,
+	sessionRepository repositories.SessionRepository) {
 	handler := &BoardHandler{
-		BoardURL:	boardURL,
-		Data:		data,
+		BoardURL:          boardURL,
+		BoardRepository:   boardRepository,
+		SessionRepository: sessionRepository,
 	}
 
 	boards := router.Group(handler.BoardURL)
@@ -31,33 +37,13 @@ func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	boardHandler.Data.Mu.RLock()
-	userID, ok := boardHandler.Data.Sessions[session.Value]
-	boardHandler.Data.Mu.RUnlock()
-
-	if !ok {
+	user := boardHandler.SessionRepository.Get(session.Value)
+	if user.Login == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Not authorized")})
 		return
 	}
 
-	boardHandler.Data.Mu.RLock()
-	users := boardHandler.Data.Users
-	allTeams := boardHandler.Data.Teams
-	boardHandler.Data.Mu.RUnlock()
-
-	var teamsID []uint
-
-	for _, user := range users {
-		if user.ID == userID {
-			teamsID = user.Teams
-			break
-		}
-	}
-
-	var teams []models.Team
-	for _, teamID := range teamsID {
-		teams = append(teams, allTeams[teamID])
-	}
+	teams := boardHandler.BoardRepository.GetAll(user.Teams)
 
 	c.IndentedJSON(http.StatusOK, teams)
 }

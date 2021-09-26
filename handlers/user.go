@@ -2,22 +2,28 @@ package handlers
 
 import (
 	"backendServer/models"
-	"backendServer/utils"
+	"backendServer/repositories"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	UserURL	string
-	Data		*models.Data
+	UserURL           string
+	UserRepository    repositories.UserRepository
+	SessionRepository repositories.SessionRepository
 }
 
-func CreateUserHandler(router *gin.RouterGroup, userURL string, data *models.Data) {
+func CreateUserHandler(router *gin.RouterGroup,
+	userURL string,
+	userRepository repositories.UserRepository,
+	sessionRepository repositories.SessionRepository) {
 	handler := &UserHandler{
-		UserURL:	userURL,
-		Data:		data,
+		UserURL:           userURL,
+		UserRepository:    userRepository,
+		SessionRepository: sessionRepository,
 	}
 
 	users := router.Group(handler.UserURL)
@@ -26,53 +32,32 @@ func CreateUserHandler(router *gin.RouterGroup, userURL string, data *models.Dat
 	}
 }
 
-func (sessionHandler *UserHandler) Create(c *gin.Context) {
+func (userHandler *UserHandler) Create(c *gin.Context) {
 	var json models.User
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("Bad request")})
 		return
 	}
 
-	//TODO валидация данных
+	// TODO валидация данных
 
-	sessionHandler.Data.Mu.RLock()
-	_, userAlreadyCreated := sessionHandler.Data.Users[json.Login]
-	users := sessionHandler.Data.Users
-	sessionHandler.Data.Mu.RUnlock()
-
-	if userAlreadyCreated {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Bad input data")}) //TODO заменить на уникальный тип ошибки
+	user, err := userHandler.UserRepository.Create(json)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
 		return
 	}
 
-	for _, user := range users {
-		if user.Email == json.Email {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Bad input data")}) //TODO заменить на уникальный тип ошибки
-			return
-		}
+	SID, err := userHandler.SessionRepository.Create(user)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		return
 	}
-
-	userID := uint(len(users))
-	sessionHandler.Data.Mu.Lock()
-	sessionHandler.Data.Users[json.Login] = &models.User{
-		ID: userID,
-		Login:    json.Login,
-		Email:    json.Email,
-		Password: json.Password,
-	}
-	sessionHandler.Data.Mu.Unlock()
-
-	SID := utils.RandStringRunes(32)
-
-	sessionHandler.Data.Mu.Lock()
-	sessionHandler.Data.Sessions[SID] = userID
-	sessionHandler.Data.Mu.Unlock()
 
 	cookie := &http.Cookie{
-		Name:    "session_id",
-		Value:   SID,
-		Expires: time.Now().Add(24 * time.Hour),
-		Secure: true,
+		Name:     "session_id",
+		Value:    SID,
+		Expires:  time.Now().Add(24 * time.Hour),
+		Secure:   true,
 		HttpOnly: true,
 	}
 
