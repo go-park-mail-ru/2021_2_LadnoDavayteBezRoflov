@@ -2,7 +2,7 @@ package main
 
 import (
 	"backendServer/handlers"
-	"backendServer/repositories"
+	"backendServer/repositories/stores"
 	"backendServer/utils"
 	"fmt"
 	"io"
@@ -40,9 +40,9 @@ func (server *Server) Run() {
 		return
 	}
 
-	sessionRepo := repositories.CreateSessionRepository(data)
-	userRepo := repositories.CreateUserRepository(data)
-	boardRepo := repositories.CreateBoardRepository(data)
+	sessionRepo := stores.CreateSessionRepository(data)
+	userRepo := stores.CreateUserRepository(data)
+	boardRepo := stores.CreateBoardRepository(data)
 
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionRepo)
