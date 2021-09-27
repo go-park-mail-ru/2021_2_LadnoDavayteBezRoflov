@@ -1,32 +1,36 @@
 package repositories
 
 import (
+	"backendServer/errors"
 	"backendServer/models"
-	"errors"
 )
 
-type UserRepository struct {
+type UserRepository interface {
+	Create(user models.User) (finalUser models.User, err error)
+}
+
+type UserStore struct {
 	data *models.Data
 }
 
-func CreateUserRepository(data *models.Data) (userRepository UserRepository) {
-	return UserRepository{data: data}
+func CreateUserRepository(data *models.Data) UserRepository {
+	return &UserStore{data: data}
 }
 
-func (userRepository *UserRepository) Create(user models.User) (finalUser models.User, err error) {
-	userRepository.data.Mu.RLock()
-	_, userAlreadyCreated := userRepository.data.Users[user.Login]
-	users := userRepository.data.Users
-	userRepository.data.Mu.RUnlock()
+func (userStore *UserStore) Create(user models.User) (finalUser models.User, err error) {
+	userStore.data.Mu.RLock()
+	_, userAlreadyCreated := userStore.data.Users[user.Login]
+	users := userStore.data.Users
+	userStore.data.Mu.RUnlock()
 
 	if userAlreadyCreated {
-		err = errors.New("User already created")
+		err = errors.ErrUserAlreadyCreated
 		return
 	}
 
 	for _, curUser := range users {
 		if curUser.Email == user.Email {
-			err = errors.New("Email already used")
+			err = errors.ErrEmailAlreadyUsed
 			return
 		}
 	}
@@ -34,9 +38,9 @@ func (userRepository *UserRepository) Create(user models.User) (finalUser models
 	finalUser = user
 	finalUser.ID = uint(len(users))
 
-	userRepository.data.Mu.Lock()
-	userRepository.data.Users[user.Login] = finalUser
-	userRepository.data.Mu.Unlock()
+	userStore.data.Mu.Lock()
+	userStore.data.Users[user.Login] = finalUser
+	userStore.data.Mu.Unlock()
 
 	return
 }

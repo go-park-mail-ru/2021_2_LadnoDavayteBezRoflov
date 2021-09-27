@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"backendServer/errors"
 	"backendServer/repositories"
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,13 +33,13 @@ func CreateBoardHandler(router *gin.RouterGroup,
 func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
 	session, err := c.Request.Cookie("session_id")
 	if err == http.ErrNoCookie {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Not authorized")})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrNotAuthorized})
 		return
 	}
 
 	user := boardHandler.SessionRepository.Get(session.Value)
 	if user.Login == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Not authorized")})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrNotAuthorized})
 		return
 	}
 

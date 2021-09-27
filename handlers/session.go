@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"backendServer/errors"
 	"backendServer/models"
 	"backendServer/repositories"
-	"errors"
+	"backendServer/utils"
 	"net/http"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 type SessionHandler struct {
 	SessionURL        string
 	SessionRepository repositories.SessionRepository
-	// Data       *models.Data
 }
 
 func CreateSessionHandler(router *gin.RouterGroup, sessionURL string, sessionRepository repositories.SessionRepository) {
@@ -33,11 +33,14 @@ func CreateSessionHandler(router *gin.RouterGroup, sessionURL string, sessionRep
 func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 	var json models.User
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("Bad request")})
+		c.JSON(http.StatusBadRequest, gin.H{"error": errors.ErrBadRequest})
 		return
 	}
 
-	// TODO валидация данных
+	if !utils.ValidateUserData(json) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData})
+		return
+	}
 
 	SID, err := sessionHandler.SessionRepository.Create(json)
 	if err != nil {
@@ -78,7 +81,7 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 	session, err := c.Request.Cookie("session_id")
 	if err == http.ErrNoCookie {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("Not authorized")})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrNotAuthorized})
 		return
 	}
 

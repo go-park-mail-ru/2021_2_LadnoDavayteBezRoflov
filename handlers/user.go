@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"backendServer/errors"
 	"backendServer/models"
 	"backendServer/repositories"
-	"errors"
+	"backendServer/utils"
 	"net/http"
 	"time"
 
@@ -35,21 +36,24 @@ func CreateUserHandler(router *gin.RouterGroup,
 func (userHandler *UserHandler) Create(c *gin.Context) {
 	var json models.User
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("Bad request")})
+		c.JSON(http.StatusBadRequest, gin.H{"error": errors.ErrBadRequest})
 		return
 	}
 
-	// TODO валидация данных
-
-	user, err := userHandler.UserRepository.Create(json)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+	if !utils.ValidateUserData(json) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData})
 		return
 	}
 
-	SID, err := userHandler.SessionRepository.Create(user)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+	user, userCreateErr := userHandler.UserRepository.Create(json)
+	if userCreateErr != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": userCreateErr})
+		return
+	}
+
+	SID, sessionCreateErr := userHandler.SessionRepository.Create(user)
+	if sessionCreateErr != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": sessionCreateErr})
 		return
 	}
 

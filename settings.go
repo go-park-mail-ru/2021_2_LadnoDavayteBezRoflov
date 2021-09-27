@@ -42,6 +42,7 @@ func InitSettings() (settings Settings) {
 		AllowedMethods: []string{
 			"GET",
 			"POST",
+			"PUT",
 			"DELETE",
 			"OPTIONS",
 		},
