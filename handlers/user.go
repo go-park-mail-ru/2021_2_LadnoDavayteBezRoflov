@@ -61,7 +61,7 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 		Name:     "session_id",
 		Value:    SID,
 		Expires:  time.Now().Add(24 * time.Hour),
-		Secure:   true,
+		Secure:   false,
 		HttpOnly: true,
 	}
 

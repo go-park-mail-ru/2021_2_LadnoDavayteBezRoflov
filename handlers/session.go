@@ -53,8 +53,9 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 		Name:     "session_id",
 		Value:    SID,
 		Expires:  time.Now().Add(24 * time.Hour),
-		Secure:   true,
+		Secure:   false,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(c.Writer, cookie)

@@ -4,11 +4,13 @@ import (
 	"backendServer/errors"
 	"backendServer/models"
 	"backendServer/repositories/stores"
+	"backendServer/utils"
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/bxcodec/faker/v3"
@@ -177,8 +179,7 @@ func TestSessionHandlerCreateFail(t *testing.T) {
 	}
 }
 
-/*
-func TestSessionHandlerGet(t *testing.T) {
+func TestSessionHandlerGetSuccess(t *testing.T) {
 	t.Parallel()
 
 	data := &models.Data{}
@@ -192,36 +193,152 @@ func TestSessionHandlerGet(t *testing.T) {
 	sessionRepo := stores.CreateSessionRepository(data)
 	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
-	data.Users["Anthony"] = models.User{
-		ID:       101,
-		Login:    "Anthony",
-		Email:    "ant@mail",
-		Password: "qwerty",
+	user := utils.GetSomeUser(data)
+	SID := strconv.Itoa(int(user.ID + 1))
+	data.Sessions[SID] = user.ID
+
+	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: SID,
 	}
-
-	body := bytes.NewReader([]byte(`{"login": "Anthony", "password": "qwerty"}`))
-
-	request, _ := http.NewRequest("GET", rootURL+sessionURL, body)
+	request.AddCookie(cookie)
 	writer := httptest.NewRecorder()
-	expectedStatus := status{StatusDescription: "you are logged in"}
-
 	router.ServeHTTP(writer, request)
 
 	if writer.Code != http.StatusOK {
 		t.Error("status is not ok")
 	}
 
-	returnedStatus := &status{}
-	err = json.Unmarshal(writer.Body.Bytes(), returnedStatus)
+	reflect.DeepEqual(data.Users["Anthony"].Login, writer.Body.String())
+}
+
+func TestSessionHandlerGetFailNoCookie(t *testing.T) {
+	t.Parallel()
+
+	data := &models.Data{}
+	err := faker.FakeData(data)
 	if err != nil {
 		t.Error(err)
 	}
 
-	reflect.DeepEqual(expectedStatus, returnedStatus)
-}
-*/
+	router := gin.New()
+	routerGroup := router.Group(rootURL)
+	sessionRepo := stores.CreateSessionRepository(data)
+	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
-/*
-func TestSessionHandlerDelete(t *testing.T) {
+	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
+	writer := httptest.NewRecorder()
+	router.ServeHTTP(writer, request)
+
+	require.Equal(t, http.StatusUnauthorized, writer.Code)
 }
-*/
+
+func TestSessionHandlerGetFailNoLogin(t *testing.T) {
+	t.Parallel()
+
+	data := &models.Data{}
+	err := faker.FakeData(data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	router := gin.New()
+	routerGroup := router.Group(rootURL)
+	sessionRepo := stores.CreateSessionRepository(data)
+	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
+
+	user := utils.GetSomeUser(data)
+	SID := strconv.Itoa(int(user.ID + 1))
+
+	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: SID,
+	}
+	request.AddCookie(cookie)
+	writer := httptest.NewRecorder()
+	router.ServeHTTP(writer, request)
+
+	require.Equal(t, http.StatusUnauthorized, writer.Code)
+}
+
+func TestSessionHandlerDeleteSuccess(t *testing.T) {
+	t.Parallel()
+
+	data := &models.Data{}
+	err := faker.FakeData(data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	router := gin.New()
+	routerGroup := router.Group(rootURL)
+	sessionRepo := stores.CreateSessionRepository(data)
+	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
+
+	user := utils.GetSomeUser(data)
+	SID := strconv.Itoa(int(user.ID + 1))
+	data.Sessions[SID] = user.ID
+
+	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: SID,
+	}
+	request.AddCookie(cookie)
+	writer := httptest.NewRecorder()
+	router.ServeHTTP(writer, request)
+
+	require.Equal(t, http.StatusOK, writer.Code)
+}
+
+func TestSessionHandlerDeleteFailNoCookie(t *testing.T) {
+	t.Parallel()
+
+	data := &models.Data{}
+	err := faker.FakeData(data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	router := gin.New()
+	routerGroup := router.Group(rootURL)
+	sessionRepo := stores.CreateSessionRepository(data)
+	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
+
+	request, _ := http.NewRequest("DELETE", rootURL+sessionURL, nil)
+	writer := httptest.NewRecorder()
+	router.ServeHTTP(writer, request)
+
+	require.Equal(t, http.StatusUnauthorized, writer.Code)
+}
+
+func TestSessionHandlerDeleteFailNoSession(t *testing.T) {
+	t.Parallel()
+
+	data := &models.Data{}
+	err := faker.FakeData(data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	router := gin.New()
+	routerGroup := router.Group(rootURL)
+	sessionRepo := stores.CreateSessionRepository(data)
+	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
+
+	user := utils.GetSomeUser(data)
+	SID := strconv.Itoa(int(user.ID + 1))
+
+	request, _ := http.NewRequest("DELETE", rootURL+sessionURL, nil)
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: SID,
+	}
+	request.AddCookie(cookie)
+	writer := httptest.NewRecorder()
+	router.ServeHTTP(writer, request)
+
+	require.Equal(t, http.StatusUnauthorized, writer.Code)
+}
