@@ -33,18 +33,19 @@ func CreateSessionHandler(router *gin.RouterGroup, sessionURL string, sessionRep
 func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 	var json models.User
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errors.ErrBadRequest})
+		c.JSON(http.StatusBadRequest, gin.H{"error": errors.ErrBadRequest.Error()})
 		return
 	}
 
+	json.Email = "email@template"
 	if !utils.ValidateUserData(json) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData.Error()})
 		return
 	}
 
 	SID, err := sessionHandler.SessionRepository.Create(json)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -81,13 +82,13 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 	session, err := c.Request.Cookie("session_id")
 	if err == http.ErrNoCookie {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrNotAuthorized})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrNotAuthorized.Error()})
 		return
 	}
 
 	err = sessionHandler.SessionRepository.Delete(session.Value)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 

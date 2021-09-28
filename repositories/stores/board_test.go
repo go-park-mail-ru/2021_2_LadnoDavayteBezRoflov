@@ -23,7 +23,7 @@ func TestCreateBoardRepository(t *testing.T) {
 func TestBoardRepository_GetAll(t *testing.T) {
 	t.Parallel()
 
-	user := getSomeUser(boardTestData)
+	user := utils.GetSomeUser(boardTestData)
 	teamsIDs := user.Teams
 	teams := boardRepo.GetAll(teamsIDs)
 

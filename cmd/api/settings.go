@@ -24,6 +24,8 @@ type Settings struct {
 
 	LogFilePath string
 	LogFormat   gin.HandlerFunc
+
+	IsRelease bool
 }
 
 func InitSettings() (settings Settings) {
@@ -33,10 +35,10 @@ func InitSettings() (settings Settings) {
 		ProfileURL: "/profile",
 		BoardsURL:  "/boards",
 
-		ServerAddress: "0.0.0.0:8080",
+		ServerAddress: ":8000",
 
 		Origins: []string{
-			"http://localhost:8080",
+			"http://localhost:8000",
 			// Адрес деплоя
 		},
 		AllowedMethods: []string{
@@ -50,6 +52,8 @@ func InitSettings() (settings Settings) {
 		corsConfig: cors.DefaultConfig(),
 
 		LogFilePath: "backendLogs.log",
+
+		IsRelease: false,
 	}
 
 	settings.corsConfig.AllowOrigins = settings.Origins

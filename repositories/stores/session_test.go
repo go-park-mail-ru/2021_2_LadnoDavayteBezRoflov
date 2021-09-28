@@ -13,14 +13,6 @@ var (
 	sessionRepo        = &SessionStore{data: sessionTestData}
 )
 
-func getSomeUser(data *models.Data) (user models.User) {
-	for _, someUser := range data.Users {
-		user = someUser
-		return
-	}
-	return
-}
-
 func TestCreateSessionRepository(t *testing.T) {
 	t.Parallel()
 
@@ -32,7 +24,7 @@ func TestCreateSessionRepository(t *testing.T) {
 func TestSessionRepositoryCreateSuccess(t *testing.T) {
 	t.Parallel()
 
-	user := getSomeUser(sessionTestData)
+	user := utils.GetSomeUser(sessionTestData)
 	SID, _ := sessionRepo.Create(user)
 
 	require.Equal(t, user.ID, sessionTestData.Sessions[SID])
@@ -41,7 +33,7 @@ func TestSessionRepositoryCreateSuccess(t *testing.T) {
 func TestSessionRepositoryCreateFail(t *testing.T) {
 	t.Parallel()
 
-	user := getSomeUser(sessionTestData)
+	user := utils.GetSomeUser(sessionTestData)
 	userWithWrongPassword := user
 	userWithWrongPassword.Password = user.Password + "FAKE"
 
@@ -54,7 +46,7 @@ func TestSessionRepositoryGetSuccess(t *testing.T) {
 	t.Parallel()
 
 	sessionValue := "someValue"
-	user := getSomeUser(sessionTestData)
+	user := utils.GetSomeUser(sessionTestData)
 	sessionTestData.Sessions[sessionValue] = user.ID
 
 	require.Equal(t, user, sessionRepo.Get(sessionValue))
@@ -72,7 +64,7 @@ func TestSessionRepositoryDeleteSuccess(t *testing.T) {
 	t.Parallel()
 
 	sessionValue := "someExistingValue"
-	user := getSomeUser(sessionTestData)
+	user := utils.GetSomeUser(sessionTestData)
 	sessionTestData.Sessions[sessionValue] = user.ID
 
 	err := sessionRepo.Delete(sessionValue)

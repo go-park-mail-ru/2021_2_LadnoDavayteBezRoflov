@@ -34,6 +34,7 @@ func (userStore *UserStore) Create(user models.User) (finalUser models.User, err
 
 	finalUser = user
 	finalUser.ID = uint(len(users))
+	finalUser.Teams = []uint{}
 
 	userStore.data.Mu.Lock()
 	userStore.data.Users[user.Login] = finalUser

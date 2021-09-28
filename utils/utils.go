@@ -79,3 +79,11 @@ func ValidateUserData(user models.User) (isValid bool) {
 
 	return
 }
+
+func GetSomeUser(data *models.Data) (user models.User) {
+	for _, someUser := range data.Users {
+		user = someUser
+		return
+	}
+	return
+}

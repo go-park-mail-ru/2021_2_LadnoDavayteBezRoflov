@@ -36,24 +36,24 @@ func CreateUserHandler(router *gin.RouterGroup,
 func (userHandler *UserHandler) Create(c *gin.Context) {
 	var json models.User
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errors.ErrBadRequest})
+		c.JSON(http.StatusBadRequest, gin.H{"error": errors.ErrBadRequest.Error()})
 		return
 	}
 
 	if !utils.ValidateUserData(json) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData.Error()})
 		return
 	}
 
 	user, userCreateErr := userHandler.UserRepository.Create(json)
 	if userCreateErr != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": userCreateErr})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": userCreateErr.Error()})
 		return
 	}
 
 	SID, sessionCreateErr := userHandler.SessionRepository.Create(user)
 	if sessionCreateErr != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": sessionCreateErr})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": sessionCreateErr.Error()})
 		return
 	}
 
@@ -66,5 +66,5 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 	}
 
 	http.SetCookie(c.Writer, cookie)
-	c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
+	c.JSON(http.StatusCreated, gin.H{"status": "you are logged in"})
 }

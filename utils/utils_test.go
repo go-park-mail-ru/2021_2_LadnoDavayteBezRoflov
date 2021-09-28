@@ -2,7 +2,10 @@ package utils
 
 import (
 	"backendServer/models"
+	"reflect"
 	"testing"
+
+	"github.com/bxcodec/faker/v3"
 
 	"github.com/stretchr/testify/require"
 )
@@ -161,4 +164,25 @@ func TestValidateUserDataFail(t *testing.T) {
 			require.Equal(t, false, isValid)
 		})
 	}
+}
+
+func TestGetSomeUser(t *testing.T) {
+	t.Parallel()
+
+	data := &models.Data{}
+	err := faker.FakeData(data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	randomUser := GetSomeUser(data)
+	isExist := false
+	for _, user := range data.Users {
+		if reflect.DeepEqual(user, randomUser) {
+			isExist = true
+			break
+		}
+	}
+
+	require.Equal(t, true, isExist)
 }

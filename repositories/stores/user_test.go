@@ -27,7 +27,10 @@ func TestUserRepositoryCreateSuccess(t *testing.T) {
 	t.Parallel()
 
 	newUser := &models.User{}
-	faker.FakeData(newUser)
+	err := faker.FakeData(newUser)
+	if err != nil {
+		t.Error(err)
+	}
 
 	user, err := userRepo.Create(*newUser)
 	if err != nil {
@@ -40,12 +43,15 @@ func TestUserRepositoryCreateSuccess(t *testing.T) {
 func TestUserRepositoryCreateFail(t *testing.T) {
 	t.Parallel()
 
-	existingUser := getSomeUser(userTestData)
+	existingUser := utils.GetSomeUser(userTestData)
 
 	_, errUserIsExist := userRepo.Create(existingUser)
 
 	newUser := &models.User{}
-	faker.FakeData(newUser)
+	err := faker.FakeData(newUser)
+	if err != nil {
+		t.Error(err)
+	}
 	newUser.Email = existingUser.Email
 	_, errEmailIsUsed := userRepo.Create(*newUser)
 
