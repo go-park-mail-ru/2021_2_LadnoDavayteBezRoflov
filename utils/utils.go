@@ -58,16 +58,16 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 
 func ValidateUserData(user models.User) (isValid bool) {
 	isValid = true
-	regBadSymbols := regexp.MustCompile("[^a-zA-Z]")
+	regLatinSymbols := regexp.MustCompile(".*[a-zA-Z].*")
 
 	userLoginLen := len(user.Login)
-	if userLoginLen < 3 || userLoginLen > 20 || regBadSymbols.MatchString(user.Login) {
+	if userLoginLen < 3 || userLoginLen > 20 || !regLatinSymbols.MatchString(user.Login) {
 		isValid = false
 		return
 	}
 
 	userPasswordLen := len(user.Password)
-	if userPasswordLen < 6 || userPasswordLen > 25 || regBadSymbols.MatchString(user.Password) {
+	if userPasswordLen < 6 || userPasswordLen > 25 || !regLatinSymbols.MatchString(user.Password) {
 		isValid = false
 		return
 	}

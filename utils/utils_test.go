@@ -38,7 +38,7 @@ var (
 		{
 			testName: "login with digits",
 			user: models.User{
-				Login: "latinCharsWith123",
+				Login: "123456",
 			},
 		},
 		{
@@ -62,7 +62,7 @@ var (
 		{
 			testName: "password with digits",
 			user: models.User{
-				Password: "latinCharsWith123",
+				Password: "123456",
 			},
 		},
 		{

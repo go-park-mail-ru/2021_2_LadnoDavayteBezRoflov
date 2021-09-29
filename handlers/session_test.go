@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"strconv"
 	"testing"
@@ -24,13 +25,18 @@ type status struct {
 	StatusDescription string `json:"status"`
 }
 
-type error struct {
+type errorResponse struct {
 	ErrDescription string `json:"error"`
 }
 
 var (
 	rootURL    = "/api"
 	sessionURL = "/sessions"
+
+	data, _     = utils.FillTestData(10, 3, 100)
+	router      = gin.New()
+	routerGroup = router.Group(rootURL)
+	sessionRepo = stores.CreateSessionRepository(data)
 
 	notExpectedErrStatus      = http.StatusNotFound
 	testsCreateSessionHandler = []struct {
@@ -68,25 +74,28 @@ var (
 		},
 		{
 			testName:      "invalid user data",
-			body:          bytes.NewReader([]byte(`{"login": "1234Anthony", "password": "qwerty"}`)),
+			body:          bytes.NewReader([]byte(`{"login": "РусскийЛогин", "password": "qwerty"}`)),
 			expectedError: errors.ErrBadInputData.Error(),
 		},
 		{
 			testName:      "user don't exist",
-			body:          bytes.NewReader([]byte(`{"login": "Anthony", "password": "qwerty"}`)),
+			body:          bytes.NewReader([]byte(`{"login": "AnthonyChum", "password": "qwerty"}`)),
 			expectedError: errors.ErrBadInputData.Error(),
 		},
 	}
 )
 
+func TestMain(m *testing.M) {
+	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
+	CreateUserHandler(routerGroup, userURL, userRepo, sessionRepo)
+	CreateBoardHandler(routerGroup, boardURL, boardRepo, sessionRepo)
+
+	code := m.Run()
+	os.Exit(code)
+}
+
 func TestCreateSessionHandler(t *testing.T) {
 	t.Parallel()
-
-	data := &models.Data{}
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
 	for _, tt := range testsCreateSessionHandler {
 		tt := tt
@@ -106,25 +115,17 @@ func TestCreateSessionHandler(t *testing.T) {
 func TestSessionHandlerCreateSuccess(t *testing.T) {
 	t.Parallel()
 
-	data := &models.Data{}
-	err := faker.FakeData(data)
+	newUser := &models.User{}
+	err := faker.FakeData(newUser)
 	if err != nil {
 		t.Error(err)
 	}
 
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
+	newUser.ID = uint(len(data.Users) + 1)
+	data.Users[newUser.Login] = *newUser
+	jsonNewUser, _ := json.Marshal(newUser)
 
-	data.Users["Anthony"] = models.User{
-		ID:       101,
-		Login:    "Anthony",
-		Email:    "ant@mail",
-		Password: "qwerty",
-	}
-
-	body := bytes.NewReader([]byte(`{"login": "Anthony", "password": "qwerty"}`))
+	body := bytes.NewReader(jsonNewUser)
 	request, _ := http.NewRequest("POST", rootURL+sessionURL, body)
 	writer := httptest.NewRecorder()
 	expectedStatus := status{StatusDescription: "you are logged in"}
@@ -147,17 +148,6 @@ func TestSessionHandlerCreateSuccess(t *testing.T) {
 func TestSessionHandlerCreateFail(t *testing.T) {
 	t.Parallel()
 
-	data := &models.Data{}
-	err := faker.FakeData(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
-
 	for _, tt := range testsCreateSessionFail {
 		tt := tt
 		t.Run(tt.testName, func(t *testing.T) {
@@ -168,7 +158,7 @@ func TestSessionHandlerCreateFail(t *testing.T) {
 
 			router.ServeHTTP(writer, request)
 
-			returnedErr := &error{}
+			returnedErr := &errorResponse{}
 			err := json.Unmarshal(writer.Body.Bytes(), returnedErr)
 			if err != nil {
 				t.Error(err)
@@ -181,17 +171,6 @@ func TestSessionHandlerCreateFail(t *testing.T) {
 
 func TestSessionHandlerGetSuccess(t *testing.T) {
 	t.Parallel()
-
-	data := &models.Data{}
-	err := faker.FakeData(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
 	user := utils.GetSomeUser(data)
 	SID := strconv.Itoa(int(user.ID + 1))
@@ -210,22 +189,11 @@ func TestSessionHandlerGetSuccess(t *testing.T) {
 		t.Error("status is not ok")
 	}
 
-	reflect.DeepEqual(data.Users["Anthony"].Login, writer.Body.String())
+	reflect.DeepEqual(user.Login, writer.Body.String())
 }
 
 func TestSessionHandlerGetFailNoCookie(t *testing.T) {
 	t.Parallel()
-
-	data := &models.Data{}
-	err := faker.FakeData(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
 	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
 	writer := httptest.NewRecorder()
@@ -236,17 +204,6 @@ func TestSessionHandlerGetFailNoCookie(t *testing.T) {
 
 func TestSessionHandlerGetFailNoLogin(t *testing.T) {
 	t.Parallel()
-
-	data := &models.Data{}
-	err := faker.FakeData(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
 	user := utils.GetSomeUser(data)
 	SID := strconv.Itoa(int(user.ID + 1))
@@ -265,17 +222,6 @@ func TestSessionHandlerGetFailNoLogin(t *testing.T) {
 
 func TestSessionHandlerDeleteSuccess(t *testing.T) {
 	t.Parallel()
-
-	data := &models.Data{}
-	err := faker.FakeData(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
 	user := utils.GetSomeUser(data)
 	SID := strconv.Itoa(int(user.ID + 1))
@@ -296,17 +242,6 @@ func TestSessionHandlerDeleteSuccess(t *testing.T) {
 func TestSessionHandlerDeleteFailNoCookie(t *testing.T) {
 	t.Parallel()
 
-	data := &models.Data{}
-	err := faker.FakeData(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
-
 	request, _ := http.NewRequest("DELETE", rootURL+sessionURL, nil)
 	writer := httptest.NewRecorder()
 	router.ServeHTTP(writer, request)
@@ -316,17 +251,6 @@ func TestSessionHandlerDeleteFailNoCookie(t *testing.T) {
 
 func TestSessionHandlerDeleteFailNoSession(t *testing.T) {
 	t.Parallel()
-
-	data := &models.Data{}
-	err := faker.FakeData(data)
-	if err != nil {
-		t.Error(err)
-	}
-
-	router := gin.New()
-	routerGroup := router.Group(rootURL)
-	sessionRepo := stores.CreateSessionRepository(data)
-	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
 
 	user := utils.GetSomeUser(data)
 	SID := strconv.Itoa(int(user.ID + 1))
