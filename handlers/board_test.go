@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"backendServer/models"
 	"backendServer/repositories/stores"
 	"backendServer/utils"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"strconv"
 	"testing"
 
@@ -34,7 +35,10 @@ func TestBoardHandlerGetAllSuccess(t *testing.T) {
 
 	user := utils.GetSomeUser(data)
 	SID := strconv.Itoa(int(user.ID + 1))
+
+	data.Mu.Lock()
 	data.Sessions[SID] = user.ID
+	data.Mu.Unlock()
 
 	request, _ := http.NewRequest("GET", rootURL+boardURL, nil)
 	cookie := &http.Cookie{
@@ -49,7 +53,29 @@ func TestBoardHandlerGetAllSuccess(t *testing.T) {
 		t.Error("status is not ok")
 	}
 
-	reflect.DeepEqual(data.Teams, writer.Body.String())
+	data.Mu.RLock()
+	allExpectedTeams := data.Teams
+	data.Mu.RUnlock()
+
+	allReturnedTeams := []models.Team{}
+	err := json.Unmarshal(writer.Body.Bytes(), &allReturnedTeams)
+	if err != nil {
+		t.Error(err)
+	}
+
+	isEqual := true
+	if len(allReturnedTeams) != len(allExpectedTeams) {
+		isEqual = false
+	}
+
+	for _, team := range allReturnedTeams {
+		if _, teamExpected := allExpectedTeams[team.ID]; !teamExpected {
+			isEqual = false
+		}
+	}
+
+	// isEqual := reflect.DeepEqual(allTeams, writer.Body.String())
+	require.True(t, isEqual)
 }
 
 func TestBoardHandlerGetAllFailNoCookie(t *testing.T) {

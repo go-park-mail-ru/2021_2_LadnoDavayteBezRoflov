@@ -1,6 +1,7 @@
 package stores
 
 import (
+	"backendServer/errors"
 	"backendServer/models"
 	"backendServer/utils"
 	"testing"
@@ -10,17 +11,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	userTestData, _ = utils.FillTestData(10, 5, 100)
-	userRepo        = &UserStore{data: userTestData}
-)
+var userRepo = &UserStore{data: testData}
 
 func TestCreateUserRepository(t *testing.T) {
 	t.Parallel()
 
-	expectedUserRepo := &UserStore{data: userTestData}
+	expectedUserRepo := &UserStore{data: testData}
 
-	require.Equal(t, expectedUserRepo, CreateUserRepository(userTestData))
+	require.Equal(t, expectedUserRepo, CreateUserRepository(testData))
 }
 
 func TestUserRepositoryCreateSuccess(t *testing.T) {
@@ -37,13 +35,17 @@ func TestUserRepositoryCreateSuccess(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	require.Equal(t, userTestData.Users[newUser.Login], user)
+	testData.Mu.RLock()
+	expectedLogin := testData.Users[newUser.Login]
+	testData.Mu.RUnlock()
+
+	require.Equal(t, expectedLogin, user)
 }
 
 func TestUserRepositoryCreateFail(t *testing.T) {
 	t.Parallel()
 
-	existingUser := utils.GetSomeUser(userTestData)
+	existingUser := utils.GetSomeUser(testData)
 
 	_, errUserIsExist := userRepo.Create(existingUser)
 
@@ -55,6 +57,6 @@ func TestUserRepositoryCreateFail(t *testing.T) {
 	newUser.Email = existingUser.Email
 	_, errEmailIsUsed := userRepo.Create(*newUser)
 
-	require.Error(t, errUserIsExist)
-	require.Error(t, errEmailIsUsed)
+	require.Error(t, errors.ErrUserAlreadyCreated, errUserIsExist)
+	require.Error(t, errors.ErrEmailAlreadyUsed, errEmailIsUsed)
 }

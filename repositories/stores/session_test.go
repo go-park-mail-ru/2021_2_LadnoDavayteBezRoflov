@@ -9,31 +9,35 @@ import (
 )
 
 var (
-	sessionTestData, _ = utils.FillTestData(10, 5, 100)
-	sessionRepo        = &SessionStore{data: sessionTestData}
+	testData, _ = utils.FillTestData(10, 5, 100)
+	sessionRepo = &SessionStore{data: testData}
 )
 
 func TestCreateSessionRepository(t *testing.T) {
 	t.Parallel()
 
-	expectedSessionRepo := &SessionStore{data: sessionTestData}
+	expectedSessionRepo := &SessionStore{data: testData}
 
-	require.Equal(t, expectedSessionRepo, CreateSessionRepository(sessionTestData))
+	require.Equal(t, expectedSessionRepo, CreateSessionRepository(testData))
 }
 
 func TestSessionRepositoryCreateSuccess(t *testing.T) {
 	t.Parallel()
 
-	user := utils.GetSomeUser(sessionTestData)
+	user := utils.GetSomeUser(testData)
 	SID, _ := sessionRepo.Create(user)
 
-	require.Equal(t, user.ID, sessionTestData.Sessions[SID])
+	testData.Mu.RLock()
+	actualSessionValue := testData.Sessions[SID]
+	testData.Mu.RUnlock()
+
+	require.Equal(t, user.ID, actualSessionValue)
 }
 
 func TestSessionRepositoryCreateFail(t *testing.T) {
 	t.Parallel()
 
-	user := utils.GetSomeUser(sessionTestData)
+	user := utils.GetSomeUser(testData)
 	userWithWrongPassword := user
 	userWithWrongPassword.Password = user.Password + "FAKE"
 
@@ -46,8 +50,11 @@ func TestSessionRepositoryGetSuccess(t *testing.T) {
 	t.Parallel()
 
 	sessionValue := "someValue"
-	user := utils.GetSomeUser(sessionTestData)
-	sessionTestData.Sessions[sessionValue] = user.ID
+	user := utils.GetSomeUser(testData)
+
+	testData.Mu.Lock()
+	testData.Sessions[sessionValue] = user.ID
+	testData.Mu.Unlock()
 
 	require.Equal(t, user, sessionRepo.Get(sessionValue))
 }
@@ -64,16 +71,21 @@ func TestSessionRepositoryDeleteSuccess(t *testing.T) {
 	t.Parallel()
 
 	sessionValue := "someExistingValue"
-	user := utils.GetSomeUser(sessionTestData)
-	sessionTestData.Sessions[sessionValue] = user.ID
+	user := utils.GetSomeUser(testData)
+
+	testData.Mu.Lock()
+	testData.Sessions[sessionValue] = user.ID
+	testData.Mu.Unlock()
 
 	err := sessionRepo.Delete(sessionValue)
-	_, notDeleted := sessionTestData.Sessions[sessionValue]
+	testData.Mu.RLock()
+	_, notDeleted := testData.Sessions[sessionValue]
+	testData.Mu.RUnlock()
 	if err != nil {
 		notDeleted = true
 	}
 
-	require.Equal(t, true, !notDeleted)
+	require.True(t, !notDeleted)
 }
 
 func TestSessionRepositoryDeleteFail(t *testing.T) {

@@ -121,8 +121,16 @@ func TestSessionHandlerCreateSuccess(t *testing.T) {
 		t.Error(err)
 	}
 
-	newUser.ID = uint(len(data.Users) + 1)
+	data.Mu.RLock()
+	usersAmount := len(data.Users)
+	data.Mu.RUnlock()
+
+	newUser.ID = uint(usersAmount + 1)
+
+	data.Mu.Lock()
 	data.Users[newUser.Login] = *newUser
+	data.Mu.Unlock()
+
 	jsonNewUser, _ := json.Marshal(newUser)
 
 	body := bytes.NewReader(jsonNewUser)
@@ -142,7 +150,7 @@ func TestSessionHandlerCreateSuccess(t *testing.T) {
 		t.Error(err)
 	}
 
-	reflect.DeepEqual(expectedStatus, returnedStatus)
+	require.Equal(t, expectedStatus.StatusDescription, returnedStatus.StatusDescription)
 }
 
 func TestSessionHandlerCreateFail(t *testing.T) {
@@ -174,7 +182,10 @@ func TestSessionHandlerGetSuccess(t *testing.T) {
 
 	user := utils.GetSomeUser(data)
 	SID := strconv.Itoa(int(user.ID + 1))
+
+	data.Mu.Lock()
 	data.Sessions[SID] = user.ID
+	data.Mu.Unlock()
 
 	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
 	cookie := &http.Cookie{
@@ -225,7 +236,10 @@ func TestSessionHandlerDeleteSuccess(t *testing.T) {
 
 	user := utils.GetSomeUser(data)
 	SID := strconv.Itoa(int(user.ID + 1))
+
+	data.Mu.Lock()
 	data.Sessions[SID] = user.ID
+	data.Mu.Unlock()
 
 	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
 	cookie := &http.Cookie{
