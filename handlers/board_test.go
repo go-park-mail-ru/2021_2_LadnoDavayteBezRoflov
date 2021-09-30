@@ -53,15 +53,14 @@ func TestBoardHandlerGetAllSuccess(t *testing.T) {
 		t.Error("status is not ok")
 	}
 
-	data.Mu.RLock()
-	allExpectedTeams := data.Teams
-	data.Mu.RUnlock()
-
 	allReturnedTeams := []models.Team{}
 	err := json.Unmarshal(writer.Body.Bytes(), &allReturnedTeams)
 	if err != nil {
 		t.Error(err)
 	}
+
+	data.Mu.RLock()
+	allExpectedTeams := data.Teams
 
 	isEqual := true
 	if len(allReturnedTeams) != len(allExpectedTeams) {
@@ -73,8 +72,8 @@ func TestBoardHandlerGetAllSuccess(t *testing.T) {
 			isEqual = false
 		}
 	}
+	data.Mu.RUnlock()
 
-	// isEqual := reflect.DeepEqual(allTeams, writer.Body.String())
 	require.True(t, isEqual)
 }
 

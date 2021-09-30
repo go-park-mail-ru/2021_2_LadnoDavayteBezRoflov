@@ -30,16 +30,16 @@ func TestUserRepositoryCreateSuccess(t *testing.T) {
 		t.Error(err)
 	}
 
-	user, err := userRepo.Create(*newUser)
-	if err != nil {
+	user, errCreate := userRepo.Create(*newUser)
+	if errCreate != nil {
 		require.NoError(t, err)
 	}
 
 	testData.Mu.RLock()
-	expectedLogin := testData.Users[newUser.Login]
+	expectedUser := testData.Users[user.Login]
 	testData.Mu.RUnlock()
 
-	require.Equal(t, expectedLogin, user)
+	require.Equal(t, expectedUser, user)
 }
 
 func TestUserRepositoryCreateFail(t *testing.T) {

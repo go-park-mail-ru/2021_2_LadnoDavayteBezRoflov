@@ -82,10 +82,9 @@ func ValidateUserData(user models.User) (isValid bool) {
 
 func GetSomeUser(data *models.Data) (user models.User) {
 	data.Mu.RLock()
-	users := data.Users
-	data.Mu.RUnlock()
+	defer data.Mu.RUnlock()
 
-	for _, someUser := range users {
+	for _, someUser := range data.Users {
 		user = someUser
 		return
 	}

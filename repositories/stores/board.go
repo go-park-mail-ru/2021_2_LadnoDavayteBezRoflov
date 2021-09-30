@@ -15,8 +15,7 @@ func CreateBoardRepository(data *models.Data) repositories.BoardRepository {
 
 func (boardStore *BoardStore) GetAll(teamsIDs []uint) (teams []models.Team) {
 	boardStore.data.Mu.RLock()
-	allTeams := boardStore.data.Teams
-	boardStore.data.Mu.RUnlock()
+	defer boardStore.data.Mu.RUnlock()
 
 	// TODO Временно закомментировано для того, чтобы можно было просматривать доски с нового пользователя
 	/*
@@ -24,7 +23,7 @@ func (boardStore *BoardStore) GetAll(teamsIDs []uint) (teams []models.Team) {
 			teams = append(teams, allTeams[teamID])
 		}*/
 
-	for _, team := range allTeams {
+	for _, team := range boardStore.data.Teams {
 		teams = append(teams, team)
 	}
 

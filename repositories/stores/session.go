@@ -37,18 +37,14 @@ func (sessionStore *SessionStore) Create(user models.User) (SID string, err erro
 
 func (sessionStore *SessionStore) Get(sessionValue string) (user models.User) {
 	sessionStore.data.Mu.RLock()
-	userID, ok := sessionStore.data.Sessions[sessionValue]
-	sessionStore.data.Mu.RUnlock()
+	defer sessionStore.data.Mu.RUnlock()
 
+	userID, ok := sessionStore.data.Sessions[sessionValue]
 	if !ok {
 		return
 	}
 
-	sessionStore.data.Mu.RLock()
-	users := sessionStore.data.Users
-	sessionStore.data.Mu.RUnlock()
-
-	for _, curUser := range users {
+	for _, curUser := range sessionStore.data.Users {
 		if curUser.ID == userID {
 			user = curUser
 			return
