@@ -1,6 +1,7 @@
 package stores
 
 import (
+	"backendServer/errors"
 	"backendServer/models"
 	"backendServer/utils"
 	"testing"
@@ -10,45 +11,52 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	userTestData, _ = utils.FillTestData(10, 5, 100)
-	userRepo        = &UserStore{data: userTestData}
-)
+var userRepo = &UserStore{data: testData}
 
 func TestCreateUserRepository(t *testing.T) {
 	t.Parallel()
 
-	expectedUserRepo := &UserStore{data: userTestData}
+	expectedUserRepo := &UserStore{data: testData}
 
-	require.Equal(t, expectedUserRepo, CreateUserRepository(userTestData))
+	require.Equal(t, expectedUserRepo, CreateUserRepository(testData))
 }
 
 func TestUserRepositoryCreateSuccess(t *testing.T) {
 	t.Parallel()
 
 	newUser := &models.User{}
-	faker.FakeData(newUser)
-
-	user, err := userRepo.Create(*newUser)
+	err := faker.FakeData(newUser)
 	if err != nil {
+		t.Error(err)
+	}
+
+	user, errCreate := userRepo.Create(*newUser)
+	if errCreate != nil {
 		require.NoError(t, err)
 	}
 
-	require.Equal(t, userTestData.Users[newUser.Login], user)
+	testData.Mu.RLock()
+	expectedUser := testData.Users[user.Login]
+	testData.Mu.RUnlock()
+
+	require.Equal(t, expectedUser, user)
 }
 
 func TestUserRepositoryCreateFail(t *testing.T) {
 	t.Parallel()
 
-	existingUser := getSomeUser(userTestData)
+	existingUser := utils.GetSomeUser(testData)
 
 	_, errUserIsExist := userRepo.Create(existingUser)
 
 	newUser := &models.User{}
-	faker.FakeData(newUser)
+	err := faker.FakeData(newUser)
+	if err != nil {
+		t.Error(err)
+	}
 	newUser.Email = existingUser.Email
 	_, errEmailIsUsed := userRepo.Create(*newUser)
 
-	require.Error(t, errUserIsExist)
-	require.Error(t, errEmailIsUsed)
+	require.Error(t, errors.ErrUserAlreadyCreated, errUserIsExist)
+	require.Error(t, errors.ErrEmailAlreadyUsed, errEmailIsUsed)
 }

@@ -22,6 +22,10 @@ func CreateServer() *Server {
 }
 
 func (server *Server) Run() {
+	if server.settings.IsRelease {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.New()
 	logFile, logFileErr := os.Create(server.settings.LogFilePath)
 	if logFileErr == nil {

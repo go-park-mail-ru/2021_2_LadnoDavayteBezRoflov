@@ -15,17 +15,17 @@ func CreateUserRepository(data *models.Data) repositories.UserRepository {
 }
 
 func (userStore *UserStore) Create(user models.User) (finalUser models.User, err error) {
-	userStore.data.Mu.RLock()
+	userStore.data.Mu.Lock()
+	defer userStore.data.Mu.Unlock()
+
 	_, userAlreadyCreated := userStore.data.Users[user.Login]
-	users := userStore.data.Users
-	userStore.data.Mu.RUnlock()
 
 	if userAlreadyCreated {
 		err = errors.ErrUserAlreadyCreated
 		return
 	}
 
-	for _, curUser := range users {
+	for _, curUser := range userStore.data.Users {
 		if curUser.Email == user.Email {
 			err = errors.ErrEmailAlreadyUsed
 			return
@@ -33,11 +33,10 @@ func (userStore *UserStore) Create(user models.User) (finalUser models.User, err
 	}
 
 	finalUser = user
-	finalUser.ID = uint(len(users))
+	finalUser.ID = uint(len(userStore.data.Users))
+	finalUser.Teams = []uint{}
 
-	userStore.data.Mu.Lock()
 	userStore.data.Users[user.Login] = finalUser
-	userStore.data.Mu.Unlock()
 
 	return
 }
