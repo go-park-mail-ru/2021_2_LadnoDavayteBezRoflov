@@ -56,7 +56,7 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 	return
 }
 
-func ValidateUserData(user models.User) (isValid bool) {
+func ValidateUserData(user models.User, isNeedToValidateEmail bool) (isValid bool) {
 	isValid = true
 	regLatinSymbols := regexp.MustCompile(".*[a-zA-Z].*")
 
@@ -72,7 +72,7 @@ func ValidateUserData(user models.User) (isValid bool) {
 		return
 	}
 
-	if !regexp.MustCompile(".+@.+").MatchString(user.Email) {
+	if isNeedToValidateEmail && !regexp.MustCompile(".+@.+").MatchString(user.Email) {
 		isValid = false
 		return
 	}

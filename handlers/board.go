@@ -45,5 +45,5 @@ func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
 
 	teams := boardHandler.BoardRepository.GetAll(user.Teams)
 
-	c.IndentedJSON(http.StatusOK, teams)
+	c.JSON(http.StatusOK, teams)
 }

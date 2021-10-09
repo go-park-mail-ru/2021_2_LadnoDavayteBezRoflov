@@ -37,15 +37,14 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	json.Email = "email@template"
-	if !utils.ValidateUserData(json) {
+	if !utils.ValidateUserData(json, false) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData.Error()})
 		return
 	}
 
 	SID, err := sessionHandler.SessionRepository.Create(json)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -76,7 +75,7 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, user.Login)
+	c.JSON(http.StatusOK, user.Login)
 	return
 }
 

@@ -40,20 +40,20 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if !utils.ValidateUserData(json) {
+	if !utils.ValidateUserData(json, true) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData.Error()})
 		return
 	}
 
 	user, userCreateErr := userHandler.UserRepository.Create(json)
 	if userCreateErr != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": userCreateErr.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": userCreateErr.Error()})
 		return
 	}
 
 	SID, sessionCreateErr := userHandler.SessionRepository.Create(user)
 	if sessionCreateErr != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": sessionCreateErr.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": sessionCreateErr.Error()})
 		return
 	}
 
