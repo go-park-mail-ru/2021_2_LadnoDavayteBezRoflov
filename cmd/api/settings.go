@@ -9,7 +9,6 @@ import (
 )
 
 type Settings struct {
-	// TODO
 	RootURL    string
 	SessionURL string
 	ProfileURL string

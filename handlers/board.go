@@ -33,13 +33,13 @@ func CreateBoardHandler(router *gin.RouterGroup,
 func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
 	session, err := c.Request.Cookie("session_id")
 	if err == http.ErrNoCookie {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrNotAuthorized.Error()})
+		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
 		return
 	}
 
-	user := boardHandler.SessionRepository.Get(session.Value)
-	if user.Login == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrNotAuthorized.Error()})
+	user, err := boardHandler.SessionRepository.Get(session.Value)
+	if err != nil {
+		c.JSON(errors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
