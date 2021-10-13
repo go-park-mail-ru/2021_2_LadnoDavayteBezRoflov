@@ -28,8 +28,8 @@ var errorToCodeMap = map[error]int{
 }
 
 func ResolveErrorToCode(err error) (code int) {
-	code, has := errorToCodeMap[err]
-	if !has {
+	code, isErrorFound := errorToCodeMap[err]
+	if !isErrorFound {
 		code = http.StatusInternalServerError
 	}
 	return
