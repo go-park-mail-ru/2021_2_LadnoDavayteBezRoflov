@@ -138,7 +138,7 @@ func TestValidateUserDataSuccess(t *testing.T) {
 			} else if tt.user.Email != "" {
 				user.Email = tt.user.Email
 			}
-			isValid := ValidateUserData(user)
+			isValid := ValidateUserData(user, true)
 			require.Equal(t, true, isValid)
 		})
 	}
@@ -160,7 +160,7 @@ func TestValidateUserDataFail(t *testing.T) {
 			} else if tt.user.Email != "" {
 				user.Email = tt.user.Email
 			}
-			isValid := ValidateUserData(user)
+			isValid := ValidateUserData(user, true)
 			require.Equal(t, false, isValid)
 		})
 	}

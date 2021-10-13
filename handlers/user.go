@@ -36,24 +36,24 @@ func CreateUserHandler(router *gin.RouterGroup,
 func (userHandler *UserHandler) Create(c *gin.Context) {
 	var json models.User
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errors.ErrBadRequest.Error()})
+		c.JSON(errors.ResolveErrorToCode(errors.ErrBadRequest), gin.H{"error": errors.ErrBadRequest.Error()})
 		return
 	}
 
-	if !utils.ValidateUserData(json) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": errors.ErrBadInputData.Error()})
+	if !utils.ValidateUserData(json, true) {
+		c.JSON(errors.ResolveErrorToCode(errors.ErrBadInputData), gin.H{"error": errors.ErrBadInputData.Error()})
 		return
 	}
 
 	user, userCreateErr := userHandler.UserRepository.Create(json)
 	if userCreateErr != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": userCreateErr.Error()})
+		c.JSON(errors.ResolveErrorToCode(userCreateErr), gin.H{"error": userCreateErr.Error()})
 		return
 	}
 
 	SID, sessionCreateErr := userHandler.SessionRepository.Create(user)
 	if sessionCreateErr != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": sessionCreateErr.Error()})
+		c.JSON(errors.ResolveErrorToCode(sessionCreateErr), gin.H{"error": sessionCreateErr.Error()})
 		return
 	}
 

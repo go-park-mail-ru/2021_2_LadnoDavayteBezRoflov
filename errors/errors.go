@@ -1,12 +1,36 @@
 package errors
 
-import "errors"
+import (
+	"errors"
+	"net/http"
+)
 
 var (
-	ErrBadRequest    = errors.New("Bad request")
-	ErrBadInputData  = errors.New("Bad input data")
-	ErrNotAuthorized = errors.New("Not authorized")
+	ErrBadRequest    = errors.New("bad request")
+	ErrBadInputData  = errors.New("bad input data")
+	ErrNotAuthorized = errors.New("not authorized")
 
-	ErrUserAlreadyCreated = errors.New("User already created")
-	ErrEmailAlreadyUsed   = errors.New("Email already used")
+	ErrUserAlreadyCreated = errors.New("user already created")
+	ErrEmailAlreadyUsed   = errors.New("email already used")
+
+	ErrInternal = errors.New("internal error")
 )
+
+var errorToCodeMap = map[error]int{
+	ErrBadRequest:    http.StatusBadRequest,
+	ErrBadInputData:  http.StatusUnauthorized,
+	ErrNotAuthorized: http.StatusUnauthorized,
+
+	ErrUserAlreadyCreated: http.StatusUnauthorized,
+	ErrEmailAlreadyUsed:   http.StatusUnauthorized,
+
+	ErrInternal: http.StatusInternalServerError,
+}
+
+func ResolveErrorToCode(err error) (code int) {
+	code, isErrorFound := errorToCodeMap[err]
+	if !isErrorFound {
+		code = http.StatusInternalServerError
+	}
+	return
+}

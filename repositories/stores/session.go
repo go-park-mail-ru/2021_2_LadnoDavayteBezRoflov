@@ -35,12 +35,13 @@ func (sessionStore *SessionStore) Create(user models.User) (SID string, err erro
 	return
 }
 
-func (sessionStore *SessionStore) Get(sessionValue string) (user models.User) {
+func (sessionStore *SessionStore) Get(sessionValue string) (user models.User, err error) {
 	sessionStore.data.Mu.RLock()
 	defer sessionStore.data.Mu.RUnlock()
 
 	userID, ok := sessionStore.data.Sessions[sessionValue]
 	if !ok {
+		err = errors.ErrBadInputData
 		return
 	}
 
