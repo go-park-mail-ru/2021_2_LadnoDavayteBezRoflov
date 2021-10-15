@@ -32,6 +32,7 @@ func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
 	uid, isExist := c.Get("uid")
 	if !isExist {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
+		return
 	}
 
 	teams, err := boardHandler.BoardUseCase.GetAll(uid.(uint))

@@ -62,6 +62,7 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 	sid, isExist := c.Get("sid")
 	if !isExist {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
+		return
 	}
 
 	userLogin, err := sessionHandler.SessionUseCase.Get(sid.(string))
@@ -77,6 +78,7 @@ func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 	sid, isExist := c.Get("sid")
 	if !isExist {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
+		return
 	}
 
 	err := sessionHandler.SessionUseCase.Delete(sid.(string))
