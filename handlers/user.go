@@ -3,8 +3,7 @@ package handlers
 import (
 	"backendServer/errors"
 	"backendServer/models"
-	"backendServer/repositories"
-	"backendServer/utils"
+	"backendServer/usecases"
 	"net/http"
 	"time"
 
@@ -12,19 +11,14 @@ import (
 )
 
 type UserHandler struct {
-	UserURL           string
-	UserRepository    repositories.UserRepository
-	SessionRepository repositories.SessionRepository
+	UserURL     string
+	UserUseCase usecases.UserUseCase
 }
 
-func CreateUserHandler(router *gin.RouterGroup,
-	userURL string,
-	userRepository repositories.UserRepository,
-	sessionRepository repositories.SessionRepository) {
+func CreateUserHandler(router *gin.RouterGroup, userURL string, userUseCase usecases.UserUseCase) {
 	handler := &UserHandler{
-		UserURL:           userURL,
-		UserRepository:    userRepository,
-		SessionRepository: sessionRepository,
+		UserURL:     userURL,
+		UserUseCase: userUseCase,
 	}
 
 	users := router.Group(handler.UserURL)
@@ -34,26 +28,15 @@ func CreateUserHandler(router *gin.RouterGroup,
 }
 
 func (userHandler *UserHandler) Create(c *gin.Context) {
-	var json models.User
-	if err := c.ShouldBindJSON(&json); err != nil {
+	var user *models.User
+	if err := c.ShouldBindJSON(user); err != nil {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrBadRequest), gin.H{"error": errors.ErrBadRequest.Error()})
 		return
 	}
 
-	if !utils.ValidateUserData(json, true) {
-		c.JSON(errors.ResolveErrorToCode(errors.ErrBadInputData), gin.H{"error": errors.ErrBadInputData.Error()})
-		return
-	}
-
-	user, userCreateErr := userHandler.UserRepository.Create(json)
-	if userCreateErr != nil {
-		c.JSON(errors.ResolveErrorToCode(userCreateErr), gin.H{"error": userCreateErr.Error()})
-		return
-	}
-
-	SID, sessionCreateErr := userHandler.SessionRepository.Create(user)
-	if sessionCreateErr != nil {
-		c.JSON(errors.ResolveErrorToCode(sessionCreateErr), gin.H{"error": sessionCreateErr.Error()})
+	SID, err := userHandler.UserUseCase.Create(user)
+	if err != nil {
+		c.JSON(errors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
 		return
 	}
 

@@ -14,7 +14,7 @@ func CreateUserRepository(data *models.Data) repositories.UserRepository {
 	return &UserStore{data: data}
 }
 
-func (userStore *UserStore) Create(user models.User) (finalUser models.User, err error) {
+func (userStore *UserStore) Create(user *models.User) (finalUser *models.User, err error) {
 	userStore.data.Mu.Lock()
 	defer userStore.data.Mu.Unlock()
 
@@ -36,7 +36,21 @@ func (userStore *UserStore) Create(user models.User) (finalUser models.User, err
 	finalUser.ID = uint(len(userStore.data.Users))
 	finalUser.Teams = []uint{}
 
-	userStore.data.Users[user.Login] = finalUser
+	userStore.data.Users[user.Login] = *finalUser
+
+	return
+}
+
+func (userStore *UserStore) GetById(uid uint) (user *models.User, err error) {
+	userStore.data.Mu.RLock()
+	defer userStore.data.Mu.RUnlock()
+
+	for _, curUser := range userStore.data.Users {
+		if curUser.ID == uid {
+			user = &curUser
+			return
+		}
+	}
 
 	return
 }
