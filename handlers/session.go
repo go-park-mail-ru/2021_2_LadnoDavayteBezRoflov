@@ -59,8 +59,8 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 }
 
 func (sessionHandler *SessionHandler) Get(c *gin.Context) {
-	sid, isExist := c.Get("sid")
-	if !isExist {
+	sid, exists := c.Get("sid")
+	if !exists {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
 		return
 	}
@@ -75,8 +75,8 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 }
 
 func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
-	sid, isExist := c.Get("sid")
-	if !isExist {
+	sid, exists := c.Get("sid")
+	if !exists {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
 		return
 	}

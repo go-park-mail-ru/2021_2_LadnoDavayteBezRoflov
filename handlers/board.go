@@ -29,8 +29,8 @@ func CreateBoardHandler(router *gin.RouterGroup,
 }
 
 func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
-	uid, isExist := c.Get("uid")
-	if !isExist {
+	uid, exists := c.Get("uid")
+	if !exists {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
 		return
 	}
