@@ -16,7 +16,7 @@ func CreateSessionRepository(data *models.Data) repositories.SessionRepository {
 	return &SessionStore{data: data}
 }
 
-func (sessionStore *SessionStore) Create(user models.User) (SID string, err error) {
+func (sessionStore *SessionStore) Create(user *models.User) (SID string, err error) {
 	sessionStore.data.Mu.RLock()
 	curUser, ok := sessionStore.data.Users[user.Login]
 	sessionStore.data.Mu.RUnlock()
@@ -35,21 +35,13 @@ func (sessionStore *SessionStore) Create(user models.User) (SID string, err erro
 	return
 }
 
-func (sessionStore *SessionStore) Get(sessionValue string) (user models.User, err error) {
+func (sessionStore *SessionStore) Get(sessionValue string) (uid uint, err error) {
 	sessionStore.data.Mu.RLock()
 	defer sessionStore.data.Mu.RUnlock()
 
-	userID, ok := sessionStore.data.Sessions[sessionValue]
+	uid, ok := sessionStore.data.Sessions[sessionValue]
 	if !ok {
 		err = errors.ErrBadInputData
-		return
-	}
-
-	for _, curUser := range sessionStore.data.Users {
-		if curUser.ID == userID {
-			user = curUser
-			return
-		}
 	}
 
 	return

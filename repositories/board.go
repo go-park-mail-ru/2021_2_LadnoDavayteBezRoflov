@@ -3,5 +3,5 @@ package repositories
 import "backendServer/models"
 
 type BoardRepository interface {
-	GetAll(teamsIDs []uint) (teams []models.Team)
+	GetAll(uid uint) (teams *[]models.Team, err error)
 }

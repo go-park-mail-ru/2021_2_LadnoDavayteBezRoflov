@@ -2,48 +2,44 @@ package handlers
 
 import (
 	"backendServer/errors"
-	"backendServer/repositories"
+	"backendServer/usecases"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type BoardHandler struct {
-	BoardURL          string
-	BoardRepository   repositories.BoardRepository
-	SessionRepository repositories.SessionRepository
+	BoardURL     string
+	BoardUseCase usecases.BoardUseCase
 }
 
 func CreateBoardHandler(router *gin.RouterGroup,
 	boardURL string,
-	boardRepository repositories.BoardRepository,
-	sessionRepository repositories.SessionRepository) {
+	boardUseCase usecases.BoardUseCase,
+	mw Middleware) {
 	handler := &BoardHandler{
-		BoardURL:          boardURL,
-		BoardRepository:   boardRepository,
-		SessionRepository: sessionRepository,
+		BoardURL:     boardURL,
+		BoardUseCase: boardUseCase,
 	}
 
 	boards := router.Group(handler.BoardURL)
 	{
-		boards.GET("", handler.GetAll)
+		boards.GET("", handler.GetAll, mw.CheckAuth())
 	}
 }
 
 func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
-	session, err := c.Request.Cookie("session_id")
-	if err == http.ErrNoCookie {
+	uid, exists := c.Get("uid")
+	if !exists {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
 		return
 	}
 
-	user, err := boardHandler.SessionRepository.Get(session.Value)
+	teams, err := boardHandler.BoardUseCase.GetAll(uid.(uint))
 	if err != nil {
 		c.JSON(errors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
 		return
 	}
-
-	teams := boardHandler.BoardRepository.GetAll(user.Teams)
 
 	c.JSON(http.StatusOK, teams)
 }

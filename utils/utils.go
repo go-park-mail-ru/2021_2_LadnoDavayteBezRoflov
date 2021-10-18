@@ -56,7 +56,7 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 	return
 }
 
-func ValidateUserData(user models.User, isValidationEmailNeeded bool) (isValid bool) {
+func ValidateUserData(user *models.User, isValidationEmailNeeded bool) (isValid bool) {
 	isValid = true
 	regLatinSymbols := regexp.MustCompile(".*[a-zA-Z].*")
 

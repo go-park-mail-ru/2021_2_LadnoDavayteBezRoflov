@@ -13,7 +13,7 @@ func CreateBoardRepository(data *models.Data) repositories.BoardRepository {
 	return &BoardStore{data: data}
 }
 
-func (boardStore *BoardStore) GetAll(teamsIDs []uint) (teams []models.Team) {
+func (boardStore *BoardStore) GetAll(uid uint) (teams *[]models.Team, err error) {
 	boardStore.data.Mu.RLock()
 	defer boardStore.data.Mu.RUnlock()
 
@@ -24,7 +24,7 @@ func (boardStore *BoardStore) GetAll(teamsIDs []uint) (teams []models.Team) {
 		}*/
 
 	for _, team := range boardStore.data.Teams {
-		teams = append(teams, team)
+		*teams = append(*teams, team)
 	}
 
 	return

@@ -3,8 +3,7 @@ package handlers
 import (
 	"backendServer/errors"
 	"backendServer/models"
-	"backendServer/repositories"
-	"backendServer/utils"
+	"backendServer/usecases"
 	"net/http"
 	"time"
 
@@ -12,37 +11,35 @@ import (
 )
 
 type SessionHandler struct {
-	SessionURL        string
-	SessionRepository repositories.SessionRepository
+	SessionURL     string
+	SessionUseCase usecases.SessionUseCase
 }
 
-func CreateSessionHandler(router *gin.RouterGroup, sessionURL string, sessionRepository repositories.SessionRepository) {
+func CreateSessionHandler(router *gin.RouterGroup,
+	sessionURL string,
+	sessionUseCase usecases.SessionUseCase,
+	mw Middleware) {
 	handler := &SessionHandler{
-		SessionURL:        sessionURL,
-		SessionRepository: sessionRepository,
+		SessionURL:     sessionURL,
+		SessionUseCase: sessionUseCase,
 	}
 
 	sessions := router.Group(handler.SessionURL)
 	{
 		sessions.POST("", handler.Create)
-		sessions.GET("", handler.Get)
-		sessions.DELETE("", handler.Delete)
+		sessions.GET("", handler.Get, mw.CheckAuth())
+		sessions.DELETE("", handler.Delete, mw.CheckAuth())
 	}
 }
 
 func (sessionHandler *SessionHandler) Create(c *gin.Context) {
-	var json models.User
-	if err := c.ShouldBindJSON(&json); err != nil {
+	var user *models.User
+	if err := c.ShouldBindJSON(user); err != nil {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrBadRequest), gin.H{"error": errors.ErrBadRequest.Error()})
 		return
 	}
 
-	if !utils.ValidateUserData(json, false) {
-		c.JSON(errors.ResolveErrorToCode(errors.ErrBadInputData), gin.H{"error": errors.ErrBadInputData.Error()})
-		return
-	}
-
-	SID, err := sessionHandler.SessionRepository.Create(json)
+	SID, err := sessionHandler.SessionUseCase.Create(user)
 	if err != nil {
 		c.JSON(errors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
 		return
@@ -62,38 +59,37 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 }
 
 func (sessionHandler *SessionHandler) Get(c *gin.Context) {
-	session, err := c.Request.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"status": "you aren't logged in"})
-		return
-	}
-
-	user, err := sessionHandler.SessionRepository.Get(session.Value)
-	if err != nil {
-		c.JSON(errors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, user.Login)
-	return
-}
-
-func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
-	session, err := c.Request.Cookie("session_id")
-	if err == http.ErrNoCookie {
+	sid, exists := c.Get("sid")
+	if !exists {
 		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
 		return
 	}
 
-	err = sessionHandler.SessionRepository.Delete(session.Value)
-	if err != errors.ErrInternal {
-		session.Expires = time.Now().AddDate(0, 0, -1)
-		http.SetCookie(c.Writer, session)
-	}
-
+	userLogin, err := sessionHandler.SessionUseCase.Get(sid.(string))
 	if err != nil {
 		c.JSON(errors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
 		return
 	}
+
+	c.JSON(http.StatusOK, userLogin)
+}
+
+func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
+	sid, exists := c.Get("sid")
+	if !exists {
+		c.JSON(errors.ResolveErrorToCode(errors.ErrNotAuthorized), gin.H{"error": errors.ErrNotAuthorized.Error()})
+		return
+	}
+
+	err := sessionHandler.SessionUseCase.Delete(sid.(string))
+	if err != nil {
+		c.JSON(errors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	session, _ := c.Request.Cookie("session_id")
+	session.Expires = time.Now().AddDate(0, 0, -1)
+	http.SetCookie(c.Writer, session)
+
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged out"})
 }
