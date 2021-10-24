@@ -1,11 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 )
 
 type Settings struct {
@@ -22,7 +18,6 @@ type Settings struct {
 	corsConfig cors.Config
 
 	LogFilePath string
-	LogFormat   gin.HandlerFunc
 
 	IsRelease bool
 }
@@ -57,20 +52,6 @@ func InitSettings() (settings Settings) {
 
 	settings.corsConfig.AllowOrigins = settings.Origins
 	settings.corsConfig.AllowCredentials = true
-
-	settings.LogFormat = gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
-			param.ClientIP,
-			param.TimeStamp.Format(time.RFC1123),
-			param.Method,
-			param.Path,
-			param.Request.Proto,
-			param.StatusCode,
-			param.Latency,
-			param.Request.UserAgent(),
-			param.ErrorMessage,
-		)
-	})
 
 	return
 }
