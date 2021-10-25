@@ -1,7 +1,7 @@
 package utils
 
 import (
-	models2 "backendServer/app/models"
+	"backendServer/app/models"
 	"reflect"
 	"testing"
 
@@ -11,21 +11,21 @@ import (
 )
 
 var (
-	normalUser = models2.User{
+	normalUser = models.User{
 		Login:    "latinChars",
 		Password: "latinCharsAgain",
 		Email:    "default@email.ru",
 	}
 	successTestsUserData = []struct {
 		testName string
-		user     models2.User
+		user     models.User
 	}{
 		{
 			testName: "normal user",
 		},
 		{
 			testName: "email without .<smth>",
-			user: models2.User{
+			user: models.User{
 				Email: "default@mail",
 			},
 		},
@@ -33,59 +33,59 @@ var (
 
 	failTestsUserData = []struct {
 		testName string
-		user     models2.User
+		user     models.User
 	}{
 		{
 			testName: "login with digits",
-			user: models2.User{
+			user: models.User{
 				Login: "123456",
 			},
 		},
 		{
 			testName: "login with russian chars",
-			user: models2.User{
+			user: models.User{
 				Login: "РусскиеСимволы",
 			},
 		},
 		{
 			testName: "too short login",
-			user: models2.User{
+			user: models.User{
 				Login: "sh",
 			},
 		},
 		{
 			testName: "too long login",
-			user: models2.User{
+			user: models.User{
 				Login: "tooLongLoginForUserOnThisServer",
 			},
 		},
 		{
 			testName: "password with digits",
-			user: models2.User{
+			user: models.User{
 				Password: "123456",
 			},
 		},
 		{
 			testName: "password with russian chars",
-			user: models2.User{
+			user: models.User{
 				Password: "парольНаРусском",
 			},
 		},
 		{
 			testName: "too short password",
-			user: models2.User{
+			user: models.User{
 				Password: "short",
 			},
 		},
 		{
 			testName: "too long password",
-			user: models2.User{
+			user: models.User{
 				Password: "veryVeryLongPasswordForUser",
 			},
 		},
 		{
 			testName: "email without @",
-			user: models2.User{
+			user: models.User{
 				Email: "emailWithoutA",
 			},
 		},
@@ -169,7 +169,7 @@ func TestValidateUserDataFail(t *testing.T) {
 func TestGetSomeUser(t *testing.T) {
 	t.Parallel()
 
-	data := &models2.Data{}
+	data := &models.Data{}
 	err := faker.FakeData(data)
 	if err != nil {
 		t.Error(err)

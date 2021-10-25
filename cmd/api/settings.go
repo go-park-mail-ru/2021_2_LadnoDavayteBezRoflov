@@ -45,7 +45,7 @@ func InitSettings() (settings Settings) {
 
 		corsConfig: cors.DefaultConfig(),
 
-		LogFilePath: "backendLogs.log",
+		LogFilePath: "../../backendLogs.log",
 
 		IsRelease: false,
 	}
