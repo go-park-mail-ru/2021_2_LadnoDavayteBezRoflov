@@ -1,13 +1,12 @@
 package main
 
 import (
-	"backendServer/handlers"
-	"backendServer/repositories/stores"
-	useCases "backendServer/usecases/impl"
-	"backendServer/utils"
+	"backendServer/app/handlers"
+	"backendServer/app/repositories/stores"
+	"backendServer/app/usecases/impl"
+	zapLogger "backendServer/pkg/logger"
+	"backendServer/pkg/utils"
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -28,20 +27,19 @@ func (server *Server) Run() {
 	}
 
 	router := gin.New()
-	logFile, logFileErr := os.Create(server.settings.LogFilePath)
-	if logFileErr == nil {
-		gin.DefaultWriter = io.MultiWriter(logFile, os.Stdout)
-	} else {
-		fmt.Println(logFileErr.Error())
-	}
-	router.Use(server.settings.LogFormat)
-	router.Use(gin.Recovery())
-	router.Use(cors.New(server.settings.corsConfig))
+
+	var logger zapLogger.Logger
+	logger.InitLogger(server.settings.LogFilePath)
+	defer func(err error) {
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(logger.Sync())
 
 	// TEMP DATA STORAGE
 	data, err := utils.FillTestData(5, 3, 15)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Error(err)
 		return
 	}
 
@@ -49,19 +47,24 @@ func (server *Server) Run() {
 	userRepo := stores.CreateUserRepository(data)
 	boardRepo := stores.CreateBoardRepository(data)
 
-	sessionUseCase := useCases.CreateSessionUseCase(sessionRepo, userRepo)
-	userUseCase := useCases.CreateUserUseCase(sessionRepo, userRepo)
-	boardUseCase := useCases.CreateBoardUseCase(boardRepo)
+	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
+	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo)
+	boardUseCase := impl.CreateBoardUseCase(boardRepo)
 
-	middleware := handlers.CreateMiddleware(sessionUseCase)
+	commonMiddleware := handlers.CreateCommonMiddleware(logger)
+	sessionMiddleware := handlers.CreateSessionMiddleware(sessionUseCase)
+
+	router.Use(commonMiddleware.Logger())
+	router.Use(gin.Recovery())
+	router.Use(cors.New(server.settings.corsConfig))
 
 	rootGroup := router.Group(server.settings.RootURL)
-	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, middleware)
+	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
 	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase)
-	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, middleware)
+	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Error(err)
 	}
 }
