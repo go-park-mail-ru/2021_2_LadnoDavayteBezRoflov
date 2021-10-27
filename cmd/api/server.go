@@ -51,16 +51,17 @@ func (server *Server) Run() {
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo)
 	boardUseCase := impl.CreateBoardUseCase(boardRepo)
 
-	middleware := handlers.CreateMiddleware(sessionUseCase, logger)
+	commonMiddleware := handlers.CreateCommonMiddleware(logger)
+	sessionMiddleware := handlers.CreateSessionMiddleware(sessionUseCase)
 
-	router.Use(middleware.Logger())
+	router.Use(commonMiddleware.Logger())
 	router.Use(gin.Recovery())
 	router.Use(cors.New(server.settings.corsConfig))
 
 	rootGroup := router.Group(server.settings.RootURL)
-	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, middleware)
+	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
 	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase)
-	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, middleware)
+	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)
 	if err != nil {

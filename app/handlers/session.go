@@ -18,7 +18,7 @@ type SessionHandler struct {
 func CreateSessionHandler(router *gin.RouterGroup,
 	sessionURL string,
 	sessionUseCase usecases.SessionUseCase,
-	mw Middleware) {
+	mw SessionMiddleware) {
 	handler := &SessionHandler{
 		SessionURL:     sessionURL,
 		SessionUseCase: sessionUseCase,

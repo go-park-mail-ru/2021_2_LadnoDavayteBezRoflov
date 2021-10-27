@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -28,14 +30,18 @@ func (logger *Logger) getEncoder() (encoder zapcore.Encoder) {
 }
 
 func (logger *Logger) getLogWriter(logFilePath string) zapcore.WriteSyncer {
-	lumberJackLogger := &lumberjack.Logger{
-		Filename:   logFilePath,
-		MaxSize:    1 << 7, // 128 Mb
-		MaxBackups: 3,
-		MaxAge:     30,
-		Compress:   false,
+	if logFilePath != "" && logFilePath != "stdout" {
+		lumberJackLogger := &lumberjack.Logger{
+			Filename:   logFilePath,
+			MaxSize:    1 << 7, // 128 Mb
+			MaxBackups: 3,
+			MaxAge:     30,
+			Compress:   false,
+		}
+		return zapcore.AddSync(lumberJackLogger)
+	} else {
+		return zapcore.AddSync(os.Stdout)
 	}
-	return zapcore.AddSync(lumberJackLogger)
 }
 
 func (logger *Logger) Sync() (err error) {

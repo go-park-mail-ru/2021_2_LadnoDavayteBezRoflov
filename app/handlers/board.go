@@ -16,7 +16,7 @@ type BoardHandler struct {
 func CreateBoardHandler(router *gin.RouterGroup,
 	boardURL string,
 	boardUseCase usecases.BoardUseCase,
-	mw Middleware) {
+	mw SessionMiddleware) {
 	handler := &BoardHandler{
 		BoardURL:     boardURL,
 		BoardUseCase: boardUseCase,
