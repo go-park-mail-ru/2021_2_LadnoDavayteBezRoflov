@@ -3,7 +3,6 @@ package handlers
 import (
 	"backendServer/pkg/errors"
 	"backendServer/pkg/logger"
-	"fmt"
 	"strings"
 	"time"
 
@@ -30,11 +29,9 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 		start := time.Now()
 		path := c.Request.URL.Path
 		raw := c.Request.URL.RawQuery
-		var resultPath strings.Builder
-		resultPath.WriteString(path)
+
 		if raw != "" {
-			resultPath.WriteString("?")
-			resultPath.WriteString(raw)
+			path = strings.Join([]string{path, "?", raw}, "; ")
 		}
 
 		c.Next()
@@ -45,20 +42,17 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 		method := c.Request.Method
 		statusCode := c.Writer.Status()
 
-		middleware.logger.Infof("\t%s %s - \"%s %s %d %s\"", requestID, clientIP, method, resultPath.String(), statusCode, latency)
+		middleware.logger.Infof("\t%s %s - \"%s %s %d %s\"",
+			requestID,
+			clientIP,
+			method,
+			path, // полный путь, на который пришел запрос
+			statusCode,
+			latency)
 
 		if len(c.Errors) > 0 {
-			var errorsLogs strings.Builder
-			errorsLogs.WriteString(requestID)
-			for _, err := range c.Errors {
-				_, printErr := fmt.Fprintf(&errorsLogs, "\n\t\t\t\t\t\t\t\t\t%s", err.Error())
-				if printErr != nil {
-					middleware.logger.Error(printErr)
-					return
-				}
-
-			}
-			middleware.logger.Error(errorsLogs.String())
+			errorsLog := strings.Join([]string{requestID, ": [", strings.Join(c.Errors.Errors(), "; "), "]"}, "")
+			middleware.logger.Error(errorsLog)
 			c.JSON(errors.ResolveErrorToCode(c.Errors.Last()), gin.H{"error": c.Errors.Last().Error()})
 		}
 	}
