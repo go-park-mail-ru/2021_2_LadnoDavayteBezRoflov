@@ -36,6 +36,16 @@ func (middleware *SessionMiddlewareImpl) CheckAuth() gin.HandlerFunc {
 			return
 		}
 
+		if time.Until(session.Expires).Hours() < 24 {
+			err := middleware.sessionUseCase.AddTime(sid, 60*3*24)
+			if err != nil {
+				_ = c.Error(err)
+				return
+			}
+			session.Expires = time.Now().Add(72 * time.Hour)
+			http.SetCookie(c.Writer, session)
+		}
+
 		c.Set("uid", uid)
 		c.Set("sid", sid)
 

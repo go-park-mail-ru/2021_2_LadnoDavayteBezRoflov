@@ -1,4 +1,4 @@
-package errors
+package customErrors
 
 import (
 	"errors"
@@ -12,6 +12,7 @@ var (
 
 	ErrUserAlreadyCreated = errors.New("user already created")
 	ErrEmailAlreadyUsed   = errors.New("email already used")
+	ErrUserNotFound       = errors.New("user not found")
 
 	ErrInternal = errors.New("internal error")
 )
@@ -23,6 +24,7 @@ var errorToCodeMap = map[error]int{
 
 	ErrUserAlreadyCreated: http.StatusUnauthorized,
 	ErrEmailAlreadyUsed:   http.StatusUnauthorized,
+	ErrUserNotFound:       http.StatusNotFound,
 
 	ErrInternal: http.StatusInternalServerError,
 }

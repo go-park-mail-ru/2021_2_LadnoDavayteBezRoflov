@@ -19,6 +19,12 @@ type Settings struct {
 
 	LogFilePath string
 
+	RedisProtocol string
+	RedisPort     string
+
+	PostgresDsn string
+	ExpiresSec  uint
+
 	IsRelease bool
 }
 
@@ -46,6 +52,12 @@ func InitSettings() (settings Settings) {
 		corsConfig: cors.DefaultConfig(),
 
 		LogFilePath: "/var/log/backendLogs.log",
+
+		RedisProtocol: "tcp",
+		RedisPort:     ":6379",
+
+		PostgresDsn: "host=localhost user=backend_ldbr password=backend_LDBR_password dbname=backend_ldbr_db port=5432 sslmode=disable",
+		ExpiresSec:  60 * 24 * 3,
 
 		IsRelease: false,
 	}

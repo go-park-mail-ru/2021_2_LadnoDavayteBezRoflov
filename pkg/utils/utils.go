@@ -22,7 +22,7 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 		if err != nil {
 			return
 		}
-		team.ID = uint(i)
+		team.TID = uint(i)
 
 		for j := 0; j < boardsPerTeamAmount; j++ {
 			board := models.Board{}
@@ -30,11 +30,11 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 			if err != nil {
 				return
 			}
-			board.ID = uint(j)
+			board.BID = uint(j)
 			team.Boards = append(team.Boards, board)
 		}
 
-		data.Teams[team.ID] = team
+		data.Teams[team.TID] = team
 	}
 
 	for i := 0; i < usersAmount; i++ {
@@ -44,12 +44,15 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 			fmt.Println(err.Error())
 			return
 		}
-		user.ID = uint(i)
-		user.Teams = []uint{
-			uint(i % teamsAmount),
-			uint(i%teamsAmount + 1),
-			uint(i%teamsAmount + 2),
-		}
+		user.UID = uint(i)
+		/*
+			user.Teams = []uint{
+				uint(i % teamsAmount),
+				uint(i%teamsAmount + 1),
+				uint(i%teamsAmount + 2),
+			}
+
+		*/
 		data.Users[user.Login] = user
 	}
 

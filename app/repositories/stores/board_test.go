@@ -29,7 +29,7 @@ func TestBoardRepository_GetAll(t *testing.T) {
 	// TODO Временно закомментировано для того, чтобы можно было просматривать доски с нового пользователя
 	/*
 		for index, team := range teams {
-			if team.ID != teamsIDs[index] {
+			if team.UID != teamsIDs[index] {
 				allTeamsReceived = false
 			}
 		}
@@ -37,7 +37,7 @@ func TestBoardRepository_GetAll(t *testing.T) {
 
 	for _, team := range teams {
 		testData.Mu.RLock()
-		_, isExist := testData.Teams[team.ID]
+		_, isExist := testData.Teams[team.TID]
 		testData.Mu.RUnlock()
 
 		if !isExist {

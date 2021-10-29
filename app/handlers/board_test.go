@@ -34,10 +34,10 @@ func TestBoardHandlerGetAllSuccess(t *testing.T) {
 	t.Parallel()
 
 	user := utils.GetSomeUser(data)
-	SID := strconv.Itoa(int(user.ID + 1))
+	SID := strconv.Itoa(int(user.UID + 1))
 
 	data.Mu.Lock()
-	data.Sessions[SID] = user.ID
+	data.Sessions[SID] = user.UID
 	data.Mu.Unlock()
 
 	request, _ := http.NewRequest("GET", rootURL+boardURL, nil)
@@ -68,7 +68,7 @@ func TestBoardHandlerGetAllSuccess(t *testing.T) {
 	}
 
 	for _, team := range allReturnedTeams {
-		if _, teamExpected := allExpectedTeams[team.ID]; !teamExpected {
+		if _, teamExpected := allExpectedTeams[team.TID]; !teamExpected {
 			isEqual = false
 		}
 	}
@@ -91,7 +91,7 @@ func TestBoardHandlerGetAllFailNoSession(t *testing.T) {
 	t.Parallel()
 
 	user := utils.GetSomeUser(data)
-	SID := strconv.Itoa(int(user.ID + 1))
+	SID := strconv.Itoa(int(user.UID + 1))
 
 	request, _ := http.NewRequest("GET", rootURL+boardURL, nil)
 	cookie := &http.Cookie{

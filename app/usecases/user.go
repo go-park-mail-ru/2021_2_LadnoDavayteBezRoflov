@@ -5,5 +5,5 @@ import (
 )
 
 type UserUseCase interface {
-	Create(user *models.User) (string, error)
+	Create(user *models.User) (sid string, err error)
 }

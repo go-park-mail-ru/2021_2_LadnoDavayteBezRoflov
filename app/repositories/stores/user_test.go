@@ -57,6 +57,6 @@ func TestUserRepositoryCreateFail(t *testing.T) {
 	newUser.Email = existingUser.Email
 	_, errEmailIsUsed := userRepo.Create(*newUser)
 
-	require.Error(t, errors.ErrUserAlreadyCreated, errUserIsExist)
-	require.Error(t, errors.ErrEmailAlreadyUsed, errEmailIsUsed)
+	require.Error(t, customErrors.ErrUserAlreadyCreated, errUserIsExist)
+	require.Error(t, customErrors.ErrEmailAlreadyUsed, errEmailIsUsed)
 }

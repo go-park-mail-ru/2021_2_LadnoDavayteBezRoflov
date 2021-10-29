@@ -3,54 +3,65 @@ package stores
 import (
 	"backendServer/app/models"
 	"backendServer/app/repositories"
-	"backendServer/pkg/errors"
+	customErrors "backendServer/pkg/errors"
+	"backendServer/pkg/hasher"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 type UserStore struct {
-	data *models.Data
+	db *gorm.DB
 }
 
-func CreateUserRepository(data *models.Data) repositories.UserRepository {
-	return &UserStore{data: data}
+func CreateUserRepository(db *gorm.DB) repositories.UserRepository {
+	return &UserStore{db: db}
 }
 
-func (userStore *UserStore) Create(user *models.User) (finalUser *models.User, err error) {
-	userStore.data.Mu.Lock()
-	defer userStore.data.Mu.Unlock()
-
-	_, userAlreadyCreated := userStore.data.Users[user.Login]
-
-	if userAlreadyCreated {
-		err = errors.ErrUserAlreadyCreated
+func (userStore *UserStore) Create(user *models.User) (err error) {
+	if isUserExist := userStore.db.Where("login = ?", user.Login).Find(user).RowsAffected; isUserExist > 0 {
+		err = customErrors.ErrUserAlreadyCreated
 		return
 	}
 
-	for _, curUser := range userStore.data.Users {
-		if curUser.Email == user.Email {
-			err = errors.ErrEmailAlreadyUsed
-			return
-		}
+	if isEmailUsed := userStore.db.Where("email = ?", user.Email).Find(user).RowsAffected; isEmailUsed > 0 {
+		err = customErrors.ErrEmailAlreadyUsed
+		return
 	}
 
-	finalUser = user
-	finalUser.ID = uint(len(userStore.data.Users))
-	finalUser.Teams = []uint{}
+	user.HashedPassword, err = hasher.HashPassword(user.Password)
+	if err != nil {
+		return
+	}
 
-	userStore.data.Users[user.Login] = *finalUser
+	err = userStore.db.Create(user).Error
+	return
+}
+
+func (userStore *UserStore) Update(user *models.User) (err error) {
+	// TODO
+	return
+}
+
+func (userStore *UserStore) GetByLogin(user *models.User) (err error) {
+	return userStore.db.Where("login = ?", user.Login).First(user).Error
+}
+
+func (userStore *UserStore) GetByID(uid uint) (user *models.User, err error) {
+	user = new(models.User)
+	if err = userStore.db.First(user, uid).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		err = customErrors.ErrUserNotFound
+	}
+	return
+}
+
+func (userStore *UserStore) GetUserTeams(uid uint) (teams *[]models.Team, err error) {
+	teams = new([]models.Team)
+	err = userStore.db.Model(&models.User{UID: uid}).Association("Teams").Find(teams)
 
 	return
 }
 
-func (userStore *UserStore) GetById(uid uint) (user *models.User, err error) {
-	userStore.data.Mu.RLock()
-	defer userStore.data.Mu.RUnlock()
-
-	for _, curUser := range userStore.data.Users {
-		if curUser.ID == uid {
-			user = &curUser
-			return
-		}
-	}
-
-	return
+func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
+	return userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(userStore.GetByID(uid))
 }

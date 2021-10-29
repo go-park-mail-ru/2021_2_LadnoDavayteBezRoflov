@@ -5,5 +5,5 @@ import (
 )
 
 type BoardUseCase interface {
-	GetAll(uid uint) (*[]models.Team, error)
+	GetUserBoards(uid uint) (*[]models.Team, error)
 }

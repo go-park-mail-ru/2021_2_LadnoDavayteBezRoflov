@@ -8,16 +8,36 @@ import (
 
 type BoardUseCaseImpl struct {
 	boardRepository repositories.BoardRepository
+	userRepository  repositories.UserRepository
+	teamRepository  repositories.TeamRepository
 }
 
-func CreateBoardUseCase(boardRepository repositories.BoardRepository) usecases.BoardUseCase {
-	return &BoardUseCaseImpl{boardRepository: boardRepository}
-}
-
-func (boardUseCaseImpl *BoardUseCaseImpl) GetAll(uid uint) (*[]models.Team, error) {
-	teams, err := boardUseCaseImpl.boardRepository.GetAll(uid)
-	if err != nil {
-		return nil, err
+func CreateBoardUseCase(
+	boardRepository repositories.BoardRepository,
+	userRepository repositories.UserRepository,
+	teamRepository repositories.TeamRepository,
+) usecases.BoardUseCase {
+	return &BoardUseCaseImpl{
+		boardRepository: boardRepository,
+		userRepository:  userRepository,
+		teamRepository:  teamRepository,
 	}
-	return teams, nil
+}
+
+func (boardUseCase *BoardUseCaseImpl) GetUserBoards(uid uint) (teams *[]models.Team, err error) {
+	teams, err = boardUseCase.userRepository.GetUserTeams(uid)
+	if err != nil {
+		return
+	}
+
+	for i, team := range *teams {
+		boards, boardsErr := boardUseCase.teamRepository.GetTeamBoards(team.TID)
+		if boardsErr != nil {
+			err = boardsErr
+			return
+		}
+		(*teams)[i].Boards = *boards
+	}
+
+	return
 }

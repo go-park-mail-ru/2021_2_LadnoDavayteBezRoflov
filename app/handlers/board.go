@@ -24,22 +24,22 @@ func CreateBoardHandler(router *gin.RouterGroup,
 
 	boards := router.Group(handler.BoardURL)
 	{
-		boards.GET("", handler.GetAll, mw.CheckAuth())
+		boards.GET("", mw.CheckAuth(), handler.GetAllUserBoards)
 	}
 }
 
-func (boardHandler *BoardHandler) GetAll(c *gin.Context) {
+func (boardHandler *BoardHandler) GetAllUserBoards(c *gin.Context) {
 	uid, exists := c.Get("uid")
 	if !exists {
-		_ = c.Error(errors.ErrNotAuthorized)
+		_ = c.Error(customErrors.ErrNotAuthorized)
 		return
 	}
 
-	teams, err := boardHandler.BoardUseCase.GetAll(uid.(uint))
+	boards, err := boardHandler.BoardUseCase.GetUserBoards(uid.(uint))
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, teams)
+	c.JSON(http.StatusOK, boards)
 }

@@ -30,22 +30,22 @@ var (
 		{
 			testName:      "not json",
 			body:          bytes.NewReader([]byte(`{"someWrongData"}`)),
-			expectedError: errors.ErrBadRequest.Error(),
+			expectedError: customErrors.ErrBadRequest.Error(),
 		},
 		{
 			testName:      "not user json",
 			body:          bytes.NewReader([]byte(`{"name": "Anthony", "title": "qwerty"}`)),
-			expectedError: errors.ErrBadInputData.Error(),
+			expectedError: customErrors.ErrBadInputData.Error(),
 		},
 		{
 			testName:      "invalid user data",
 			body:          bytes.NewReader([]byte(`{"login": "РусскийЛогин", "password": "qwerty"}`)),
-			expectedError: errors.ErrBadInputData.Error(),
+			expectedError: customErrors.ErrBadInputData.Error(),
 		},
 		{
 			testName:      "user already exist",
 			body:          bytes.NewReader(jsonSomeUser),
-			expectedError: errors.ErrUserAlreadyCreated.Error(),
+			expectedError: customErrors.ErrUserAlreadyCreated.Error(),
 		},
 	}
 )

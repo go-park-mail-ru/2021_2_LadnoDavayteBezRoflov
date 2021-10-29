@@ -5,8 +5,8 @@ import (
 	"backendServer/app/repositories"
 	"backendServer/app/usecases"
 	"backendServer/pkg/errors"
+	"backendServer/pkg/hasher"
 	"backendServer/pkg/utils"
-	"strconv"
 )
 
 type SessionUseCaseImpl struct {
@@ -23,17 +23,27 @@ func CreateSessionUseCase(sessionRepository repositories.SessionRepository,
 	}
 }
 
-func (sessionUseCase *SessionUseCaseImpl) Create(user *models.User) (string, error) {
+func (sessionUseCase *SessionUseCaseImpl) Create(user *models.User) (sid string, err error) {
 	if !utils.ValidateUserData(user, false) {
-		return "", errors.ErrBadInputData
+		err = customErrors.ErrBadInputData
 	}
 
-	SID, err := sessionUseCase.sessionRepository.Create(user)
+	err = sessionUseCase.userRepository.GetByLogin(user)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	return SID, nil
+	if !hasher.IsPasswordsEqual(user.Password, user.HashedPassword) {
+		err = customErrors.ErrBadInputData
+		return
+	}
+
+	sid, err = sessionUseCase.sessionRepository.Create(user.UID)
+	return
+}
+
+func (sessionUseCase *SessionUseCaseImpl) AddTime(sid string, secs uint) (err error) {
+	return sessionUseCase.sessionRepository.AddTime(sid, secs)
 }
 
 func (sessionUseCase *SessionUseCaseImpl) Get(sid string) (string, error) {
@@ -41,7 +51,7 @@ func (sessionUseCase *SessionUseCaseImpl) Get(sid string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	user, err := sessionUseCase.userRepository.GetById(uid)
+	user, err := sessionUseCase.userRepository.GetByID(uid)
 	if err != nil {
 		return "", err
 	}
@@ -49,13 +59,13 @@ func (sessionUseCase *SessionUseCaseImpl) Get(sid string) (string, error) {
 	return user.Login, nil
 }
 
-func (sessionUseCase *SessionUseCaseImpl) GetUID(sid string) (string, error) {
+func (sessionUseCase *SessionUseCaseImpl) GetUID(sid string) (uint, error) {
 	uid, err := sessionUseCase.sessionRepository.Get(sid)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	return strconv.FormatUint(uint64(uid), 10), nil
+	return uid, nil
 }
 
 func (sessionUseCase *SessionUseCaseImpl) Delete(sid string) (err error) {

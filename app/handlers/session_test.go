@@ -65,22 +65,22 @@ var (
 		{
 			testName:      "not json",
 			body:          bytes.NewReader([]byte(`{"someWrongData"}`)),
-			expectedError: errors.ErrBadRequest.Error(),
+			expectedError: customErrors.ErrBadRequest.Error(),
 		},
 		{
 			testName:      "not user json",
 			body:          bytes.NewReader([]byte(`{"name": "Anthony", "title": "qwerty"}`)),
-			expectedError: errors.ErrBadInputData.Error(),
+			expectedError: customErrors.ErrBadInputData.Error(),
 		},
 		{
 			testName:      "invalid user data",
 			body:          bytes.NewReader([]byte(`{"login": "РусскийЛогин", "password": "qwerty"}`)),
-			expectedError: errors.ErrBadInputData.Error(),
+			expectedError: customErrors.ErrBadInputData.Error(),
 		},
 		{
 			testName:      "user don't exist",
 			body:          bytes.NewReader([]byte(`{"login": "AnthonyChum", "password": "qwerty"}`)),
-			expectedError: errors.ErrBadInputData.Error(),
+			expectedError: customErrors.ErrBadInputData.Error(),
 		},
 	}
 )
@@ -125,7 +125,7 @@ func TestSessionHandlerCreateSuccess(t *testing.T) {
 	usersAmount := len(data.Users)
 	data.Mu.RUnlock()
 
-	newUser.ID = uint(usersAmount + 1)
+	newUser.UID = uint(usersAmount + 1)
 
 	data.Mu.Lock()
 	data.Users[newUser.Login] = *newUser
@@ -181,10 +181,10 @@ func TestSessionHandlerGetSuccess(t *testing.T) {
 	t.Parallel()
 
 	user := utils.GetSomeUser(data)
-	SID := strconv.Itoa(int(user.ID + 1))
+	SID := strconv.Itoa(int(user.UID + 1))
 
 	data.Mu.Lock()
-	data.Sessions[SID] = user.ID
+	data.Sessions[SID] = user.UID
 	data.Mu.Unlock()
 
 	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
@@ -217,7 +217,7 @@ func TestSessionHandlerGetFailNoLogin(t *testing.T) {
 	t.Parallel()
 
 	user := utils.GetSomeUser(data)
-	SID := strconv.Itoa(int(user.ID + 1))
+	SID := strconv.Itoa(int(user.UID + 1))
 
 	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
 	cookie := &http.Cookie{
@@ -235,10 +235,10 @@ func TestSessionHandlerDeleteSuccess(t *testing.T) {
 	t.Parallel()
 
 	user := utils.GetSomeUser(data)
-	SID := strconv.Itoa(int(user.ID + 1))
+	SID := strconv.Itoa(int(user.UID + 1))
 
 	data.Mu.Lock()
-	data.Sessions[SID] = user.ID
+	data.Sessions[SID] = user.UID
 	data.Mu.Unlock()
 
 	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
@@ -267,7 +267,7 @@ func TestSessionHandlerDeleteFailNoSession(t *testing.T) {
 	t.Parallel()
 
 	user := utils.GetSomeUser(data)
-	SID := strconv.Itoa(int(user.ID + 1))
+	SID := strconv.Itoa(int(user.UID + 1))
 
 	request, _ := http.NewRequest("DELETE", rootURL+sessionURL, nil)
 	cookie := &http.Cookie{

@@ -21,19 +21,18 @@ func CreateUserUseCase(sessionRepository repositories.SessionRepository,
 	}
 }
 
-func (userUseCase *UserUseCaseImpl) Create(user *models.User) (string, error) {
+func (userUseCase *UserUseCaseImpl) Create(user *models.User) (sid string, err error) {
 	if !utils.ValidateUserData(user, true) {
-		return "", errors.ErrBadInputData
+		err = customErrors.ErrBadInputData
+		return
 	}
 
-	addedUser, err := userUseCase.userRepository.Create(user)
+	err = userUseCase.userRepository.Create(user)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	SID, err := userUseCase.sessionRepository.Create(addedUser)
-	if err != nil {
-		return "", err
-	}
-	return SID, nil
+	sid, err = userUseCase.sessionRepository.Create(user.UID)
+
+	return
 }
