@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/gin-contrib/cors"
 )
 
@@ -14,6 +16,8 @@ type Settings struct {
 
 	Origins        []string
 	AllowedMethods []string
+
+	SessionCookieLifeTimeInDays time.Duration
 
 	corsConfig cors.Config
 
@@ -48,6 +52,8 @@ func InitSettings() (settings Settings) {
 			"DELETE",
 			"OPTIONS",
 		},
+
+		SessionCookieLifeTimeInDays: 3,
 
 		corsConfig: cors.DefaultConfig(),
 

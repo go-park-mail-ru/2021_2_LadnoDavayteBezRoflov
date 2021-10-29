@@ -4,8 +4,8 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/usecases"
 	"backendServer/pkg/errors"
+	"backendServer/pkg/sessionCookieController"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,14 +40,6 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 		return
 	}
 
-	cookie := &http.Cookie{
-		Name:     "session_id",
-		Value:    sid,
-		Expires:  time.Now().Add(72 * time.Hour),
-		Secure:   false,
-		HttpOnly: true,
-	}
-
-	http.SetCookie(c.Writer, cookie)
+	http.SetCookie(c.Writer, sessionCookieController.CreateSessionCookie(sid))
 	c.JSON(http.StatusCreated, gin.H{"status": "you are logged in"})
 }

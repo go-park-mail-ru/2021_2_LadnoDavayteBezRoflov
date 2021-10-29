@@ -4,8 +4,8 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/usecases"
 	"backendServer/pkg/errors"
+	"backendServer/pkg/sessionCookieController"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,16 +45,7 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	cookie := &http.Cookie{
-		Name:     "session_id",
-		Value:    sid,
-		Expires:  time.Now().Add(72 * time.Hour),
-		Secure:   false,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	}
-
-	http.SetCookie(c.Writer, cookie)
+	http.SetCookie(c.Writer, sessionCookieController.CreateSessionCookie(sid))
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
 }
 
@@ -88,7 +79,7 @@ func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 	}
 
 	session, _ := c.Request.Cookie("session_id")
-	session.Expires = time.Now().AddDate(0, 0, -1)
+	sessionCookieController.SetSessionCookieExpired(session)
 	http.SetCookie(c.Writer, session)
 
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged out"})

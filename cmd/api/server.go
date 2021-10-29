@@ -7,6 +7,7 @@ import (
 	"backendServer/app/usecases/impl"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
+	"backendServer/pkg/sessionCookieController"
 
 	"github.com/gomodule/redigo/redis"
 
@@ -24,6 +25,7 @@ type Server struct {
 
 func CreateServer() *Server {
 	settings := InitSettings()
+	sessionCookieController.InitSessionCookieController(settings.SessionCookieLifeTimeInDays)
 	return &Server{settings: settings}
 }
 
