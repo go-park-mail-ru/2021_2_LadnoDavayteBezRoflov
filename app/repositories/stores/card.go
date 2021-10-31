@@ -5,7 +5,6 @@ import (
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
 	"errors"
-	"time"
 
 	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -52,7 +51,7 @@ func (cardStore *CardStore) Update(card *models.Card) (err error) {
 		oldCard.CLID = card.CLID
 	}
 
-	if card.Deadline != (time.Time{}) && card.Deadline != oldCard.Deadline {
+	if !card.Deadline.IsZero() && card.Deadline != oldCard.Deadline {
 		oldCard.Deadline = card.Deadline
 	}
 

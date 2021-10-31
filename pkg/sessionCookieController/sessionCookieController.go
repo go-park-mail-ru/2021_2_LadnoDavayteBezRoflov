@@ -34,7 +34,5 @@ func UpdateSessionCookieExpires(cookie *http.Cookie) {
 }
 
 func IsSessionCookieExpiresSoon(cookie *http.Cookie) bool {
-	t := time.Until(cookie.Expires) * time.Hour
-	t2 := SmallLifeTimeInHours
-	return t < t2
+	return time.Until(cookie.Expires) < SmallLifeTimeInHours
 }
