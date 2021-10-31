@@ -37,7 +37,7 @@ func (middleware *SessionMiddlewareImpl) CheckAuth() gin.HandlerFunc {
 		}
 
 		if sessionCookieController.IsSessionCookieExpiresSoon(session) {
-			err := middleware.sessionUseCase.AddTime(sid, uint(sessionCookieController.SessionCookieLifeTimeInSecs.Seconds()))
+			err := middleware.sessionUseCase.AddTime(sid, uint(sessionCookieController.SessionCookieLifeTimeInHours))
 			if err != nil {
 				_ = c.Error(err)
 				return

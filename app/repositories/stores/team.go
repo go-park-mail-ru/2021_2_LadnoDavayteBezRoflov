@@ -3,7 +3,10 @@ package stores
 import (
 	"backendServer/app/models"
 	"backendServer/app/repositories"
+	customErrors "backendServer/pkg/errors"
+	"errors"
 
+	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -16,27 +19,50 @@ func CreateTeamRepository(db *gorm.DB) repositories.TeamRepository {
 }
 
 func (teamStore *TeamStore) Create(team *models.Team) (err error) {
-	// TODO
-	return
+	isExist, err := teamStore.IsTeamExist(team)
+	if !isExist {
+		return
+	}
+	return teamStore.db.Create(team).Error
 }
 
 func (teamStore *TeamStore) Update(team *models.Team) (err error) {
-	// TODO
-	return
+	oldTeam, err := teamStore.GetByID(team.TID)
+	if err != nil {
+		return
+	}
+
+	if team.Title != "" && team.Title != oldTeam.Title {
+		var isNewTitleExist bool
+		isNewTitleExist, err = teamStore.IsTeamExist(team)
+		if !isNewTitleExist {
+			return
+		}
+		oldTeam.Title = team.Title
+	}
+
+	return teamStore.db.Save(oldTeam).Error
 }
 
 func (teamStore *TeamStore) Delete(tid uint) (err error) {
-	// TODO
-	return
+	return teamStore.db.Delete(tid).Error
 }
 
-func (teamStore *TeamStore) GetByID(tid uint) (team *models.Team, err error) {
-	// TODO
-	return
+func (teamStore *TeamStore) GetByID(tid uint) (*models.Team, error) {
+	team := new(models.Team)
+	err := teamStore.db.First(team, tid).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = customErrors.ErrTeamNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return team, nil
 }
 
 func (teamStore *TeamStore) GetTeamMembers(tid uint) (members *[]models.User, err error) {
-	// TODO
+	members = new([]models.User)
+	err = teamStore.db.Model(&models.Team{TID: tid}).Association("Users").Find(members)
 	return
 }
 
@@ -44,4 +70,12 @@ func (teamStore *TeamStore) GetTeamBoards(tid uint) (boards *[]models.Board, err
 	boards = new([]models.Board)
 	err = teamStore.db.Model(&models.Team{TID: tid}).Association("Boards").Find(boards)
 	return
+}
+
+func (teamStore *TeamStore) IsTeamExist(team *models.Team) (bool, error) {
+	err := teamStore.db.Where("title = ?", team.Title).Find(team).Error
+	if err != nil {
+		return true, err
+	}
+	return false, nil
 }

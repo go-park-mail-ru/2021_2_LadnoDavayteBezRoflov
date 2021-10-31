@@ -7,20 +7,18 @@ import (
 
 var (
 	SmallLifeTimeInHours         = 24 * time.Hour
-	SessionCookieLifeTimeInDays  time.Duration
-	SessionCookieLifeTimeInHours = 24 * SessionCookieLifeTimeInDays
-	SessionCookieLifeTimeInSecs  = 60 * 60 * SessionCookieLifeTimeInHours
+	SessionCookieLifeTimeInHours time.Duration
 )
 
 func InitSessionCookieController(sessionCookieLifeTimeInDays time.Duration) {
-	SessionCookieLifeTimeInDays = sessionCookieLifeTimeInDays
+	SessionCookieLifeTimeInHours = 24 * (sessionCookieLifeTimeInDays * time.Hour)
 }
 
 func CreateSessionCookie(sid string) *http.Cookie {
 	return &http.Cookie{
 		Name:     "session_id",
 		Value:    sid,
-		Expires:  time.Now().Add(time.Hour * SessionCookieLifeTimeInHours),
+		Expires:  time.Now().Add(SessionCookieLifeTimeInHours),
 		Secure:   false,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
@@ -32,9 +30,11 @@ func SetSessionCookieExpired(cookie *http.Cookie) {
 }
 
 func UpdateSessionCookieExpires(cookie *http.Cookie) {
-	cookie.Expires = time.Now().Add(time.Hour * SessionCookieLifeTimeInHours)
+	cookie.Expires = time.Now().Add(SessionCookieLifeTimeInHours)
 }
 
 func IsSessionCookieExpiresSoon(cookie *http.Cookie) bool {
-	return time.Until(cookie.Expires).Hours() < SmallLifeTimeInHours.Hours()
+	t := time.Until(cookie.Expires) * time.Hour
+	t2 := SmallLifeTimeInHours
+	return t < t2
 }

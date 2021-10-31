@@ -27,7 +27,6 @@ type Settings struct {
 	RedisPort     string
 
 	PostgresDsn string
-	ExpiresSec  uint
 
 	IsRelease bool
 }
@@ -63,7 +62,6 @@ func InitSettings() (settings Settings) {
 		RedisPort:     ":6379",
 
 		PostgresDsn: "host=localhost user=backend_ldbr password=backend_LDBR_password dbname=backend_ldbr_db port=5432 sslmode=disable",
-		ExpiresSec:  60 * 24 * 3,
 
 		IsRelease: false,
 	}

@@ -8,4 +8,5 @@ type CardListRepository interface { // TODO реализовать перено�
 	Delete(clid uint) (err error)
 	GetByID(clid uint) (cardList *models.CardList, err error)
 	GetCardListCards(clid uint) (cards *[]models.Card, err error)
+	Move(fromPos, toPos, bid uint) (err error)
 }

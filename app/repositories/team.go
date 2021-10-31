@@ -9,4 +9,5 @@ type TeamRepository interface {
 	GetByID(tid uint) (team *models.Team, err error)
 	GetTeamMembers(tid uint) (members *[]models.User, err error)
 	GetTeamBoards(tid uint) (boards *[]models.Board, err error)
+	IsTeamExist(team *models.Team) (bool, error)
 }

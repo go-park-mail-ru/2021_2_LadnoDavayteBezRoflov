@@ -42,13 +42,6 @@ func (server *Server) Run() {
 	everythingCloser := closer.CreateCloser(&logger)
 	defer everythingCloser.Close(logger.Sync)
 
-	// TEMP DATA STORAGE
-	//data, err := utils.FillTestData(5, 3, 15)
-	//if err != nil {
-	//	logger.Error(err)
-	//	return
-	//}
-
 	// Redis
 	redisPool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
@@ -75,12 +68,12 @@ func (server *Server) Run() {
 	}
 
 	// Repositories
-	sessionRepo := stores.CreateSessionRepository(redisPool, server.settings.ExpiresSec, everythingCloser)
+	sessionRepo := stores.CreateSessionRepository(redisPool, uint64(sessionCookieController.SessionCookieLifeTimeInHours), everythingCloser)
 	userRepo := stores.CreateUserRepository(postgresClient)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	// cardListRepo := stores.CreateCardListRepository(postgresClient) // Пока что закоментированны за ненадобностью
-	// cardRepo :=  stores.CreateCardRepository(postgresClient)
+	// cardRepo := stores.CreateCardRepository(postgresClient)
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
@@ -96,6 +89,7 @@ func (server *Server) Run() {
 	router.Use(cors.New(server.settings.corsConfig))
 
 	// Handlers
+	router.NoRoute(handlers.NoRouteHandler)
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
 	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase)

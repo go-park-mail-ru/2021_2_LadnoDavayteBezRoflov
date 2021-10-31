@@ -7,4 +7,5 @@ type CardRepository interface { // TODO реализовать перенос в
 	Update(card *models.Card) (err error)
 	Delete(cid uint) (err error)
 	GetByID(cid uint) (card *models.Card, err error)
+	Move(fromPos, toPos, fromCardListID, toCardListID uint) (err error)
 }

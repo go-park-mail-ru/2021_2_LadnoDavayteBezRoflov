@@ -28,7 +28,7 @@ func (sessionUseCase *SessionUseCaseImpl) Create(user *models.User) (sid string,
 		err = customErrors.ErrBadInputData
 	}
 
-	err = sessionUseCase.userRepository.GetByLogin(user)
+	user, err = sessionUseCase.userRepository.GetByLogin(user.Login)
 	if err != nil {
 		return
 	}

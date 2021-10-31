@@ -11,11 +11,11 @@ import (
 
 type SessionStore struct {
 	DB         *redis.Pool
-	ExpiresSec uint
+	ExpiresSec uint64
 	closer     *closer.Closer
 }
 
-func CreateSessionRepository(db *redis.Pool, expiresSec uint, closer *closer.Closer) repositories.SessionRepository {
+func CreateSessionRepository(db *redis.Pool, expiresSec uint64, closer *closer.Closer) repositories.SessionRepository {
 	return &SessionStore{DB: db, ExpiresSec: expiresSec, closer: closer}
 }
 
