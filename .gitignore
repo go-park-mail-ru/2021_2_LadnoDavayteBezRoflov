@@ -19,3 +19,9 @@
 
 # Log files
 *.log
+
+# redis-data
+redis-data/
+
+# redis.conf
+refis.conf/

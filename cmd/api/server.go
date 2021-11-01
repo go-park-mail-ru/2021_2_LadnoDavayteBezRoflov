@@ -30,10 +30,6 @@ func CreateServer() *Server {
 }
 
 func (server *Server) Run() {
-	if server.settings.IsRelease {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
 	router := gin.New()
 
 	// Logger and Closer

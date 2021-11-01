@@ -1,0 +1,70 @@
+version: "3"
+services: 
+
+    redis:
+        image: "redis:alpine"
+        command: redis-server --port 6380
+        environment: 
+            - TZ=Europe/Moscow
+            - REDIS_REPLICATION_MODE=master
+        ports:
+            - "6380:6380"
+        volumes:
+            - $PWD/redis-data:/var/lib/redis
+            - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+        healthcheck:
+            test: ["CMD", "redis-cli","ping"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+
+    postgres:
+        image: postgres:latest
+        container_name: db_postgres
+        command: -p 5433 
+        environment:
+            - POSTGRES_USER=backend_ldbr
+            - POSTGRES_PASSWORD=backend_LDBR_password
+            - POSTGRES_DB=backend_ldbr_db
+            - DATABASE_HOST=db
+            - TZ=Europe/Moscow
+        ports:
+            - "5433:5433"
+        volumes:
+            - database_postgres:/var/lib/postgresql/data
+        healthcheck:
+            test: /usr/bin/pg_isready
+            interval: 30s
+            timeout: 10s
+            retries: 5
+
+    backend:
+        environment:
+            - DB_PORT=5433
+            - REDIS_PORT=6380
+            - POSTGRES_USER=backend_ldbr
+            - POSTGRES_PASSWORD=backend_LDBR_password
+            - POSTGRES_DB=backend_ldbr_db
+            - DATABASE_HOST=db
+            - FRONTEND_ADDRESS=localhost:3000 #95.163.213.142
+            - GIN_MODE=debug
+            - TZ=Europe/Moscow
+        build: .
+        container_name: "2021_2_LadnoDavayteBezRoflov_Backend"
+        ports: 
+            - 8000:8000
+        expose:
+            - "8000"
+        volumes:
+            - ./:/backend
+        restart: on-failure 
+        depends_on: 
+            - redis
+            - postgres
+        links:
+            - "postgres:db"
+            - "redis:redis"
+
+volumes:
+    api:
+    database_postgres:
