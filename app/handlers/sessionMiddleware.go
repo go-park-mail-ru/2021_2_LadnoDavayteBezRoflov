@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"backendServer/app/usecases"
+	"backendServer/pkg/sessionCookieController"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,10 +30,20 @@ func (middleware *SessionMiddlewareImpl) CheckAuth() gin.HandlerFunc {
 		sid := session.Value
 		uid, err := middleware.sessionUseCase.GetUID(sid)
 		if err != nil {
-			session.Expires = time.Now().AddDate(0, 0, -1)
+			sessionCookieController.SetSessionCookieExpired(session)
 			http.SetCookie(c.Writer, session)
 			_ = c.Error(err)
 			return
+		}
+
+		if sessionCookieController.IsSessionCookieExpiresSoon(session) {
+			err := middleware.sessionUseCase.AddTime(sid, uint(sessionCookieController.SessionCookieLifeTimeInHours))
+			if err != nil {
+				_ = c.Error(err)
+				return
+			}
+			sessionCookieController.UpdateSessionCookieExpires(session)
+			http.SetCookie(c.Writer, session)
 		}
 
 		c.Set("uid", uid)

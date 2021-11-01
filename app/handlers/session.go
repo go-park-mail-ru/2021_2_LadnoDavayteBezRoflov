@@ -4,8 +4,8 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/usecases"
 	"backendServer/pkg/errors"
+	"backendServer/pkg/sessionCookieController"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,41 +27,32 @@ func CreateSessionHandler(router *gin.RouterGroup,
 	sessions := router.Group(handler.SessionURL)
 	{
 		sessions.POST("", handler.Create)
-		sessions.GET("", handler.Get, mw.CheckAuth())
-		sessions.DELETE("", handler.Delete, mw.CheckAuth())
+		sessions.GET("", mw.CheckAuth(), handler.Get)
+		sessions.DELETE("", mw.CheckAuth(), handler.Delete)
 	}
 }
 
 func (sessionHandler *SessionHandler) Create(c *gin.Context) {
-	var user *models.User
+	user := new(models.User)
 	if err := c.ShouldBindJSON(user); err != nil {
-		_ = c.Error(errors.ErrBadRequest)
+		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
 
-	SID, err := sessionHandler.SessionUseCase.Create(user)
+	sid, err := sessionHandler.SessionUseCase.Create(user)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	cookie := &http.Cookie{
-		Name:     "session_id",
-		Value:    SID,
-		Expires:  time.Now().Add(24 * time.Hour),
-		Secure:   false,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	}
-
-	http.SetCookie(c.Writer, cookie)
+	http.SetCookie(c.Writer, sessionCookieController.CreateSessionCookie(sid))
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
 }
 
 func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 	sid, exists := c.Get("sid")
 	if !exists {
-		_ = c.Error(errors.ErrNotAuthorized)
+		_ = c.Error(customErrors.ErrNotAuthorized)
 		return
 	}
 
@@ -77,7 +68,7 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 	sid, exists := c.Get("sid")
 	if !exists {
-		_ = c.Error(errors.ErrNotAuthorized)
+		_ = c.Error(customErrors.ErrNotAuthorized)
 		return
 	}
 
@@ -88,7 +79,7 @@ func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 	}
 
 	session, _ := c.Request.Cookie("session_id")
-	session.Expires = time.Now().AddDate(0, 0, -1)
+	sessionCookieController.SetSessionCookieExpired(session)
 	http.SetCookie(c.Writer, session)
 
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged out"})

@@ -1,4 +1,4 @@
-package errors
+package customErrors
 
 import (
 	"errors"
@@ -12,8 +12,18 @@ var (
 
 	ErrUserAlreadyCreated = errors.New("user already created")
 	ErrEmailAlreadyUsed   = errors.New("email already used")
+	ErrUserNotFound       = errors.New("user not found")
 
-	ErrInternal = errors.New("internal error")
+	ErrTeamNotFound = errors.New("team not found")
+
+	ErrBoardNotFound = errors.New("board not found")
+
+	ErrCardListNotFound = errors.New("card list not found")
+
+	ErrCardNotFound = errors.New("card not found")
+
+	ErrNotImplemented = errors.New("not implemented")
+	ErrInternal       = errors.New("internal error")
 )
 
 var errorToCodeMap = map[error]int{
@@ -23,8 +33,18 @@ var errorToCodeMap = map[error]int{
 
 	ErrUserAlreadyCreated: http.StatusUnauthorized,
 	ErrEmailAlreadyUsed:   http.StatusUnauthorized,
+	ErrUserNotFound:       http.StatusNotFound,
 
-	ErrInternal: http.StatusInternalServerError,
+	ErrTeamNotFound: http.StatusNotFound,
+
+	ErrBoardNotFound: http.StatusNotFound,
+
+	ErrCardListNotFound: http.StatusNotFound,
+
+	ErrCardNotFound: http.StatusNotFound,
+
+	ErrNotImplemented: http.StatusNotImplemented,
+	ErrInternal:       http.StatusInternalServerError,
 }
 
 func ResolveErrorToCode(err error) (code int) {

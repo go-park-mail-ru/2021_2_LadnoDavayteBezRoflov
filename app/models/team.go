@@ -1,7 +1,8 @@
 package models
 
 type Team struct {
-	ID     uint    `json:"id"`
-	Title  string  `json:"team_name" faker:"word"`
-	Boards []Board `json:"boards" faker:"-"`
+	TID    uint    `json:"tid" gorm:"primaryKey"`
+	Title  string  `json:"team_name" faker:"word" gorm:"not null;unique;index"`
+	Boards []Board `json:"boards" faker:"-" gorm:"foreignKey:TID;"`
+	Users  []User  `json:"users" faker:"-" gorm:"many2many:users_teams;"`
 }

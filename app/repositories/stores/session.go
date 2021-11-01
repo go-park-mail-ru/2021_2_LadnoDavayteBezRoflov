@@ -1,65 +1,61 @@
 package stores
 
 import (
-	"backendServer/app/models"
 	"backendServer/app/repositories"
-	"backendServer/pkg/errors"
+	"backendServer/pkg/closer"
+
+	"github.com/gomodule/redigo/redis"
 
 	"github.com/google/uuid"
 )
 
 type SessionStore struct {
-	data *models.Data
+	DB         *redis.Pool
+	ExpiresSec uint64
+	closer     *closer.Closer
 }
 
-func CreateSessionRepository(data *models.Data) repositories.SessionRepository {
-	return &SessionStore{data: data}
+func CreateSessionRepository(db *redis.Pool, expiresSec uint64, closer *closer.Closer) repositories.SessionRepository {
+	return &SessionStore{DB: db, ExpiresSec: expiresSec, closer: closer}
 }
 
-func (sessionStore *SessionStore) Create(user *models.User) (SID string, err error) {
-	sessionStore.data.Mu.RLock()
-	curUser, ok := sessionStore.data.Users[user.Login]
-	sessionStore.data.Mu.RUnlock()
+func (sessionStore *SessionStore) Create(uid uint) (sid string, err error) {
+	connection := sessionStore.DB.Get()
+	defer sessionStore.closer.Close(connection.Close)
 
-	if !ok || curUser.Password != user.Password {
-		err = errors.ErrBadInputData
-		return
-	}
+	sid = uuid.NewString()
 
-	SID = uuid.NewString()
-
-	sessionStore.data.Mu.Lock()
-	sessionStore.data.Sessions[SID] = user.ID
-	sessionStore.data.Mu.Unlock()
+	_, err = connection.Do("SETEX", sid, sessionStore.ExpiresSec, uid)
 
 	return
 }
 
-func (sessionStore *SessionStore) Get(sessionValue string) (uid uint, err error) {
-	sessionStore.data.Mu.RLock()
-	defer sessionStore.data.Mu.RUnlock()
+func (sessionStore *SessionStore) AddTime(sid string, secs uint) (err error) {
+	connection := sessionStore.DB.Get()
+	defer sessionStore.closer.Close(connection.Close)
 
-	uid, ok := sessionStore.data.Sessions[sessionValue]
-	if !ok {
-		err = errors.ErrBadInputData
-	}
-
+	_, err = connection.Do("EXPIRE", sid, secs)
 	return
 }
 
-func (sessionStore *SessionStore) Delete(sessionValue string) (err error) {
-	sessionStore.data.Mu.RLock()
-	_, ok := sessionStore.data.Sessions[sessionValue]
-	sessionStore.data.Mu.RUnlock()
+func (sessionStore *SessionStore) Get(sid string) (uid uint, err error) {
+	connection := sessionStore.DB.Get()
+	defer sessionStore.closer.Close(connection.Close)
 
-	if !ok {
-		err = errors.ErrNotAuthorized
+	uid64, err := redis.Uint64(connection.Do("GET", sid))
+	if err != nil {
 		return
 	}
 
-	sessionStore.data.Mu.Lock()
-	delete(sessionStore.data.Sessions, sessionValue)
-	sessionStore.data.Mu.Unlock()
+	uid = uint(uid64)
+	return
+}
+
+func (sessionStore *SessionStore) Delete(sid string) (err error) {
+	connection := sessionStore.DB.Get()
+	defer sessionStore.closer.Close(connection.Close)
+
+	_, err = connection.Do("DEL", sid)
 
 	return
 }

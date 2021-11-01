@@ -4,8 +4,8 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/usecases"
 	"backendServer/pkg/errors"
+	"backendServer/pkg/sessionCookieController"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,26 +28,18 @@ func CreateUserHandler(router *gin.RouterGroup, userURL string, userUseCase usec
 }
 
 func (userHandler *UserHandler) Create(c *gin.Context) {
-	var user *models.User
+	user := new(models.User)
 	if err := c.ShouldBindJSON(user); err != nil {
-		_ = c.Error(errors.ErrBadRequest)
+		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
 
-	SID, err := userHandler.UserUseCase.Create(user)
+	sid, err := userHandler.UserUseCase.Create(user)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	cookie := &http.Cookie{
-		Name:     "session_id",
-		Value:    SID,
-		Expires:  time.Now().Add(24 * time.Hour),
-		Secure:   false,
-		HttpOnly: true,
-	}
-
-	http.SetCookie(c.Writer, cookie)
+	http.SetCookie(c.Writer, sessionCookieController.CreateSessionCookie(sid))
 	c.JSON(http.StatusCreated, gin.H{"status": "you are logged in"})
 }

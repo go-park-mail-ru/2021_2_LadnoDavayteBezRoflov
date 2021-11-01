@@ -53,7 +53,7 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			errorsLog := strings.Join([]string{requestID, ": [", strings.Join(c.Errors.Errors(), "; "), "]"}, "")
 			middleware.logger.Error(errorsLog)
-			c.JSON(errors.ResolveErrorToCode(c.Errors.Last()), gin.H{"error": c.Errors.Last().Error()})
+			c.JSON(customErrors.ResolveErrorToCode(c.Errors.Last()), gin.H{"error": c.Errors.Last().Error()})
 		}
 	}
 }

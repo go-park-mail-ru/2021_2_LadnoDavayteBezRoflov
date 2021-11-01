@@ -31,7 +31,7 @@ func TestSessionRepositoryCreateSuccess(t *testing.T) {
 	actualSessionValue := testData.Sessions[SID]
 	testData.Mu.RUnlock()
 
-	require.Equal(t, user.ID, actualSessionValue)
+	require.Equal(t, user.UID, actualSessionValue)
 }
 
 func TestSessionRepositoryCreateFail(t *testing.T) {
@@ -53,7 +53,7 @@ func TestSessionRepositoryGetSuccess(t *testing.T) {
 	user := utils.GetSomeUser(testData)
 
 	testData.Mu.Lock()
-	testData.Sessions[sessionValue] = user.ID
+	testData.Sessions[sessionValue] = user.UID
 	testData.Mu.Unlock()
 
 	require.Equal(t, user, sessionRepo.Get(sessionValue))
@@ -74,7 +74,7 @@ func TestSessionRepositoryDeleteSuccess(t *testing.T) {
 	user := utils.GetSomeUser(testData)
 
 	testData.Mu.Lock()
-	testData.Sessions[sessionValue] = user.ID
+	testData.Sessions[sessionValue] = user.UID
 	testData.Mu.Unlock()
 
 	err := sessionRepo.Delete(sessionValue)
