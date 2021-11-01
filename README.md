@@ -1,19 +1,19 @@
 # Trello
 
-Trello backend repository for Ladno Davayte Bez Roflov team, autumn of 2021.
+Trello backend repository for LadnoDavayteBezRoflov team, autumn of 2021.
 
 ### Team
 
 * [Anton Chumakov](https://github.com/TonyBlock);
 * [Alexander Orletskiy](https://github.com/Trollbump);
-* [Georgij Sedojkin](https://github.com/GeorgiyX);
-* [Dmitrij Peshkov](https://github.com/DPeshkoff).
+* [Georgiy Sedoykin](https://github.com/GeorgiyX);
+* [Dmitriy Peshkov](https://github.com/DPeshkoff).
 
 ### Mentors
 
 * [Ekaterina Alekseeva](https://github.com/yletamitlu) — frontend mentor;
-* [Gavrilenco Roman](https://github.com/gavroman) — frontend mentor;
-* [Timofej Razumov](https://github.com/TimRazumov) — backend mentor.
+* [Roman Gavrilenco](https://github.com/gavroman) — frontend mentor;
+* [Timofey Razumov](https://github.com/TimRazumov) — backend mentor.
 
 ### Frontend repository
 [Link to frontend repository](https://github.com/frontend-park-mail-ru/2021_2_LadnoDavayteBezRoflov).
@@ -23,3 +23,29 @@ Trello backend repository for Ladno Davayte Bez Roflov team, autumn of 2021.
 
 ### Deploy
 [Link to deploy](http://95.163.213.142).
+
+### Usage
+
+> Starting the bare server (requires Redis and PostgreSQL): `go build ./cmd/api && sudo ./api`
+
+> Starting the server using docker-compose: `docker-compose up`
+
+> Running backend tests: `go test --coverpkg=$$(go list ./... | xargs echo | tr ' ' ,) ./... && go tool cover -func=.coverprofile`
+
+### Directory structure
+
+```bash
+2021_2_LadnoDavayteBezRoflov
+|--cmd/api
+|  |-main.go
+|  |-server.go
+|  |-settings.go
+|
+|--app
+|  |-handlers
+|  |-models
+|  |-repositories
+|  |-usecases
+|
+|--pkg
+```
