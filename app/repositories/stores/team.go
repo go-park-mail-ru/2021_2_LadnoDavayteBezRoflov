@@ -20,7 +20,7 @@ func CreateTeamRepository(db *gorm.DB) repositories.TeamRepository {
 
 func (teamStore *TeamStore) Create(team *models.Team) (err error) {
 	isExist, err := teamStore.IsTeamExist(team)
-	if !isExist {
+	if isExist {
 		return
 	}
 	return teamStore.db.Create(team).Error

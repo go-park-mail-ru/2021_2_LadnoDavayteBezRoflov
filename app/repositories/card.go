@@ -2,7 +2,7 @@ package repositories
 
 import "backendServer/app/models"
 
-type CardRepository interface { // TODO реализовать перенос в рамках доски и списка карточек
+type CardRepository interface {
 	Create(card *models.Card) (err error)
 	Update(card *models.Card) (err error)
 	Delete(cid uint) (err error)

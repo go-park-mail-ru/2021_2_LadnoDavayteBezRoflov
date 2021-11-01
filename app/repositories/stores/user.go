@@ -21,12 +21,12 @@ func CreateUserRepository(db *gorm.DB) repositories.UserRepository {
 
 func (userStore *UserStore) Create(user *models.User) (err error) {
 	isUserExist, err := userStore.IsUserExist(user)
-	if !isUserExist {
+	if isUserExist {
 		return
 	}
 
 	isEmailUsed, err := userStore.IsEmailUsed(user)
-	if !isEmailUsed {
+	if isEmailUsed {
 		return
 	}
 
@@ -79,7 +79,7 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 func (userStore *UserStore) GetByLogin(login string) (*models.User, error) {
 	user := new(models.User)
 	err := userStore.db.Where("login = ?", login).First(user).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if errors.Is(err, gorm.ErrRecordNotFound) { // возможно (очень вероятно) не заходит сюда даже в случае отсутствия юзера
 		err = customErrors.ErrUserNotFound
 	}
 	if err != nil {
@@ -112,21 +112,19 @@ func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
 }
 
 func (userStore *UserStore) IsUserExist(user *models.User) (bool, error) {
-	if err := userStore.db.Where("login = ?", user.Login).Find(user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = customErrors.ErrUserAlreadyCreated
-		}
-		return true, err
+	if res := userStore.db.Select("login").Where("login = ?", user.Login).Find(user); res.Error != nil {
+		return true, res.Error
+	} else if res.RowsAffected == 0 {
+		return false, nil
 	}
-	return false, nil
+	return true, customErrors.ErrUserAlreadyCreated
 }
 
 func (userStore *UserStore) IsEmailUsed(user *models.User) (bool, error) {
-	if err := userStore.db.Where("email = ?", user.Email).Find(user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = customErrors.ErrEmailAlreadyUsed
-		}
-		return true, err
+	if res := userStore.db.Select("email").Where("email = ?", user.Email).Find(user); res.Error != nil {
+		return true, res.Error
+	} else if res.RowsAffected == 0 {
+		return false, nil
 	}
-	return false, nil
+	return true, customErrors.ErrEmailAlreadyUsed
 }

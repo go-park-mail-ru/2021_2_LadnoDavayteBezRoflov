@@ -11,13 +11,18 @@ import (
 type UserUseCaseImpl struct {
 	sessionRepository repositories.SessionRepository
 	userRepository    repositories.UserRepository
+	teamRepository    repositories.TeamRepository
 }
 
-func CreateUserUseCase(sessionRepository repositories.SessionRepository,
-	userRepository repositories.UserRepository) usecases.UserUseCase {
+func CreateUserUseCase(
+	sessionRepository repositories.SessionRepository,
+	userRepository repositories.UserRepository,
+	teamRepository repositories.TeamRepository,
+) usecases.UserUseCase {
 	return &UserUseCaseImpl{
 		sessionRepository: sessionRepository,
 		userRepository:    userRepository,
+		teamRepository:    teamRepository,
 	}
 }
 
@@ -28,6 +33,18 @@ func (userUseCase *UserUseCaseImpl) Create(user *models.User) (sid string, err e
 	}
 
 	err = userUseCase.userRepository.Create(user)
+	if err != nil {
+		return
+	}
+
+	privateTeam := &models.Team{Title: "Личное пространство " + user.Login}
+
+	err = userUseCase.teamRepository.Create(privateTeam)
+	if err != nil {
+		return
+	}
+
+	err = userUseCase.userRepository.AddUserToTeam(user.UID, privateTeam.TID) // TODO TEMP все пользователи в одной команде
 	if err != nil {
 		return
 	}
