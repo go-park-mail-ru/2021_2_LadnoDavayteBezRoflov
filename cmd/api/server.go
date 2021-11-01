@@ -69,7 +69,7 @@ func (server *Server) Run() {
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
-	// cardRepo := stores.CreateCardRepository(postgresClient) // Пока что закоментированны за ненадобностью
+	// cardRepo := stores.CreateCardRepository(postgresClient) // Пока что закоментированна за ненадобностью
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
@@ -88,7 +88,7 @@ func (server *Server) Run() {
 	router.NoRoute(handlers.NoRouteHandler)
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
-	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase)
+	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware, server.settings.AvatarsPath)
 	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)

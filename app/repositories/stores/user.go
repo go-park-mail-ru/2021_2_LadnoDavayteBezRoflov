@@ -5,7 +5,11 @@ import (
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/hasher"
-	"errors"
+	"io"
+	"os"
+	"strings"
+
+	"github.com/google/uuid"
 
 	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -71,31 +75,44 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 		oldUser.Description = user.Description
 	}
 
-	// TODO добавление аватара
+	if user.Avatar != "" {
+		fileName := uuid.NewString()
+		out := new(os.File)
+		out, err = os.Create(strings.Join([]string{user.AvatarsPath, "/", fileName}, ""))
+		defer func(closeErr error) {
+			if closeErr != nil {
+				err = closeErr
+			}
+		}(out.Close())
+
+		_, err = io.Copy(out, user.AvatarFile)
+		if err != nil {
+			return
+		}
+
+		user.Avatar = fileName
+		oldUser.Avatar = user.Avatar
+	}
 
 	return userStore.db.Save(oldUser).Error
 }
 
 func (userStore *UserStore) GetByLogin(login string) (*models.User, error) {
 	user := new(models.User)
-	err := userStore.db.Where("login = ?", login).First(user).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) { // возможно (очень вероятно) не заходит сюда даже в случае отсутствия юзера
-		err = customErrors.ErrUserNotFound
-	}
-	if err != nil {
-		return nil, err
+	if res := userStore.db.Where("login = ?", login).First(user); res.Error != nil {
+		return nil, res.Error
+	} else if res.RowsAffected == 0 {
+		return nil, customErrors.ErrUserNotFound
 	}
 	return user, nil
 }
 
 func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 	user := new(models.User)
-	err := userStore.db.First(user, uid).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		err = customErrors.ErrUserNotFound
-	}
-	if err != nil {
-		return nil, err
+	if res := userStore.db.First(user, uid); res.Error != nil {
+		return nil, res.Error
+	} else if res.RowsAffected == 0 {
+		return nil, customErrors.ErrUserNotFound
 	}
 	return user, nil
 }

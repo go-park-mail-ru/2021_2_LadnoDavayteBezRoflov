@@ -24,6 +24,7 @@ type Settings struct {
 	corsConfig cors.Config
 
 	LogFilePath string
+	AvatarsPath string
 
 	RedisProtocol string
 	RedisPort     string
@@ -32,10 +33,10 @@ type Settings struct {
 }
 
 type EnvironmentVariables struct {
-	DB_PORT           string `env:"DB_PORT",required`
-	REDIS_PORT        string `env:"REDIS_PORT",required`
-	POSTGRES_USER     string `env:"POSTGRES_USER",required`
-	POSTGRES_PASSWORD string `env:"POSTGRES_PASSWORD",required`
+	DB_PORT           string `env:"DB_PORT,required"`
+	REDIS_PORT        string `env:"REDIS_PORT,required"`
+	POSTGRES_USER     string `env:"POSTGRES_USER,required"`
+	POSTGRES_PASSWORD string `env:"POSTGRES_PASSWORD,required"`
 	DATABASE_HOST     string `env:"DATABASE_HOST,required"`
 	POSTGRES_DB       string `env:"POSTGRES_DB,required"`
 	FRONTEND_ADDRESS  string `env:"FRONTEND_ADDRESS,required"`
@@ -73,6 +74,7 @@ func InitSettings() (settings Settings) {
 		corsConfig: cors.DefaultConfig(),
 
 		LogFilePath: env.LOG_LOCATION,
+		AvatarsPath: fmt.Sprintf("%s/public/avatars", env.FRONTEND_ADDRESS),
 
 		RedisProtocol: "tcp",
 		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
