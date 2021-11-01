@@ -22,6 +22,8 @@ var (
 
 	ErrCardNotFound = errors.New("card not found")
 
+	ErrNoAccess = errors.New("no access")
+
 	ErrNotImplemented = errors.New("not implemented")
 	ErrInternal       = errors.New("internal error")
 )
@@ -42,6 +44,8 @@ var errorToCodeMap = map[error]int{
 	ErrCardListNotFound: http.StatusNotFound,
 
 	ErrCardNotFound: http.StatusNotFound,
+
+	ErrNoAccess: http.StatusForbidden,
 
 	ErrNotImplemented: http.StatusNotImplemented,
 	ErrInternal:       http.StatusInternalServerError,

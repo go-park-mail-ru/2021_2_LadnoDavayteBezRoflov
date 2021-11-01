@@ -68,13 +68,13 @@ func (server *Server) Run() {
 	userRepo := stores.CreateUserRepository(postgresClient)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
-	// cardListRepo := stores.CreateCardListRepository(postgresClient) // Пока что закоментированны за ненадобностью
-	// cardRepo := stores.CreateCardRepository(postgresClient)
+	cardListRepo := stores.CreateCardListRepository(postgresClient)
+	// cardRepo := stores.CreateCardRepository(postgresClient) // Пока что закоментированны за ненадобностью
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
-	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo)
-	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo)
+	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
+	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo)
 
 	// Middlewares
 	commonMiddleware := handlers.CreateCommonMiddleware(logger)
