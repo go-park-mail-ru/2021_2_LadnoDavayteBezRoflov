@@ -27,7 +27,7 @@ func CreateCardListHandler(router *gin.RouterGroup,
 	cards := router.Group(handler.CardListURL)
 	{
 		cards.GET("/:clid", mw.CheckAuth(), mw.CSRF(), handler.GetCardList)
-		cards.POST("/:clid", mw.CheckAuth(), mw.CSRF(), handler.CreateCardList)
+		cards.POST("", mw.CheckAuth(), mw.CSRF(), handler.CreateCardList)
 		cards.PUT("/:clid", mw.CheckAuth(), mw.CSRF(), handler.UpdateCardList)
 		cards.DELETE("/:clid", mw.CheckAuth(), mw.CSRF(), handler.DeleteCardList)
 	}

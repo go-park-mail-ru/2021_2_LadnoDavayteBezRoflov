@@ -69,13 +69,13 @@ func (server *Server) Run() {
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
-	cardRepo := stores.CreateCardRepository(postgresClient) // Пока что закоментированна за ненадобностью
+	cardRepo := stores.CreateCardRepository(postgresClient)
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
 	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo)
-	cardListUseCase := impl.CreateCardListUseCase(cardListRepo)
+	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo, teamRepo, boardRepo)
 	cardUseCase := impl.CreateCardUseCase(cardRepo)
 
 	// Middlewares

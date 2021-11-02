@@ -63,8 +63,10 @@ func (boardHandler *BoardHandler) GetBoard(c *gin.Context) {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
+
 	board, err := boardHandler.BoardUseCase.GetBoard(uid.(uint), uint(bid))
 	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
 

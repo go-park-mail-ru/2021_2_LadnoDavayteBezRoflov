@@ -27,7 +27,7 @@ func CreateCardHandler(router *gin.RouterGroup,
 	cards := router.Group(handler.CardURL)
 	{
 		cards.GET("/:cid", mw.CheckAuth(), mw.CSRF(), handler.GetCard)
-		cards.POST("/:cid", mw.CheckAuth(), mw.CSRF(), handler.CreateCard)
+		cards.POST("", mw.CheckAuth(), mw.CSRF(), handler.CreateCard)
 		cards.PUT("/:cid", mw.CheckAuth(), mw.CSRF(), handler.UpdateCard)
 		cards.DELETE("/:cid", mw.CheckAuth(), mw.CSRF(), handler.DeleteCard)
 	}
