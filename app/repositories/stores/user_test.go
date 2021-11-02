@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createMockDB() (*gorm.DB, sqlmock.Sqlmock, error) {
+func createMockDB() (*UserStore, sqlmock.Sqlmock, error) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, nil, err
@@ -27,20 +27,26 @@ func createMockDB() (*gorm.DB, sqlmock.Sqlmock, error) {
 		_ = db.Close()
 		return nil, nil, err
 	}
-	return gdb, mock, err
+
+	return &UserStore{db: gdb}, mock, nil
 }
 
 func TestCreateUserRepository(t *testing.T) {
 	t.Parallel()
 
-	db, _, err := createMockDB()
+	db, _, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("cant create mockDB: %s", err)
 	}
+	gdb, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		_ = db.Close()
+		t.Fatalf("cant create mockDB: %s", err)
+	}
 
-	expectedUserRepo := &UserStore{db: db}
+	expectedUserRepo := &UserStore{db: gdb}
 
-	require.Equal(t, expectedUserRepo, CreateUserRepository(db, "", ""))
+	require.Equal(t, expectedUserRepo, CreateUserRepository(gdb, "", ""))
 }
 
 func createMockQueryInsertUser(mock *sqlmock.Sqlmock, user *models.User, isSuccessful bool, err error) {
@@ -64,11 +70,10 @@ func createMockQueryInsertUser(mock *sqlmock.Sqlmock, user *models.User, isSucce
 func TestUserRepositoryCreateSuccess(t *testing.T) {
 	t.Parallel()
 
-	db, mock, err := createMockDB()
+	repo, mock, err := createMockDB()
 	if err != nil {
 		t.Fatalf("cant create mockDB: %s", err)
 	}
-	repo := &UserStore{db: db}
 
 	newUser := &models.User{}
 	if err := faker.FakeData(newUser); err != nil {
@@ -95,11 +100,10 @@ func TestUserRepositoryCreateSuccess(t *testing.T) {
 func TestUserRepositoryCreateFail(t *testing.T) {
 	t.Parallel()
 
-	db, mock, err := createMockDB()
+	repo, mock, err := createMockDB()
 	if err != nil {
 		t.Fatalf("cant create mockDB: %s", err)
 	}
-	repo := &UserStore{db: db}
 
 	existingUser := &models.User{}
 	if err := faker.FakeData(existingUser); err != nil {
@@ -175,11 +179,10 @@ func TestUserRepositoryAddUserToTeamFail(t *testing.T) {
 func TestUserRepositoryIsUserExist(t *testing.T) {
 	t.Parallel()
 
-	db, mock, err := createMockDB()
+	repo, mock, err := createMockDB()
 	if err != nil {
 		t.Fatalf("cant create mockDB: %s", err)
 	}
-	repo := &UserStore{db: db}
 
 	user := &models.User{}
 	if err := faker.FakeData(user); err != nil {
@@ -212,11 +215,10 @@ func TestUserRepositoryIsUserExist(t *testing.T) {
 func TestUserRepositoryIsEmailUsed(t *testing.T) {
 	t.Parallel()
 
-	db, mock, err := createMockDB()
+	repo, mock, err := createMockDB()
 	if err != nil {
 		t.Fatalf("cant create mockDB: %s", err)
 	}
-	repo := &UserStore{db: db}
 
 	user := &models.User{}
 	if err := faker.FakeData(user); err != nil {

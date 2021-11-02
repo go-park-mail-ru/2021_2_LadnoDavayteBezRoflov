@@ -7,6 +7,7 @@ import (
 	"backendServer/pkg/errors"
 	"backendServer/pkg/hasher"
 	"backendServer/pkg/utils"
+	"mime/multipart"
 )
 
 type UserUseCaseImpl struct {
@@ -84,12 +85,12 @@ func (userUseCase *UserUseCaseImpl) Update(user *models.User) (err error) {
 	return
 }
 
-func (userUseCase *UserUseCaseImpl) UpdateAvatar(user *models.User) (err error) {
+func (userUseCase *UserUseCaseImpl) UpdateAvatar(user *models.User, avatar *multipart.FileHeader) (err error) {
 	_, err = userUseCase.userRepository.GetByID(user.UID)
 	if err != nil {
 		return
 	}
 
-	err = userUseCase.userRepository.UpdateAvatar(user)
+	err = userUseCase.userRepository.UpdateAvatar(user, avatar)
 	return
 }

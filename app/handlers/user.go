@@ -103,10 +103,10 @@ func (userHandler *UserHandler) UpdateUserAvatar(c *gin.Context) {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
-	user.Avatar = file.Filename
-	user.AvatarFile = *file
 
-	err = userHandler.UserUseCase.UpdateAvatar(user)
+	user.Avatar = file.Filename
+
+	err = userHandler.UserUseCase.UpdateAvatar(user, file)
 	if err != nil {
 		_ = c.Error(err)
 		return

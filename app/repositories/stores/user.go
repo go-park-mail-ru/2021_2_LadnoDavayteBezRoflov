@@ -5,7 +5,9 @@ import (
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/hasher"
-	"image/png"
+	"image"
+	_ "image/png"
+	"mime/multipart"
 	"os"
 	"strings"
 
@@ -83,7 +85,7 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 	return userStore.db.Save(oldUser).Error
 }
 
-func (userStore *UserStore) UpdateAvatar(user *models.User) (err error) {
+func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.FileHeader) (err error) {
 	oldUser, err := userStore.GetByID(user.UID)
 	if err != nil {
 		return
@@ -93,12 +95,12 @@ func (userStore *UserStore) UpdateAvatar(user *models.User) (err error) {
 		fileNameID := uuid.NewString()
 		fileName := strings.Join([]string{userStore.avatarPath, "/", fileNameID, ".webp"}, "")
 
-		in, err := user.AvatarFile.Open()
+		in, err := avatar.Open()
 		if err != nil {
 			return err
 		}
 
-		img, err := png.Decode(in)
+		img, _, err := image.Decode(in)
 		if err != nil {
 			return err
 		}
