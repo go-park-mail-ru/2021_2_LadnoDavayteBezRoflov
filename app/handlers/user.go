@@ -12,14 +12,12 @@ import (
 
 type UserHandler struct {
 	UserURL     string
-	AvatarsPath string
 	UserUseCase usecases.UserUseCase
 }
 
-func CreateUserHandler(router *gin.RouterGroup, userURL string, userUseCase usecases.UserUseCase, mw SessionMiddleware, avatarsPath string) {
+func CreateUserHandler(router *gin.RouterGroup, userURL string, userUseCase usecases.UserUseCase, mw SessionMiddleware) {
 	handler := &UserHandler{
 		UserURL:     userURL,
-		AvatarsPath: avatarsPath,
 		UserUseCase: userUseCase,
 	}
 
@@ -106,7 +104,6 @@ func (userHandler *UserHandler) UpdateUserAvatar(c *gin.Context) {
 		return
 	}
 	user.Avatar = file.Filename
-	user.AvatarsPath = userHandler.AvatarsPath
 	user.AvatarFile = *file
 
 	err = userHandler.UserUseCase.UpdateAvatar(user)

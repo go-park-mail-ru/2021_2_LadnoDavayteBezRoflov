@@ -20,11 +20,13 @@ import (
 )
 
 type UserStore struct {
-	db *gorm.DB
+	db                *gorm.DB
+	avatarPath        string
+	defaultAvatarName string
 }
 
-func CreateUserRepository(db *gorm.DB) repositories.UserRepository {
-	return &UserStore{db: db}
+func CreateUserRepository(db *gorm.DB, avatarPath, defaultAvatarName string) repositories.UserRepository {
+	return &UserStore{db: db, avatarPath: avatarPath, defaultAvatarName: defaultAvatarName}
 }
 
 func (userStore *UserStore) Create(user *models.User) (err error) {
@@ -43,6 +45,7 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 		return
 	}
 
+	user.Avatar = strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
 	err = userStore.db.Create(user).Error
 	return
 }
@@ -81,16 +84,13 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 
 	if user.Avatar != "" {
 		fileNameID := uuid.NewString()
-		out := new(os.File)
-
-		fileName := strings.Join([]string{user.AvatarsPath, "/", fileNameID, ".webp"}, "")
+		fileName := strings.Join([]string{userStore.avatarPath, "/", fileNameID, ".webp"}, "")
 
 		in, openErr := user.AvatarFile.Open()
 		if openErr != nil {
 			err = openErr
 			return
 		}
-		defer in.Close().Error()
 
 		img, decodeErr := png.Decode(in)
 		if decodeErr != nil {
@@ -103,7 +103,6 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 			err = createErr
 			return
 		}
-		defer out.Close().Error()
 
 		options, optionsErr := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
 		if err != nil {

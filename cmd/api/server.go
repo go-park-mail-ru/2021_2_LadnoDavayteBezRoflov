@@ -65,7 +65,7 @@ func (server *Server) Run() {
 
 	// Repositories
 	sessionRepo := stores.CreateSessionRepository(redisPool, uint64(sessionCookieController.SessionCookieLifeTimeInHours), everythingCloser)
-	userRepo := stores.CreateUserRepository(postgresClient)
+	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
@@ -88,7 +88,7 @@ func (server *Server) Run() {
 	router.NoRoute(handlers.NoRouteHandler)
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
-	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware, server.settings.AvatarsPath)
+	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware)
 	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)

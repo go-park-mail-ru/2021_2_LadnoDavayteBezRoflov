@@ -14,6 +14,5 @@ type User struct {
 	Description    string               `json:"description" faker:"sentence"`
 	Avatar         string               `json:"avatar" faker:"uuid_digit"`
 	AvatarFile     multipart.FileHeader `json:"-" faker:"-" gorm:"-"`
-	AvatarsPath    string               `json:"-" faker:"-" gorm:"-"`
 	Teams          []Team               `json:"teams" faker:"-" gorm:"many2many:users_teams;"`
 }

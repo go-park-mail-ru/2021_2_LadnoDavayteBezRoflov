@@ -23,8 +23,9 @@ type Settings struct {
 
 	corsConfig cors.Config
 
-	LogFilePath string
-	AvatarsPath string
+	LogFilePath       string
+	AvatarsPath       string
+	DefaultAvatarName string
 
 	RedisProtocol string
 	RedisPort     string
@@ -74,8 +75,9 @@ func InitSettings() (settings Settings) {
 
 		corsConfig: cors.DefaultConfig(),
 
-		LogFilePath: env.LOG_LOCATION,
-		AvatarsPath: env.FRONTEND_PATH,
+		LogFilePath:       env.LOG_LOCATION,
+		AvatarsPath:       env.FRONTEND_PATH,
+		DefaultAvatarName: "default_user_picture.webp",
 
 		RedisProtocol: "tcp",
 		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
