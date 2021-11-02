@@ -9,10 +9,12 @@ import (
 )
 
 type Settings struct {
-	RootURL    string
-	SessionURL string
-	ProfileURL string
-	BoardsURL  string
+	RootURL      string
+	SessionURL   string
+	ProfileURL   string
+	BoardsURL    string
+	CardListsURL string
+	CardsURL     string
 
 	ServerAddress string
 
@@ -52,10 +54,12 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
-		RootURL:    "/api",
-		SessionURL: "/sessions",
-		ProfileURL: "/profile",
-		BoardsURL:  "/boards",
+		RootURL:      "/api",
+		SessionURL:   "/sessions",
+		ProfileURL:   "/profile",
+		BoardsURL:    "/boards",
+		CardListsURL: "/cardLists",
+		CardsURL:     "/cards",
 
 		ServerAddress: ":8000",
 
