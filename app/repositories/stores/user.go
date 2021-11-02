@@ -6,10 +6,14 @@ import (
 	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/hasher"
 	"image"
+	_ "image/gif"
+	_ "image/jpeg"
 	_ "image/png"
 	"mime/multipart"
 	"os"
 	"strings"
+
+	_ "golang.org/x/image/bmp"
 
 	"github.com/google/uuid"
 	"github.com/kolesa-team/go-webp/encoder"
