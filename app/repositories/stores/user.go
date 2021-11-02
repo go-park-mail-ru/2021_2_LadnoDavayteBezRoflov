@@ -9,11 +9,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kolesa-team/go-webp/encoder"
-
-	"github.com/kolesa-team/go-webp/webp"
-
 	"github.com/google/uuid"
+	"github.com/kolesa-team/go-webp/encoder"
+	"github.com/kolesa-team/go-webp/webp"
 
 	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -86,28 +84,24 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 		fileNameID := uuid.NewString()
 		fileName := strings.Join([]string{userStore.avatarPath, "/", fileNameID, ".webp"}, "")
 
-		in, openErr := user.AvatarFile.Open()
-		if openErr != nil {
-			err = openErr
-			return
-		}
-
-		img, decodeErr := png.Decode(in)
-		if decodeErr != nil {
-			err = decodeErr
-			return
-		}
-
-		out, createErr := os.Create(fileName)
-		if createErr != nil {
-			err = createErr
-			return
-		}
-
-		options, optionsErr := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+		in, err := user.AvatarFile.Open()
 		if err != nil {
-			err = optionsErr
-			return
+			return err
+		}
+
+		img, err := png.Decode(in)
+		if err != nil {
+			return err
+		}
+
+		out, err := os.Create(fileName)
+		if err != nil {
+			return err
+		}
+
+		options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+		if err != nil {
+			return err
 		}
 
 		err = webp.Encode(out, img, options)
