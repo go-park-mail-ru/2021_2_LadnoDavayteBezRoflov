@@ -26,11 +26,11 @@ func CreateBoardHandler(router *gin.RouterGroup,
 
 	boards := router.Group(handler.BoardURL)
 	{
-		boards.GET("", mw.CheckAuth(), handler.GetAllUserBoards)
-		boards.POST("", mw.CheckAuth(), handler.CreateBoard)
-		boards.GET("/:bid", mw.CheckAuth(), handler.GetBoard)
-		boards.PUT("/:bid", mw.CheckAuth(), handler.UpdateBoard)
-		boards.DELETE("/:bid", mw.CheckAuth(), handler.DeleteBoard)
+		boards.GET("", mw.CheckAuth(), mw.CSRF(), handler.GetAllUserBoards)
+		boards.POST("", mw.CheckAuth(), mw.CSRF(), handler.CreateBoard)
+		boards.GET("/:bid", mw.CheckAuth(), mw.CSRF(), handler.GetBoard)
+		boards.PUT("/:bid", mw.CheckAuth(), mw.CSRF(), handler.UpdateBoard)
+		boards.DELETE("/:bid", mw.CheckAuth(), mw.CSRF(), handler.DeleteBoard)
 	}
 }
 
@@ -63,8 +63,10 @@ func (boardHandler *BoardHandler) GetBoard(c *gin.Context) {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
+
 	board, err := boardHandler.BoardUseCase.GetBoard(uid.(uint), uint(bid))
 	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
 

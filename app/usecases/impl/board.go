@@ -95,8 +95,7 @@ func (boardUseCase *BoardUseCaseImpl) UpdateBoard(uid uint, board *models.Board)
 		return customErrors.ErrNoAccess
 	}
 
-	err = boardUseCase.boardRepository.Update(board)
-	return
+	return boardUseCase.boardRepository.Update(board)
 }
 
 func (boardUseCase *BoardUseCaseImpl) DeleteBoard(uid, bid uint) (err error) {

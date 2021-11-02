@@ -54,7 +54,7 @@ func (cardListStore *CardListStore) Delete(clid uint) (err error) {
 	if err != nil {
 		return
 	}
-	err = cardListStore.Move(cardList.PositionOnBoard, ^uint(0), cardList.BID)
+	err = cardListStore.Move(cardList.PositionOnBoard, ^uint(0)-1, cardList.BID)
 	if err != nil {
 		return
 	}

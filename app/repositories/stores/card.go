@@ -63,7 +63,7 @@ func (cardStore *CardStore) Delete(cid uint) (err error) {
 	if err != nil {
 		return
 	}
-	err = cardStore.Move(card.PositionOnCardList, ^uint(0), card.CLID, card.CLID)
+	err = cardStore.Move(card.PositionOnCardList, ^uint(0)-1, card.CLID, card.CLID)
 	if err != nil {
 		return
 	}

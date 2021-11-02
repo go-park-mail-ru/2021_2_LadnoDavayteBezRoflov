@@ -65,16 +65,18 @@ func (server *Server) Run() {
 
 	// Repositories
 	sessionRepo := stores.CreateSessionRepository(redisPool, uint64(sessionCookieController.SessionCookieLifeTimeInHours), everythingCloser)
-	userRepo := stores.CreateUserRepository(postgresClient)
+	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
-	// cardRepo := stores.CreateCardRepository(postgresClient) // Пока что закоментированны за ненадобностью
+	cardRepo := stores.CreateCardRepository(postgresClient)
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
 	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo)
+	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo, teamRepo, boardRepo)
+	cardUseCase := impl.CreateCardUseCase(cardRepo)
 
 	// Middlewares
 	commonMiddleware := handlers.CreateCommonMiddleware(logger)
@@ -88,8 +90,10 @@ func (server *Server) Run() {
 	router.NoRoute(handlers.NoRouteHandler)
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
-	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase)
+	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware)
 	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, sessionMiddleware)
+	handlers.CreateCardListHandler(rootGroup, server.settings.CardListsURL, cardListUseCase, sessionMiddleware)
+	handlers.CreateCardHandler(rootGroup, server.settings.CardsURL, cardUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)
 	if err != nil {

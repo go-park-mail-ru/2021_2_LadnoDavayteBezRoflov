@@ -27,8 +27,8 @@ func CreateSessionHandler(router *gin.RouterGroup,
 	sessions := router.Group(handler.SessionURL)
 	{
 		sessions.POST("", handler.Create)
-		sessions.GET("", mw.CheckAuth(), handler.Get)
-		sessions.DELETE("", mw.CheckAuth(), handler.Delete)
+		sessions.GET("", mw.CheckAuth(), mw.CSRF(), handler.Get)
+		sessions.DELETE("", mw.CheckAuth(), mw.CSRF(), handler.Delete)
 	}
 }
 
