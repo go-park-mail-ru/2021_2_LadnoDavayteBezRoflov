@@ -5,9 +5,13 @@ import (
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/hasher"
-	"io"
+	"image/png"
 	"os"
 	"strings"
+
+	"github.com/kolesa-team/go-webp/encoder"
+
+	"github.com/kolesa-team/go-webp/webp"
 
 	"github.com/google/uuid"
 
@@ -52,7 +56,7 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 	if user.Login != "" && user.Login != oldUser.Login {
 		var isNewLoginExist bool
 		isNewLoginExist, err = userStore.IsUserExist(user)
-		if !isNewLoginExist {
+		if isNewLoginExist {
 			return
 		}
 		oldUser.Login = user.Login
@@ -61,7 +65,7 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 	if user.Email != "" && user.Email != oldUser.Email {
 		var isNewEmailUsed bool
 		isNewEmailUsed, err = userStore.IsEmailUsed(user)
-		if !isNewEmailUsed {
+		if isNewEmailUsed {
 			return
 		}
 		oldUser.Email = user.Email
@@ -76,22 +80,51 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 	}
 
 	if user.Avatar != "" {
-		fileName := uuid.NewString()
+		fileNameID := uuid.NewString()
 		out := new(os.File)
-		out, err = os.Create(strings.Join([]string{user.AvatarsPath, "/", fileName}, ""))
-		defer func(closeErr error) {
-			if closeErr != nil {
-				err = closeErr
-			}
-		}(out.Close())
 
-		_, err = io.Copy(out, user.AvatarFile)
+		fileName := strings.Join([]string{user.AvatarsPath, "/", fileNameID, ".webp"}, "")
+
+		in, openErr := user.AvatarFile.Open()
+		if openErr != nil {
+			err = openErr
+			return
+		}
+		defer in.Close().Error()
+
+		img, decodeErr := png.Decode(in)
+		if decodeErr != nil {
+			err = decodeErr
+			return
+		}
+
+		out, createErr := os.Create(fileName)
+		if createErr != nil {
+			err = createErr
+			return
+		}
+		defer out.Close().Error()
+
+		options, optionsErr := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+		if err != nil {
+			err = optionsErr
+			return
+		}
+
+		err = webp.Encode(out, img, options)
 		if err != nil {
 			return
 		}
 
+		if oldUser.Avatar != "" {
+			err = os.Remove(oldUser.Avatar)
+			if err != nil {
+				return
+			}
+		}
+
 		user.Avatar = fileName
-		oldUser.Avatar = user.Avatar
+		oldUser.Avatar = fileName
 	}
 
 	return userStore.db.Save(oldUser).Error

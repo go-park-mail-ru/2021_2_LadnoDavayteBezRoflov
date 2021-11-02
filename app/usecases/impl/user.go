@@ -69,23 +69,24 @@ func (userUseCase *UserUseCaseImpl) Get(uid uint, login string) (user *models.Us
 	return
 }
 
-func (userUseCase *UserUseCaseImpl) Update(login, newPassword, oldPassword string, user *models.User) (err error) {
-	if user.Password != newPassword {
-		err = customErrors.ErrBadRequest
-		return
-	}
-
-	oldUser, err := userUseCase.userRepository.GetByLogin(login)
+func (userUseCase *UserUseCaseImpl) Update(user *models.User) (err error) {
+	oldUser, err := userUseCase.userRepository.GetByID(user.UID)
 	if err != nil {
 		return
 	}
 
-	if oldUser.UID != user.UID {
-		err = customErrors.ErrNoAccess
+	if !hasher.IsPasswordsEqual(user.OldPassword, oldUser.HashedPassword) {
+		err = customErrors.ErrBadRequest
+		return
 	}
 
-	if hasher.IsPasswordsEqual(oldPassword, oldUser.HashedPassword) {
-		err = customErrors.ErrBadRequest
+	err = userUseCase.userRepository.Update(user)
+	return
+}
+
+func (userUseCase *UserUseCaseImpl) UpdateAvatar(user *models.User) (err error) {
+	_, err = userUseCase.userRepository.GetByID(user.UID)
+	if err != nil {
 		return
 	}
 

@@ -40,6 +40,7 @@ type EnvironmentVariables struct {
 	DATABASE_HOST     string `env:"DATABASE_HOST,required"`
 	POSTGRES_DB       string `env:"POSTGRES_DB,required"`
 	FRONTEND_ADDRESS  string `env:"FRONTEND_ADDRESS,required"`
+	FRONTEND_PATH     string `env:"PUBLIC_DIR,required"`
 	LOG_LOCATION      string `env:"LOG_LOCATION" envDefault:"/var/log/backendLogs.log"`
 }
 
@@ -74,7 +75,7 @@ func InitSettings() (settings Settings) {
 		corsConfig: cors.DefaultConfig(),
 
 		LogFilePath: env.LOG_LOCATION,
-		AvatarsPath: fmt.Sprintf("%s/public/avatars", env.FRONTEND_ADDRESS),
+		AvatarsPath: env.FRONTEND_PATH,
 
 		RedisProtocol: "tcp",
 		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),

@@ -27,7 +27,8 @@ func CreateUserHandler(router *gin.RouterGroup, userURL string, userUseCase usec
 	{
 		users.POST("", handler.CreateUser)
 		users.GET("/:login", mw.CheckAuth(), handler.GetUser)
-		users.POST("/:login", mw.CheckAuth(), handler.UpdateUser)
+		users.PUT("/:login", mw.CheckAuth(), handler.UpdateUser)
+		users.PUT("/:login/upload", mw.CheckAuth(), handler.UpdateUserAvatar)
 	}
 }
 
@@ -55,7 +56,7 @@ func (userHandler *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	login := c.Param("bid")
+	login := c.Param("login")
 
 	user, err := userHandler.UserUseCase.Get(uid.(uint), login)
 	if err != nil {
@@ -73,42 +74,42 @@ func (userHandler *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	login := c.Param("bid")
-
 	user := new(models.User)
 	if err := c.ShouldBindJSON(user); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
 
-	type Passwords struct {
-		NewPassword string `json:"password_repeat"`
-		OldPassword string `json:"old_password"`
-	}
-	passwords := &Passwords{}
-	if err := c.ShouldBindJSON(passwords); err != nil {
-		_ = c.Error(customErrors.ErrBadRequest)
+	user.UID = uid.(uint)
+	err := userHandler.UserUseCase.Update(user)
+	if err != nil {
+		_ = c.Error(err)
 		return
 	}
 
-	if user.Avatar != "" {
-		resp, err := http.Get(user.Avatar)
-		if err != nil {
-			_ = c.Error(customErrors.ErrBadRequest)
-			return
-		}
-		defer func(err error) {
-			if err != nil {
-				_ = c.Error(err)
-			}
-		}(resp.Body.Close())
+	c.JSON(http.StatusOK, user.Avatar)
+}
 
-		user.AvatarFile = resp.Body
+func (userHandler *UserHandler) UpdateUserAvatar(c *gin.Context) {
+	uid, exists := c.Get("uid")
+	if !exists {
+		_ = c.Error(customErrors.ErrNotAuthorized)
+		return
 	}
 
+	user := new(models.User)
 	user.UID = uid.(uint)
+
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
+		return
+	}
+	user.Avatar = file.Filename
 	user.AvatarsPath = userHandler.AvatarsPath
-	err := userHandler.UserUseCase.Update(login, passwords.NewPassword, passwords.OldPassword, user)
+	user.AvatarFile = *file
+
+	err = userHandler.UserUseCase.UpdateAvatar(user)
 	if err != nil {
 		_ = c.Error(err)
 		return

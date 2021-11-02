@@ -49,6 +49,7 @@ services:
             - FRONTEND_ADDRESS=localhost:3000 #95.163.213.142
             - GIN_MODE=debug
             - TZ=Europe/Moscow
+            - PUBLIC_DIR=/assets
         build: .
         container_name: "2021_2_LadnoDavayteBezRoflov_Backend"
         ports: 
@@ -57,7 +58,8 @@ services:
             - "8000"
         volumes:
             - ./:/backend
-        restart: on-failure 
+            - /Users/anton/GolandProjects/backendServer/Front/public/assets:/assets
+        restart: on-failure
         depends_on: 
             - redis
             - postgres
