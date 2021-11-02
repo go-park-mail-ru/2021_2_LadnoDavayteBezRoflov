@@ -24,9 +24,9 @@ func CreateUserHandler(router *gin.RouterGroup, userURL string, userUseCase usec
 	users := router.Group(handler.UserURL)
 	{
 		users.POST("", handler.CreateUser)
-		users.GET("/:login", mw.CheckAuth(), handler.GetUser)
-		users.PUT("/:login", mw.CheckAuth(), handler.UpdateUser)
-		users.PUT("/:login/upload", mw.CheckAuth(), handler.UpdateUserAvatar)
+		users.GET("/:login", mw.CheckAuth(), mw.CSRF(), handler.GetUser)
+		users.PUT("/:login", mw.CheckAuth(), mw.CSRF(), handler.UpdateUser)
+		users.PUT("/:login/upload", mw.CheckAuth(), mw.CSRF(), handler.UpdateUserAvatar)
 	}
 }
 

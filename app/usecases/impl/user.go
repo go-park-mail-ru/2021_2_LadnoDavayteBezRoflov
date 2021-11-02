@@ -90,6 +90,6 @@ func (userUseCase *UserUseCaseImpl) UpdateAvatar(user *models.User) (err error) 
 		return
 	}
 
-	err = userUseCase.userRepository.Update(user)
+	err = userUseCase.userRepository.UpdateAvatar(user)
 	return
 }

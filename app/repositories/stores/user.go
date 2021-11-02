@@ -80,6 +80,15 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 		oldUser.Description = user.Description
 	}
 
+	return userStore.db.Save(oldUser).Error
+}
+
+func (userStore *UserStore) UpdateAvatar(user *models.User) (err error) {
+	oldUser, err := userStore.GetByID(user.UID)
+	if err != nil {
+		return
+	}
+
 	if user.Avatar != "" {
 		fileNameID := uuid.NewString()
 		fileName := strings.Join([]string{userStore.avatarPath, "/", fileNameID, ".webp"}, "")
@@ -106,13 +115,13 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 
 		err = webp.Encode(out, img, options)
 		if err != nil {
-			return
+			return err
 		}
 
-		if oldUser.Avatar != "" {
+		if oldUser.Avatar != "" && oldUser.Avatar != strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "") {
 			err = os.Remove(oldUser.Avatar)
 			if err != nil {
-				return
+				return err
 			}
 		}
 
