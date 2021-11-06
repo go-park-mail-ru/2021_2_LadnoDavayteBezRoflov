@@ -6,6 +6,7 @@ import (
 	"backendServer/pkg/errors"
 	"backendServer/pkg/sessionCookieController"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,9 +43,9 @@ func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 	sid, err := sessionHandler.SessionUseCase.Create(user)
 	if err != nil {
 		_ = c.Error(err)
+		_ = c.Error(customErrors.ErrNotAuthorized)
 		return
 	}
-
 	http.SetCookie(c.Writer, sessionCookieController.CreateSessionCookie(sid))
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
 }
@@ -62,7 +63,7 @@ func (sessionHandler *SessionHandler) Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, userLogin)
+	c.JSON(http.StatusOK, gin.H{"login": userLogin})
 }
 
 func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
@@ -81,6 +82,11 @@ func (sessionHandler *SessionHandler) Delete(c *gin.Context) {
 	session, _ := c.Request.Cookie("session_id")
 	sessionCookieController.SetSessionCookieExpired(session)
 	http.SetCookie(c.Writer, session)
+
+	csrf, _ := c.Request.Cookie("csrf_token")
+	csrf.Path = "/"
+	csrf.Expires = time.Now().Add(-1)
+	http.SetCookie(c.Writer, csrf)
 
 	c.JSON(http.StatusOK, gin.H{"status": "you are logged out"})
 }

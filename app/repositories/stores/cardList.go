@@ -4,7 +4,6 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
-	"errors"
 
 	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -54,7 +53,7 @@ func (cardListStore *CardListStore) Delete(clid uint) (err error) {
 	if err != nil {
 		return
 	}
-	err = cardListStore.Move(cardList.PositionOnBoard, ^uint(0)-1, cardList.BID)
+	err = cardListStore.Move(cardList.PositionOnBoard, (^uint(0)-1)/2, cardList.BID)
 	if err != nil {
 		return
 	}
@@ -64,19 +63,17 @@ func (cardListStore *CardListStore) Delete(clid uint) (err error) {
 
 func (cardListStore *CardListStore) GetByID(clid uint) (*models.CardList, error) {
 	cardList := new(models.CardList)
-	err := cardListStore.db.First(cardList, clid).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		err = customErrors.ErrCardListNotFound
-	}
-	if err != nil {
-		return nil, err
+	if res := cardListStore.db.First(cardList, clid); res.RowsAffected == 0 {
+		return nil, customErrors.ErrCardListNotFound
+	} else if res.Error != nil {
+		return nil, res.Error
 	}
 	return cardList, nil
 }
 
 func (cardListStore *CardListStore) GetCardListCards(clid uint) (cards *[]models.Card, err error) {
 	cards = new([]models.Card)
-	err = cardListStore.db.Where("clid = ?", clid).Order("position_on_card_list").Find(cards).Error
+	err = cardListStore.db.Where("cl_id = ?", clid).Order("position_on_card_list").Find(cards).Error
 	return
 }
 

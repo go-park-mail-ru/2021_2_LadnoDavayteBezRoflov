@@ -4,7 +4,6 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
-	"errors"
 
 	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -40,24 +39,23 @@ func (boardStore *BoardStore) Update(board *models.Board) (err error) {
 }
 
 func (boardStore *BoardStore) Delete(bid uint) (err error) {
-	return boardStore.db.Delete(bid).Error
+	return boardStore.db.Delete(&models.Board{}, bid).Error
 }
 
 func (boardStore *BoardStore) GetByID(bid uint) (*models.Board, error) {
 	board := new(models.Board)
-	err := boardStore.db.First(board, bid).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		err = customErrors.ErrBoardNotFound
-	}
-	if err != nil {
+	if res := boardStore.db.Find(board, bid); res.RowsAffected == 0 {
+		err := customErrors.ErrBoardNotFound
 		return nil, err
+	} else if res.Error != nil {
+		return nil, res.Error
 	}
 	return board, nil
 }
 
 func (boardStore *BoardStore) GetBoardCardLists(bid uint) (cardLists *[]models.CardList, err error) {
 	cardLists = new([]models.CardList)
-	err = boardStore.db.Where("bid = ?", bid).Order("position_on_board").Find(cardLists).Error
+	err = boardStore.db.Where("b_id = ?", bid).Order("position_on_board").Find(cardLists).Error
 	return
 }
 

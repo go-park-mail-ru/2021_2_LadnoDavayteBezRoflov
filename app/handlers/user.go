@@ -85,7 +85,7 @@ func (userHandler *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user.Avatar)
+	c.JSON(http.StatusOK, user)
 }
 
 func (userHandler *UserHandler) UpdateUserAvatar(c *gin.Context) {
@@ -112,5 +112,5 @@ func (userHandler *UserHandler) UpdateUserAvatar(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user.Avatar)
+	c.JSON(http.StatusOK, user)
 }

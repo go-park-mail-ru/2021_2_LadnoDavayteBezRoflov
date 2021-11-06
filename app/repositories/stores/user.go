@@ -140,20 +140,20 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 
 func (userStore *UserStore) GetByLogin(login string) (*models.User, error) {
 	user := new(models.User)
-	if res := userStore.db.Where("login = ?", login).First(user); res.Error != nil {
-		return nil, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Where("login = ?", login).Find(user); res.RowsAffected == 0 {
 		return nil, customErrors.ErrUserNotFound
+	} else if res.Error != nil {
+		return nil, res.Error
 	}
 	return user, nil
 }
 
 func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 	user := new(models.User)
-	if res := userStore.db.First(user, uid); res.Error != nil {
-		return nil, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Find(user, uid); res.RowsAffected == 0 {
 		return nil, customErrors.ErrUserNotFound
+	} else if res.Error != nil {
+		return nil, res.Error
 	}
 	return user, nil
 }
@@ -161,7 +161,6 @@ func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 func (userStore *UserStore) GetUserTeams(uid uint) (teams *[]models.Team, err error) {
 	teams = new([]models.Team)
 	err = userStore.db.Model(&models.User{UID: uid}).Association("Teams").Find(teams)
-
 	return
 }
 
@@ -170,19 +169,19 @@ func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
 }
 
 func (userStore *UserStore) IsUserExist(user *models.User) (bool, error) {
-	if res := userStore.db.Select("login").Where("login = ?", user.Login).Find(user); res.Error != nil {
-		return true, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Select("login").Where("login = ?", user.Login).Find(user); res.RowsAffected == 0 {
 		return false, nil
+	} else if res.Error != nil {
+		return true, res.Error
 	}
 	return true, customErrors.ErrUserAlreadyCreated
 }
 
 func (userStore *UserStore) IsEmailUsed(user *models.User) (bool, error) {
-	if res := userStore.db.Select("email").Where("email = ?", user.Email).Find(user); res.Error != nil {
-		return true, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Select("email").Where("email = ?", user.Email).Find(user); res.RowsAffected == 0 {
 		return false, nil
+	} else if res.Error != nil {
+		return true, res.Error
 	}
 	return true, customErrors.ErrEmailAlreadyUsed
 }

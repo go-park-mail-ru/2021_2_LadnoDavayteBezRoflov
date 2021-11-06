@@ -63,6 +63,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 		err = customErrors.ErrNoAccess
 		return
 	}
+
 	board, err = boardUseCase.boardRepository.GetByID(bid)
 	if err != nil {
 		return

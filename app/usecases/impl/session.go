@@ -28,17 +28,16 @@ func (sessionUseCase *SessionUseCaseImpl) Create(user *models.User) (sid string,
 		err = customErrors.ErrBadInputData
 	}
 
-	user, err = sessionUseCase.userRepository.GetByLogin(user.Login)
+	existingUser, err := sessionUseCase.userRepository.GetByLogin(user.Login)
 	if err != nil {
 		return
 	}
-
-	if !hasher.IsPasswordsEqual(user.Password, user.HashedPassword) {
+	if !hasher.IsPasswordsEqual(user.Password, existingUser.HashedPassword) { // TODO
 		err = customErrors.ErrBadInputData
 		return
 	}
 
-	sid, err = sessionUseCase.sessionRepository.Create(user.UID)
+	sid, err = sessionUseCase.sessionRepository.Create(existingUser.UID)
 	return
 }
 

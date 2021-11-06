@@ -18,6 +18,7 @@ func CreateSessionCookie(sid string) *http.Cookie {
 	return &http.Cookie{
 		Name:     "session_id",
 		Value:    sid,
+		Path:     "/",
 		Expires:  time.Now().Add(SessionCookieLifeTimeInHours),
 		Secure:   false,
 		HttpOnly: true,
@@ -26,6 +27,7 @@ func CreateSessionCookie(sid string) *http.Cookie {
 }
 
 func SetSessionCookieExpired(cookie *http.Cookie) {
+	cookie.Path = "/"
 	cookie.Expires = time.Now().Add(-1)
 }
 

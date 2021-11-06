@@ -4,7 +4,6 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
-	"errors"
 
 	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -63,7 +62,7 @@ func (cardStore *CardStore) Delete(cid uint) (err error) {
 	if err != nil {
 		return
 	}
-	err = cardStore.Move(card.PositionOnCardList, ^uint(0)-1, card.CLID, card.CLID)
+	err = cardStore.Move(card.PositionOnCardList, (^uint(0)-1)/2, card.CLID, card.CLID)
 	if err != nil {
 		return
 	}
@@ -73,12 +72,10 @@ func (cardStore *CardStore) Delete(cid uint) (err error) {
 
 func (cardStore *CardStore) GetByID(cid uint) (*models.Card, error) {
 	card := new(models.Card)
-	err := cardStore.db.First(card, cid).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		err = customErrors.ErrCardNotFound
-	}
-	if err != nil {
-		return nil, err
+	if res := cardStore.db.Find(card, cid); res.RowsAffected == 0 {
+		return nil, customErrors.ErrCardNotFound
+	} else if res.Error != nil {
+		return nil, res.Error
 	}
 	return card, nil
 }
@@ -108,11 +105,11 @@ func (cardStore *CardStore) Move(fromPos, toPos, fromCardListID, toCardListID ui
 			err = cardStore.move(fromPos+1, toPos, fromCardListID, true)
 		}
 	} else {
-		err = cardStore.move(fromPos, ^uint(0) /*максимально возможное значение позиции*/, fromCardListID, true)
+		err = cardStore.move(fromPos, (^uint(0)-1)/2 /*максимально возможное значение позиции*/, fromCardListID, true)
 		if err != nil {
 			return
 		}
-		err = cardStore.move(toPos, ^uint(0) /*максимально возможное значение позиции*/, toCardListID, false)
+		err = cardStore.move(toPos, (^uint(0)-1)/2 /*максимально возможное значение позиции*/, toCardListID, false)
 	}
 	return
 }

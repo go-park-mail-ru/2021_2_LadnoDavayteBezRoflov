@@ -35,6 +35,7 @@ func HashPassword(password string) ([]byte, error) {
 }
 
 func IsPasswordsEqual(plainPassword string, hashedPassword []byte) bool {
-	salt := hashedPassword[0:saltLen]
+	var salt []byte
+	salt = append(salt, hashedPassword[0:saltLen]...)
 	return bytes.Equal(hashedPassword, saltPassword(salt, plainPassword))
 }
