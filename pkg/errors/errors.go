@@ -62,7 +62,6 @@ func FindError(err error) error {
 }
 
 func ResolveErrorToCode(err error) (code int) {
-	err = errors.Unwrap(err)
 	code, isErrorFound := errorToCodeMap[err]
 	if !isErrorFound {
 		code = http.StatusInternalServerError
