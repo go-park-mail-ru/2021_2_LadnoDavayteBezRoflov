@@ -51,6 +51,16 @@ var errorToCodeMap = map[error]int{
 	ErrInternal:       http.StatusInternalServerError,
 }
 
+func FindError(err error) error {
+	err = errors.Unwrap(err)
+	_, isErrorFound := errorToCodeMap[err]
+	if isErrorFound {
+		return err
+	} else {
+		return ErrInternal
+	}
+}
+
 func ResolveErrorToCode(err error) (code int) {
 	err = errors.Unwrap(err)
 	code, isErrorFound := errorToCodeMap[err]

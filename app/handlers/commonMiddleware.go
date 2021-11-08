@@ -37,7 +37,8 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 		c.Next()
 
 		if len(c.Errors) > 0 {
-			c.JSON(customErrors.ResolveErrorToCode(c.Errors.Last()), gin.H{"error": c.Errors.Last().Error()})
+			err := customErrors.FindError(c.Errors.Last())
+			c.JSON(customErrors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
 		}
 
 		timeStamp := time.Now()
