@@ -37,7 +37,7 @@ func (cardStore *CardStore) Update(card *models.Card) (err error) {
 		oldCard.Title = card.Title
 	}
 
-	if card.Description != "" && card.Description != oldCard.Description {
+	if card.Description != oldCard.Description {
 		oldCard.Description = card.Description
 	}
 
