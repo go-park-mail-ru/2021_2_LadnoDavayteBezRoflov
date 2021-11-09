@@ -131,6 +131,7 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 			}
 		}
 
+		fileName = strings.Replace(fileName, "/backend", "", -1)
 		user.Avatar = fileName
 		oldUser.Avatar = fileName
 	}
