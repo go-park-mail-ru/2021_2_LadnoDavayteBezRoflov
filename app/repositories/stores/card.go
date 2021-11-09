@@ -41,7 +41,7 @@ func (cardStore *CardStore) Update(card *models.Card) (err error) {
 		oldCard.Description = card.Description
 	}
 
-	if card.PositionOnCardList != 0 && (card.PositionOnCardList != oldCard.PositionOnCardList || card.CLID != oldCard.CLID) {
+	if card.PositionOnCardList != 0 && card.CLID != 0 && (card.PositionOnCardList != oldCard.PositionOnCardList || card.CLID != oldCard.CLID) {
 		err = cardStore.Move(oldCard.PositionOnCardList, card.PositionOnCardList, oldCard.CLID, card.CLID)
 		if err != nil {
 			return
