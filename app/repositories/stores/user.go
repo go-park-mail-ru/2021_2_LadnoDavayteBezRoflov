@@ -50,6 +50,7 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	}
 
 	user.Avatar = strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
+	user.Avatar = strings.Replace(user.Avatar, "/backend", "", -1)
 	err = userStore.db.Create(user).Error
 	return
 }
