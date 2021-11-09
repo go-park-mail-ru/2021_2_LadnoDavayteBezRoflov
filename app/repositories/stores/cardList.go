@@ -37,7 +37,7 @@ func (cardListStore *CardListStore) Update(cardList *models.CardList) (err error
 		oldCardList.Title = cardList.Title
 	}
 
-	if cardList.PositionOnBoard != oldCardList.PositionOnBoard {
+	if cardList.PositionOnBoard != 0 && cardList.PositionOnBoard != oldCardList.PositionOnBoard {
 		err = cardListStore.Move(oldCardList.PositionOnBoard, cardList.PositionOnBoard, oldCardList.BID)
 		if err != nil {
 			return

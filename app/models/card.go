@@ -1,8 +1,6 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
 type Card struct {
 	CID                uint      `json:"cid" gorm:"primaryKey"`
@@ -11,5 +9,6 @@ type Card struct {
 	PositionOnCardList uint      `json:"pos" faker:"-"`
 	Title              string    `json:"card_name" faker:"word" gorm:"not null;index"`
 	Description        string    `json:"description" faker:"sentence"`
-	Deadline           time.Time `json:"deadline" faker:"timestamp"`
+	Deadline           time.Time `json:"-" faker:"timestamp"`
+	// Deadline           time.Time `json:"deadline" faker:"timestamp"`
 }
