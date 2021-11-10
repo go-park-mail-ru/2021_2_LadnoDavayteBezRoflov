@@ -125,7 +125,9 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 			return err
 		}
 
-		if oldUser.Avatar != "" && oldUser.Avatar != strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "") {
+		defaultAvatar := strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
+		fileName = strings.Replace(fileName, "/backend", "", -1)
+		if oldUser.Avatar != "" && oldUser.Avatar != defaultAvatar {
 			err = os.Remove(oldUser.Avatar)
 			if err != nil {
 				return err
