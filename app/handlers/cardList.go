@@ -74,7 +74,7 @@ func (cardListHandler *CardListHandler) CreateCardList(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, clid)
+	c.JSON(http.StatusOK, gin.H{"clid": clid})
 }
 
 func (cardListHandler *CardListHandler) UpdateCardList(c *gin.Context) {

@@ -66,7 +66,7 @@ func (boardHandler *BoardHandler) GetBoard(c *gin.Context) {
 
 	board, err := boardHandler.BoardUseCase.GetBoard(uid.(uint), uint(bid))
 	if err != nil {
-		_ = c.Error(customErrors.ErrBadRequest)
+		_ = c.Error(err)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (boardHandler *BoardHandler) CreateBoard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, bid)
+	c.JSON(http.StatusOK, gin.H{"bid": bid})
 }
 
 func (boardHandler *BoardHandler) UpdateBoard(c *gin.Context) {

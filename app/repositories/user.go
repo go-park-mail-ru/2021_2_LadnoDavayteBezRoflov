@@ -15,4 +15,7 @@ type UserRepository interface {
 	AddUserToTeam(uid, tid uint) (err error)
 	IsUserExist(user *models.User) (bool, error)
 	IsEmailUsed(user *models.User) (bool, error)
+	IsBoardAccessed(uid uint, bid uint) (isAccessed bool, err error)
+	IsCardListAccessed(uid uint, clid uint) (isAccessed bool, err error)
+	IsCardAccessed(uid uint, cid uint) (isAccessed bool, err error)
 }

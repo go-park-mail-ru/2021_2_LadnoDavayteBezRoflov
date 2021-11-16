@@ -4,6 +4,7 @@ import (
 	"backendServer/app/models"
 	"backendServer/app/repositories"
 	"backendServer/app/usecases"
+	customErrors "backendServer/pkg/errors"
 )
 
 type CardListUseCaseImpl struct {
@@ -36,7 +37,15 @@ func (cardListUseCase *CardListUseCaseImpl) CreateCardList(cardList *models.Card
 }
 
 func (cardListUseCase *CardListUseCaseImpl) GetCardList(uid, clid uint) (cardList *models.CardList, err error) {
-	// TODO добавить проверку на то, что пользователь имеет доступ к этому списку карт
+	isAccessed, err := cardListUseCase.userRepository.IsCardListAccessed(uid, clid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
+
 	cardList, err = cardListUseCase.cardListRepository.GetByID(clid)
 	if err != nil {
 		return
@@ -52,36 +61,27 @@ func (cardListUseCase *CardListUseCaseImpl) GetCardList(uid, clid uint) (cardLis
 }
 
 func (cardListUseCase *CardListUseCaseImpl) UpdateCardList(uid uint, cardList *models.CardList) (err error) {
-	// TODO добавить проверку на то, что пользователь имеет доступ к этому списку карт
+	isAccessed, err := cardListUseCase.userRepository.IsCardListAccessed(uid, cardList.CLID)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
 
 	return cardListUseCase.cardListRepository.Update(cardList)
 }
 
 func (cardListUseCase *CardListUseCaseImpl) DeleteCardList(uid, clid uint) (err error) {
-	// TODO добавить проверку на то, что пользователь имеет доступ к этому списку карт
+	isAccessed, err := cardListUseCase.userRepository.IsCardListAccessed(uid, clid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
 
 	return cardListUseCase.cardListRepository.Delete(clid)
 }
-
-//func (cardListUseCase *CardListUseCaseImpl) isUserHaveAccessToCardList(uid, clid uint) (isAccessed bool, err error) {
-//	teams, err := cardListUseCase.userRepository.GetUserTeams(uid)
-//	if err != nil {
-//		return
-//	}
-//
-//	for _, team := range *teams {
-//		boards, boardsErr := boardUseCase.teamRepository.GetTeamBoards(team.TID)
-//		if boardsErr != nil {
-//			err = boardsErr
-//			return
-//		}
-//		for _, board := range *boards {
-//			if board.BID == bid {
-//				isAccessed = true
-//				return
-//			}
-//		}
-//	}
-//	isAccessed = false
-//	return
-//}

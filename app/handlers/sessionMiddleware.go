@@ -40,15 +40,20 @@ func (middleware *SessionMiddlewareImpl) CheckAuth() gin.HandlerFunc {
 			return
 		}
 
-		if sessionCookieController.IsSessionCookieExpiresSoon(session) {
-			err := middleware.sessionUseCase.AddTime(sid, uint(sessionCookieController.SessionCookieLifeTimeInHours))
-			if err != nil {
-				_ = c.Error(err)
-				return
-			}
-			sessionCookieController.UpdateSessionCookieExpires(session)
-			http.SetCookie(c.Writer, session)
-		}
+		//if sessionCookieController.IsSessionCookieExpiresSoon(session) {
+		//	fmt.Println("TEST")
+		//	err := middleware.sessionUseCase.AddTime(sid, uint(sessionCookieController.SessionCookieLifeTimeInHours))
+		//	if err != nil {
+		//		_ = c.Error(err)
+		//		return
+		//	}
+		//
+		//	// sessionCookieController.SetSessionCookieExpired(session)
+		//	// http.SetCookie(c.Writer, session)
+		//
+		//	sessionCookieController.UpdateSessionCookieExpires(session)
+		//	http.SetCookie(c.Writer, session)
+		//}
 
 		c.Set("uid", uid)
 		c.Set("sid", sid)
@@ -106,6 +111,7 @@ func (middleware *SessionMiddlewareImpl) CSRF() gin.HandlerFunc {
 				CSRFcookie := &http.Cookie{
 					Name:     "csrf_token",
 					Value:    token,
+					Path:     "/",
 					Expires:  time.Now().Add(15 * time.Minute),
 					Secure:   false,
 					HttpOnly: true,
