@@ -5,7 +5,7 @@ import (
 	"backendServer/app/repositories"
 	customErrors "backendServer/pkg/errors"
 
-	_ "gorm.io/driver/postgres"
+	_ "gorm.io/driver/postgres" // Register postgres driver
 	"gorm.io/gorm"
 )
 
@@ -50,8 +50,12 @@ func (cardStore *CardStore) Update(card *models.Card) (err error) {
 		oldCard.CLID = card.CLID
 	}
 
-	if !card.Deadline.IsZero() && card.Deadline != oldCard.Deadline {
+	if card.Deadline != oldCard.Deadline {
 		oldCard.Deadline = card.Deadline
+	}
+
+	if card.DeadlineChecked != oldCard.DeadlineChecked {
+		oldCard.DeadlineChecked = card.DeadlineChecked
 	}
 
 	return cardStore.db.Save(oldCard).Error

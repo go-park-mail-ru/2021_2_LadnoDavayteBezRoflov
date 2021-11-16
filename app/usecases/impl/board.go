@@ -55,7 +55,7 @@ func (boardUseCase *BoardUseCaseImpl) CreateBoard(board *models.Board) (bid uint
 }
 
 func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Board, err error) {
-	isAccessed, err := boardUseCase.isUserHaveAccessToBoard(uid, bid)
+	isAccessed, err := boardUseCase.userRepository.IsBoardAccessed(uid, bid)
 	if err != nil {
 		return
 	}
@@ -75,7 +75,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 	}
 
 	for i, list := range *lists {
-		cards := new([]models.Card)
+		var cards *[]models.Card
 		cards, err = boardUseCase.cardListRepository.GetCardListCards(list.CLID)
 		if err != nil {
 			return
@@ -88,7 +88,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 }
 
 func (boardUseCase *BoardUseCaseImpl) UpdateBoard(uid uint, board *models.Board) (err error) {
-	isAccessed, err := boardUseCase.isUserHaveAccessToBoard(uid, board.BID)
+	isAccessed, err := boardUseCase.userRepository.IsBoardAccessed(uid, board.BID)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (boardUseCase *BoardUseCaseImpl) UpdateBoard(uid uint, board *models.Board)
 }
 
 func (boardUseCase *BoardUseCaseImpl) DeleteBoard(uid, bid uint) (err error) {
-	isAccessed, err := boardUseCase.isUserHaveAccessToBoard(uid, bid)
+	isAccessed, err := boardUseCase.userRepository.IsBoardAccessed(uid, bid)
 	if err != nil {
 		return err
 	}
@@ -108,27 +108,4 @@ func (boardUseCase *BoardUseCaseImpl) DeleteBoard(uid, bid uint) (err error) {
 		return customErrors.ErrNoAccess
 	}
 	return boardUseCase.boardRepository.Delete(bid)
-}
-
-func (boardUseCase *BoardUseCaseImpl) isUserHaveAccessToBoard(uid, bid uint) (isAccessed bool, err error) {
-	teams, err := boardUseCase.userRepository.GetUserTeams(uid)
-	if err != nil {
-		return
-	}
-
-	for _, team := range *teams {
-		boards, boardsErr := boardUseCase.teamRepository.GetTeamBoards(team.TID)
-		if boardsErr != nil {
-			err = boardsErr
-			return
-		}
-		for _, board := range *boards {
-			if board.BID == bid {
-				isAccessed = true
-				return
-			}
-		}
-	}
-	isAccessed = false
-	return
 }

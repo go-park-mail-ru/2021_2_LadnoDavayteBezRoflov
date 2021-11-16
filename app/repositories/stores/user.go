@@ -191,3 +191,65 @@ func (userStore *UserStore) IsEmailUsed(user *models.User) (bool, error) {
 	}
 	return true, customErrors.ErrEmailAlreadyUsed
 }
+
+func (userStore *UserStore) IsBoardAccessed(uid uint, bid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Where("users.uid = ? AND boards.b_id = ?", uid, bid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCardListAccessed(uid uint, clid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN card_lists ON card_lists.b_id = boards.b_id").
+		Where("users.uid = ? AND card_lists.cl_id = ?", uid, clid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Where("users.uid = ? AND cards.c_id = ?", uid, cid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
