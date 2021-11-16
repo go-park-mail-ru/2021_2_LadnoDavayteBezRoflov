@@ -73,9 +73,13 @@ func (teamStore *TeamStore) GetTeamBoards(tid uint) (boards *[]models.Board, err
 }
 
 func (teamStore *TeamStore) IsTeamExist(team *models.Team) (bool, error) {
-	err := teamStore.db.Where("title = ?", team.Title).Find(team).Error
-	if err != nil {
-		return true, err
+	result := teamStore.db.Where("title = ?", team.Title).Find(team)
+	if result.Error != nil {
+		return true, result.Error
+	}
+
+	if result.RowsAffected > 0 {
+		return true, nil
 	}
 	return false, nil
 }

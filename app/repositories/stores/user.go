@@ -50,6 +50,7 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	}
 
 	user.Avatar = strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
+	user.Avatar = strings.Replace(user.Avatar, "/backend", "", -1)
 	err = userStore.db.Create(user).Error
 	return
 }
@@ -78,7 +79,7 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 		oldUser.Email = user.Email
 	}
 
-	if user.Password != "" && hasher.IsPasswordsEqual(user.Password, oldUser.HashedPassword) {
+	if user.Password != "" && !hasher.IsPasswordsEqual(user.Password, oldUser.HashedPassword) {
 		oldUser.HashedPassword, err = hasher.HashPassword(user.Password)
 	}
 
@@ -124,13 +125,18 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 			return err
 		}
 
-		if oldUser.Avatar != "" && oldUser.Avatar != strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "") {
+		defaultAvatar := strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
+		defaultAvatar = strings.Replace(defaultAvatar, "/backend", "", -1)
+		if oldUser.Avatar != "" && oldUser.Avatar != defaultAvatar {
+			oldUser.Avatar = strings.Join([]string{"/backend", oldUser.Avatar}, "")
 			err = os.Remove(oldUser.Avatar)
 			if err != nil {
+				oldUser.Avatar = strings.Replace(oldUser.Avatar, "/backend", "", -1)
 				return err
 			}
 		}
 
+		fileName = strings.Replace(fileName, "/backend", "", -1)
 		user.Avatar = fileName
 		oldUser.Avatar = fileName
 	}
@@ -140,20 +146,20 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 
 func (userStore *UserStore) GetByLogin(login string) (*models.User, error) {
 	user := new(models.User)
-	if res := userStore.db.Where("login = ?", login).First(user); res.Error != nil {
-		return nil, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Where("login = ?", login).Find(user); res.RowsAffected == 0 {
 		return nil, customErrors.ErrUserNotFound
+	} else if res.Error != nil {
+		return nil, res.Error
 	}
 	return user, nil
 }
 
 func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 	user := new(models.User)
-	if res := userStore.db.First(user, uid); res.Error != nil {
-		return nil, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Find(user, uid); res.RowsAffected == 0 {
 		return nil, customErrors.ErrUserNotFound
+	} else if res.Error != nil {
+		return nil, res.Error
 	}
 	return user, nil
 }
@@ -161,7 +167,6 @@ func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 func (userStore *UserStore) GetUserTeams(uid uint) (teams *[]models.Team, err error) {
 	teams = new([]models.Team)
 	err = userStore.db.Model(&models.User{UID: uid}).Association("Teams").Find(teams)
-
 	return
 }
 
@@ -170,19 +175,81 @@ func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
 }
 
 func (userStore *UserStore) IsUserExist(user *models.User) (bool, error) {
-	if res := userStore.db.Select("login").Where("login = ?", user.Login).Find(user); res.Error != nil {
-		return true, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Select("login").Where("login = ?", user.Login).Find(user); res.RowsAffected == 0 {
 		return false, nil
+	} else if res.Error != nil {
+		return true, res.Error
 	}
 	return true, customErrors.ErrUserAlreadyCreated
 }
 
 func (userStore *UserStore) IsEmailUsed(user *models.User) (bool, error) {
-	if res := userStore.db.Select("email").Where("email = ?", user.Email).Find(user); res.Error != nil {
-		return true, res.Error
-	} else if res.RowsAffected == 0 {
+	if res := userStore.db.Select("email").Where("email = ?", user.Email).Find(user); res.RowsAffected == 0 {
 		return false, nil
+	} else if res.Error != nil {
+		return true, res.Error
 	}
 	return true, customErrors.ErrEmailAlreadyUsed
+}
+
+func (userStore *UserStore) IsBoardAccessed(uid uint, bid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Where("users.uid = ? AND boards.b_id = ?", uid, bid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCardListAccessed(uid uint, clid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN card_lists ON card_lists.b_id = boards.b_id").
+		Where("users.uid = ? AND card_lists.cl_id = ?", uid, clid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Where("users.uid = ? AND cards.c_id = ?", uid, cid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
 }

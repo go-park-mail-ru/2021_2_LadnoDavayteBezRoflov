@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backendServer/pkg/errors"
+	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/logger"
 	"strings"
 	"time"
@@ -36,6 +36,11 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 
 		c.Next()
 
+		if len(c.Errors) > 0 {
+			err := customErrors.FindError(c.Errors.Last())
+			c.JSON(customErrors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
+		}
+
 		timeStamp := time.Now()
 		latency := timeStamp.Sub(start)
 		clientIP := c.ClientIP()
@@ -53,7 +58,6 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			errorsLog := strings.Join([]string{requestID, ": [", strings.Join(c.Errors.Errors(), "; "), "]"}, "")
 			middleware.logger.Error(errorsLog)
-			c.JSON(customErrors.ResolveErrorToCode(c.Errors.Last()), gin.H{"error": c.Errors.Last().Error()})
 		}
 	}
 }

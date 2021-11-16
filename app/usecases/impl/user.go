@@ -82,6 +82,8 @@ func (userUseCase *UserUseCaseImpl) Update(user *models.User) (err error) {
 	}
 
 	err = userUseCase.userRepository.Update(user)
+	user.Password = ""
+	user.OldPassword = ""
 	return
 }
 

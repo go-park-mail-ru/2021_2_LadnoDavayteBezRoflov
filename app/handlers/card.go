@@ -74,7 +74,7 @@ func (cardHandler *CardHandler) CreateCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, cid)
+	c.JSON(http.StatusOK, gin.H{"cid": cid})
 }
 
 func (cardHandler *CardHandler) UpdateCard(c *gin.Context) {
