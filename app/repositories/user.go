@@ -18,4 +18,5 @@ type UserRepository interface {
 	IsBoardAccessed(uid uint, bid uint) (isAccessed bool, err error)
 	IsCardListAccessed(uid uint, clid uint) (isAccessed bool, err error)
 	IsCardAccessed(uid uint, cid uint) (isAccessed bool, err error)
+	IsCommentAccessed(uid uint, cmid uint) (isAccessed bool, err error)
 }

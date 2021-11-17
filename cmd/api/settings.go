@@ -15,6 +15,7 @@ type Settings struct {
 	BoardsURL    string
 	CardListsURL string
 	CardsURL     string
+	CommentsURL  string
 
 	ServerAddress string
 
@@ -60,6 +61,7 @@ func InitSettings() (settings Settings) {
 		BoardsURL:    "/boards",
 		CardListsURL: "/cardLists",
 		CardsURL:     "/cards",
+		CommentsURL:  "/comments",
 
 		ServerAddress: ":8000",
 
