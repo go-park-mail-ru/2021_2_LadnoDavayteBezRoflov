@@ -75,7 +75,7 @@ func (server *Server) Run() {
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
-	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo)
+	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo)
 	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo)
 	cardUseCase := impl.CreateCardUseCase(cardRepo, userRepo)
 	commentUseCase := impl.CreateCommentUseCase(commentRepo, userRepo)
