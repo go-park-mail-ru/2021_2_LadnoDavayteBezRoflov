@@ -29,4 +29,4 @@ jobs:
           skip-go-installation: true
 
       - name: Run tests
-        run: go test --coverpkg=$$\(go list ./... | xargs echo | tr ' ' ,\) ./... && go tool cover -func=.coverprofile
+        run: go test -cover ./... -race
