@@ -10,21 +10,15 @@ import (
 type CardListUseCaseImpl struct {
 	cardListRepository repositories.CardListRepository
 	userRepository     repositories.UserRepository
-	teamRepository     repositories.TeamRepository
-	boardRepository    repositories.BoardRepository
 }
 
 func CreateCardListUseCase(
 	cardListRepository repositories.CardListRepository,
 	userRepository repositories.UserRepository,
-	teamRepository repositories.TeamRepository,
-	boardRepository repositories.BoardRepository,
 ) usecases.CardListUseCase {
 	return &CardListUseCaseImpl{
 		cardListRepository: cardListRepository,
 		userRepository:     userRepository,
-		teamRepository:     teamRepository,
-		boardRepository:    boardRepository,
 	}
 }
 
