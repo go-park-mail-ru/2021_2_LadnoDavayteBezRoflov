@@ -26,6 +26,7 @@ func CreateSessionUseCase(sessionRepository repositories.SessionRepository,
 func (sessionUseCase *SessionUseCaseImpl) Create(user *models.User) (sid string, err error) {
 	if !utils.ValidateUserData(user, false) {
 		err = customErrors.ErrBadInputData
+		return
 	}
 
 	existingUser, err := sessionUseCase.userRepository.GetByLogin(user.Login)
