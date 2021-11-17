@@ -1,3 +1,7 @@
+[![CI](https://github.com/go-park-mail-ru/2021_2_LadnoDavayteBezRoflov/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/go-park-mail-ru/2021_2_LadnoDavayteBezRoflov/actions/workflows/CI.yml)
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/go-park-mail-ru/2021_2_LadnoDavayteBezRoflov)](https://goreportcard.com/report/github.com/go-park-mail-ru/2021_2_LadnoDavayteBezRoflov)
+
 # Trello
 
 Trello backend repository for LadnoDavayteBezRoflov team, autumn of 2021.

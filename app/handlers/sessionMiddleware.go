@@ -57,8 +57,6 @@ func (middleware *SessionMiddlewareImpl) CheckAuth() gin.HandlerFunc {
 
 		c.Set("uid", uid)
 		c.Set("sid", sid)
-
-		return
 	}
 }
 
