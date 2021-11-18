@@ -103,6 +103,12 @@ func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Commen
 	return
 }
 
+func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models.CheckList, err error) {
+	checkLists = new([]models.CheckList)
+	err = cardStore.db.Where("c_id = ?", cid).Find(checkLists).Error
+	return
+}
+
 func (cardStore *CardStore) move(from, to, clid uint, isToLeftMove bool) (err error) {
 	subQuery := cardStore.db.Model(&models.Card{}).Where(
 		"cl_id = ? AND position_on_card_list BETWEEN ? AND ?",

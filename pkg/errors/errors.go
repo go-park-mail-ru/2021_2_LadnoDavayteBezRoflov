@@ -24,6 +24,10 @@ var (
 
 	ErrCommentNotFound = errors.New("comment not found")
 
+	ErrCheckListNotFound = errors.New("check list not found")
+
+	ErrCheckListItemNotFound = errors.New("check list item not found")
+
 	ErrNoAccess = errors.New("no access")
 
 	ErrNotImplemented = errors.New("not implemented")
@@ -48,6 +52,10 @@ var errorToCodeMap = map[error]int{
 	ErrCardNotFound: http.StatusNotFound,
 
 	ErrCommentNotFound: http.StatusNotFound,
+
+	ErrCheckListNotFound: http.StatusNotFound,
+
+	ErrCheckListItemNotFound: http.StatusNotFound,
 
 	ErrNoAccess: http.StatusForbidden,
 

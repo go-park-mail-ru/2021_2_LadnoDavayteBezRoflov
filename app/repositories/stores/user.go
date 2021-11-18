@@ -269,3 +269,48 @@ func (userStore *UserStore) IsCommentAccessed(uid uint, cmid uint) (isAccessed b
 	}
 	return
 }
+
+func (userStore *UserStore) IsCheckListAccessed(uid uint, chlid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
+		Where("users.uid = ? AND check_lists.chl_id = ?", uid, chlid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCheckListItemAccessed(uid uint, chliid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
+		Joins("JOIN check_list_items ON check_list_items.chl_id = check_lists.chl_id").
+		Where("users.uid = ? AND check_list_items.chli_id = ?", uid, chliid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}

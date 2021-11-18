@@ -71,14 +71,18 @@ func (server *Server) Run() {
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
 	cardRepo := stores.CreateCardRepository(postgresClient)
 	commentRepo := stores.CreateCommentRepository(postgresClient)
+	checkListRepo := stores.CreateCheckListRepository(postgresClient)
+	checkListItemRepo := stores.CreateCheckListItemRepository(postgresClient)
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
-	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo)
+	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo, checkListRepo)
 	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo)
 	cardUseCase := impl.CreateCardUseCase(cardRepo, userRepo)
 	commentUseCase := impl.CreateCommentUseCase(commentRepo, userRepo)
+	checkListUseCase := impl.CreateCheckListUseCase(checkListRepo, userRepo)
+	checkListItemUseCase := impl.CreateCheckListItemUseCase(checkListItemRepo, userRepo)
 
 	// Middlewares
 	commonMiddleware := handlers.CreateCommonMiddleware(logger)
@@ -97,6 +101,8 @@ func (server *Server) Run() {
 	handlers.CreateCardListHandler(rootGroup, server.settings.CardListsURL, cardListUseCase, sessionMiddleware)
 	handlers.CreateCardHandler(rootGroup, server.settings.CardsURL, cardUseCase, sessionMiddleware)
 	handlers.CreateCommentHandler(rootGroup, server.settings.CommentsURL, commentUseCase, sessionMiddleware)
+	handlers.CreateCheckListHandler(rootGroup, server.settings.CheckListsURL, checkListUseCase, sessionMiddleware)
+	handlers.CreateCheckListItemHandler(rootGroup, server.settings.CheckListItemsURL, checkListItemUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)
 	if err != nil {

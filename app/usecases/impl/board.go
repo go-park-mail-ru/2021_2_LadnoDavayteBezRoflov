@@ -8,11 +8,12 @@ import (
 )
 
 type BoardUseCaseImpl struct {
-	boardRepository    repositories.BoardRepository
-	userRepository     repositories.UserRepository
-	teamRepository     repositories.TeamRepository
-	cardListRepository repositories.CardListRepository
-	cardRepository     repositories.CardRepository
+	boardRepository     repositories.BoardRepository
+	userRepository      repositories.UserRepository
+	teamRepository      repositories.TeamRepository
+	cardListRepository  repositories.CardListRepository
+	cardRepository      repositories.CardRepository
+	checkListRepository repositories.CheckListRepository
 }
 
 func CreateBoardUseCase(
@@ -21,13 +22,15 @@ func CreateBoardUseCase(
 	teamRepository repositories.TeamRepository,
 	cardListRepository repositories.CardListRepository,
 	cardRepository repositories.CardRepository,
+	checkListRepository repositories.CheckListRepository,
 ) usecases.BoardUseCase {
 	return &BoardUseCaseImpl{
-		boardRepository:    boardRepository,
-		userRepository:     userRepository,
-		teamRepository:     teamRepository,
-		cardListRepository: cardListRepository,
-		cardRepository:     cardRepository,
+		boardRepository:     boardRepository,
+		userRepository:      userRepository,
+		teamRepository:      teamRepository,
+		cardListRepository:  cardListRepository,
+		cardRepository:      cardRepository,
+		checkListRepository: checkListRepository,
 	}
 }
 
@@ -90,6 +93,23 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 				return
 			}
 			(*cards)[j].Comments = *comments
+
+			var checkLists *[]models.CheckList
+			checkLists, err = boardUseCase.cardRepository.GetCardCheckLists(card.CID)
+			if err != nil {
+				return
+			}
+
+			for index, checkList := range *checkLists {
+				var checkListItems *[]models.CheckListItem
+				checkListItems, err = boardUseCase.checkListRepository.GetCheckListItems(checkList.CHLID)
+				if err != nil {
+					return
+				}
+				(*checkLists)[index].CheckListItems = *checkListItems
+			}
+
+			(*cards)[j].CheckLists = *checkLists
 		}
 		(*lists)[i].Cards = *cards
 	}
