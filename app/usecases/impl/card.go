@@ -12,8 +12,8 @@ type CardUseCaseImpl struct {
 	userRepository repositories.UserRepository
 }
 
-func CreateCardUseCase(cardRepository repositories.CardRepository) usecases.CardUseCase {
-	return &CardUseCaseImpl{cardRepository: cardRepository}
+func CreateCardUseCase(cardRepository repositories.CardRepository, userRepository repositories.UserRepository) usecases.CardUseCase {
+	return &CardUseCaseImpl{cardRepository: cardRepository, userRepository: userRepository}
 }
 
 func (cardUseCase *CardUseCaseImpl) CreateCard(card *models.Card) (cid uint, err error) {
@@ -35,6 +35,16 @@ func (cardUseCase *CardUseCaseImpl) GetCard(uid, cid uint) (card *models.Card, e
 	}
 
 	card, err = cardUseCase.cardRepository.GetByID(cid)
+	if err != nil {
+		return
+	}
+
+	comments, err := cardUseCase.cardRepository.GetCardComments(cid)
+	if err != nil {
+		return
+	}
+
+	card.Comments = *comments
 	return
 }
 

@@ -253,3 +253,19 @@ func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool,
 	}
 	return
 }
+
+func (userStore *UserStore) IsCommentAccessed(uid uint, cmid uint) (isAccessed bool, err error) {
+	result := userStore.db.Where("cm_id = ? AND uid = ?", cmid, uid).Find(&models.Comment{})
+
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}

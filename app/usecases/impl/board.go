@@ -12,6 +12,7 @@ type BoardUseCaseImpl struct {
 	userRepository     repositories.UserRepository
 	teamRepository     repositories.TeamRepository
 	cardListRepository repositories.CardListRepository
+	cardRepository     repositories.CardRepository
 }
 
 func CreateBoardUseCase(
@@ -19,12 +20,14 @@ func CreateBoardUseCase(
 	userRepository repositories.UserRepository,
 	teamRepository repositories.TeamRepository,
 	cardListRepository repositories.CardListRepository,
+	cardRepository repositories.CardRepository,
 ) usecases.BoardUseCase {
 	return &BoardUseCaseImpl{
 		boardRepository:    boardRepository,
 		userRepository:     userRepository,
 		teamRepository:     teamRepository,
 		cardListRepository: cardListRepository,
+		cardRepository:     cardRepository,
 	}
 }
 
@@ -79,6 +82,14 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 		cards, err = boardUseCase.cardListRepository.GetCardListCards(list.CLID)
 		if err != nil {
 			return
+		}
+		for j, card := range *cards {
+			var comments *[]models.Comment
+			comments, err = boardUseCase.cardRepository.GetCardComments(card.CID)
+			if err != nil {
+				return
+			}
+			(*cards)[j].Comments = *comments
 		}
 		(*lists)[i].Cards = *cards
 	}

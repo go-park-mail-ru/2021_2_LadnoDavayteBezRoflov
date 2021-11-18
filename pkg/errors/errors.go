@@ -22,6 +22,8 @@ var (
 
 	ErrCardNotFound = errors.New("card not found")
 
+	ErrCommentNotFound = errors.New("comment not found")
+
 	ErrNoAccess = errors.New("no access")
 
 	ErrNotImplemented = errors.New("not implemented")
@@ -44,6 +46,8 @@ var errorToCodeMap = map[error]int{
 	ErrCardListNotFound: http.StatusNotFound,
 
 	ErrCardNotFound: http.StatusNotFound,
+
+	ErrCommentNotFound: http.StatusNotFound,
 
 	ErrNoAccess: http.StatusForbidden,
 

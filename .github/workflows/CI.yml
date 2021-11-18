@@ -29,4 +29,4 @@ jobs:
           skip-go-installation: true
 
       - name: Run tests
-        run: sudo apt-get install libwebp-dev; go test -cover ./... -race
+        run: sudo apt-get install libwebp-dev; go clean -testcache; go test -cover ./... -race

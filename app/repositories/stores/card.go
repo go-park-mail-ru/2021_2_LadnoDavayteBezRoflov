@@ -84,6 +84,25 @@ func (cardStore *CardStore) GetByID(cid uint) (*models.Card, error) {
 	return card, nil
 }
 
+func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Comment, err error) {
+	comments = new([]models.Comment)
+	err = cardStore.db.Where("c_id = ?", cid).Order("date").Find(comments).Error
+	if err != nil {
+		return
+	}
+
+	for i, comment := range *comments {
+		user := new(models.PublicUserInfo)
+		err = cardStore.db.Model(&models.User{UID: comment.UID}).Find(user).Error
+		if err != nil {
+			return
+		}
+		(*comments)[i].User = *user
+	}
+
+	return
+}
+
 func (cardStore *CardStore) move(from, to, clid uint, isToLeftMove bool) (err error) {
 	subQuery := cardStore.db.Model(&models.Card{}).Where(
 		"cl_id = ? AND position_on_card_list BETWEEN ? AND ?",
