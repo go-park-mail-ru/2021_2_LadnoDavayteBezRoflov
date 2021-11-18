@@ -57,7 +57,16 @@ func (server *Server) Run() {
 		logger.Error(err)
 		return
 	}
-	err = postgresClient.AutoMigrate(&models.User{}, &models.Team{}, &models.Board{}, &models.CardList{}, &models.Card{})
+	err = postgresClient.AutoMigrate(
+		&models.User{},
+		&models.Team{},
+		&models.Board{},
+		&models.CardList{},
+		&models.Card{},
+		&models.Comment{},
+		&models.CheckList{},
+		&models.CheckListItem{},
+	)
 	if err != nil {
 		logger.Error(err)
 		return
