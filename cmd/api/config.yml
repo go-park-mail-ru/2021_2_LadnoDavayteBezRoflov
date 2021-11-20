@@ -1,0 +1,22 @@
+server_address: ':8000'
+
+root_url:      '/api'
+session_url:   '/sessions'
+profile_url:   '/profile'
+boards_url:    '/boards'
+card_lists_url: '/cardLists'
+cards_url:     '/cards'
+comments_url:  '/comments'
+
+allowed_methods:
+  - 'GET'
+  - 'POST'
+  - 'PUT'
+  - 'DELETE'
+  - 'OPTIONS'
+
+session_cookie_life_time_in_days: 72h
+
+default_avatar_name: "default_user_picture.webp"
+
+redis_protocol: "tcp"

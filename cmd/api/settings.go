@@ -4,95 +4,106 @@ import (
 	"fmt"
 	"time"
 
-	envParser "github.com/caarlos0/env"
-	"github.com/gin-contrib/cors"
+    envParser "github.com/caarlos0/env"
+    "github.com/gin-contrib/cors"
+
+    "github.com/spf13/viper"
 )
 
+// type UrlConfig struct {
+//     RootURL      string `mapstructure:"root_url"`
+//     SessionURL   string `mapstructure:"session_url"`
+//     ProfileURL   string `mapstructure:"profile_url"`
+//     BoardsURL    string `mapstructure:"boards_url"`
+//     CardListsURL string `mapstructure:"card_lists_url"`
+//     CardsURL     string `mapstructure:"cards_url"`
+//     CommentsURL  string `mapstructure:"comments_url"`
+// }
+
 type Settings struct {
-	RootURL      string
-	SessionURL   string
-	ProfileURL   string
-	BoardsURL    string
-	CardListsURL string
-	CardsURL     string
-	CommentsURL  string
+    RootURL      string `mapstructure:"root_url"`
+	SessionURL   string `mapstructure:"session_url"`
+	ProfileURL   string `mapstructure:"profile_url"`
+	BoardsURL    string `mapstructure:"boards_url"`
+	CardListsURL string `mapstructure:"card_lists_url"`
+	CardsURL     string `mapstructure:"cards_url"`
+	CommentsURL  string `mapstructure:"comments_url"`
+	ServerAddress string `mapstructure:"server_address"`
 
-	ServerAddress string
+    Origins        []string
+	AllowedMethods []string `mapstructure:"allowed_methods"`
 
-	Origins        []string
-	AllowedMethods []string
+	SessionCookieLifeTimeInDays time.Duration `mapstructure:"session_cookie_life_time_in_days"`
 
-	SessionCookieLifeTimeInDays time.Duration
+    corsConfig cors.Config
 
-	corsConfig cors.Config
+    LogFilePath       string
+    AvatarsPath       string
+	DefaultAvatarName string `mapstructure:"default_avatar_name"`
 
-	LogFilePath       string
-	AvatarsPath       string
-	DefaultAvatarName string
+	RedisProtocol string `mapstructure:"redis_protocol"`
+    RedisPort     string
 
-	RedisProtocol string
-	RedisPort     string
-
-	PostgresDsn string
+    PostgresDsn string
 }
 
 type EnvironmentVariables struct {
-	DB_PORT           string `env:"DB_PORT,required"`
-	REDIS_PORT        string `env:"REDIS_PORT,required"`
-	POSTGRES_USER     string `env:"POSTGRES_USER,required"`
-	POSTGRES_PASSWORD string `env:"POSTGRES_PASSWORD,required"`
-	DATABASE_HOST     string `env:"DATABASE_HOST,required"`
-	POSTGRES_DB       string `env:"POSTGRES_DB,required"`
-	FRONTEND_ADDRESS  string `env:"FRONTEND_ADDRESS,required"`
-	FRONTEND_PATH     string `env:"PUBLIC_DIR,required"`
-	LOG_LOCATION      string `env:"LOG_LOCATION" envDefault:"/var/log/backendLogs.log"`
+    DB_PORT           string `env:"DB_PORT,required"`
+    REDIS_PORT        string `env:"REDIS_PORT,required"`
+    POSTGRES_USER     string `env:"POSTGRES_USER,required"`
+    POSTGRES_PASSWORD string `env:"POSTGRES_PASSWORD,required"`
+    DATABASE_HOST     string `env:"DATABASE_HOST,required"`
+    POSTGRES_DB       string `env:"POSTGRES_DB,required"`
+    FRONTEND_ADDRESS  string `env:"FRONTEND_ADDRESS,required"`
+    FRONTEND_PATH     string `env:"PUBLIC_DIR,required"`
+    LOG_LOCATION      string `env:"LOG_LOCATION" envDefault:"/var/log/backendLogs.log"`
 }
 
 func InitSettings() (settings Settings) {
-	env := EnvironmentVariables{}
-	if err := envParser.Parse(&env); err != nil {
-		fmt.Printf("%+v\n", err)
-	}
+    env := EnvironmentVariables{}
+    if err := envParser.Parse(&env); err != nil {
+        fmt.Printf("%+v\n", err)
+    }
+
+    viper.AddConfigPath(".")
+    viper.SetConfigName("config")
+    if err := viper.ReadInConfig(); err != nil {
+        fmt.Printf("%+v\n", err)
+    }
 
 	settings = Settings{
-		RootURL:      "/api",
-		SessionURL:   "/sessions",
-		ProfileURL:   "/profile",
-		BoardsURL:    "/boards",
-		CardListsURL: "/cardLists",
-		CardsURL:     "/cards",
-		CommentsURL:  "/comments",
+        RootURL:       viper.GetString("root_url"),
+        SessionURL:    viper.GetString("session_url"),
+        ProfileURL:    viper.GetString("profile_url"),
+        BoardsURL:     viper.GetString("boards_url"),
+        CardListsURL:  viper.GetString("card_lists_url"),
+        CardsURL:      viper.GetString("cards_url"),
+        CommentsURL:   viper.GetString("comments_url"),
+        
+        ServerAddress: viper.GetString("server_address"),
 
-		ServerAddress: ":8000",
+        Origins: []string{
+            "http://localhost:8000",
+            fmt.Sprintf("http://%s", env.FRONTEND_ADDRESS),
+        },
+        
+        AllowedMethods: viper.GetStringSlice("allowed_methods"),
 
-		Origins: []string{
-			"http://localhost:8000",
-			fmt.Sprintf("http://%s", env.FRONTEND_ADDRESS),
-		},
-		AllowedMethods: []string{
-			"GET",
-			"POST",
-			"PUT",
-			"DELETE",
-			"OPTIONS",
-		},
+        SessionCookieLifeTimeInDays: viper.GetDuration("session_cookie_life_time_in_days"),
 
-		SessionCookieLifeTimeInDays: 3,
+        corsConfig: cors.DefaultConfig(),
 
-		corsConfig: cors.DefaultConfig(),
+        LogFilePath:       env.LOG_LOCATION,
+        AvatarsPath:       env.FRONTEND_PATH,
+        DefaultAvatarName: viper.GetString("default_avatar_name"),
 
-		LogFilePath:       env.LOG_LOCATION,
-		AvatarsPath:       env.FRONTEND_PATH,
-		DefaultAvatarName: "default_user_picture.webp",
+        RedisProtocol: viper.GetString("redis_protocol"),
+        RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
 
-		RedisProtocol: "tcp",
-		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
-
-		PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),
-	}
-
-	settings.corsConfig.AllowOrigins = settings.Origins
-	settings.corsConfig.AllowCredentials = true
+        PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),
+    }
+    settings.corsConfig.AllowOrigins = settings.Origins
+    settings.corsConfig.AllowCredentials = true
 
 	return
 }
