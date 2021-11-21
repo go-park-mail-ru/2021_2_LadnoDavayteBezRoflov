@@ -56,7 +56,7 @@ func (commentHandler *CommentHandler) GetComment(c *gin.Context) {
 }
 
 func (commentHandler *CommentHandler) CreateComment(c *gin.Context) {
-	_, exists := c.Get("uid")
+	uid, exists := c.Get("uid")
 	if !exists {
 		_ = c.Error(customErrors.ErrNotAuthorized)
 		return
@@ -67,14 +67,15 @@ func (commentHandler *CommentHandler) CreateComment(c *gin.Context) {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
+	comment.UID = uid.(uint)
 
-	cmid, err := commentHandler.CommentUseCase.CreateComment(comment)
+	comment, err := commentHandler.CommentUseCase.CreateComment(comment)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"cmid": cmid})
+	c.JSON(http.StatusOK, comment)
 }
 
 func (commentHandler *CommentHandler) UpdateComment(c *gin.Context) {

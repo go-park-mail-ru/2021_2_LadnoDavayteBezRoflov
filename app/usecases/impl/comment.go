@@ -23,13 +23,13 @@ func CreateCommentUseCase(
 	}
 }
 
-func (commentUseCase *CommentUseCaseImpl) CreateComment(comment *models.Comment) (cmid uint, err error) {
+func (commentUseCase *CommentUseCaseImpl) CreateComment(comment *models.Comment) (finalComment *models.Comment, err error) {
 	comment.Date = time.Now()
 	err = commentUseCase.commentRepository.Create(comment)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return comment.CMID, nil
+	return comment, nil
 }
 
 func (commentUseCase *CommentUseCaseImpl) GetComment(uid, cmid uint) (comment *models.Comment, err error) {
