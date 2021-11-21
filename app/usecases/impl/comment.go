@@ -29,6 +29,7 @@ func (commentUseCase *CommentUseCaseImpl) CreateComment(comment *models.Comment)
 	if err != nil {
 		return nil, err
 	}
+	comment.DateParsed = comment.Date.Round(time.Second).String()
 	return comment, nil
 }
 

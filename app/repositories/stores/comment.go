@@ -17,7 +17,18 @@ func CreateCommentRepository(db *gorm.DB) repositories.CommentRepository {
 }
 
 func (commentStore *CommentStore) Create(comment *models.Comment) (err error) {
-	return commentStore.db.Create(comment).Error
+	err = commentStore.db.Create(comment).Error
+	if err != nil {
+		return
+	}
+
+	user := new(models.PublicUserInfo)
+	err = commentStore.db.Model(&models.User{UID: comment.UID}).Find(user).Error
+	if err != nil {
+		return
+	}
+	comment.User = *user
+	return
 }
 
 func (commentStore *CommentStore) Update(comment *models.Comment) (err error) {
@@ -44,5 +55,12 @@ func (commentStore *CommentStore) GetByID(cmid uint) (*models.Comment, error) {
 	} else if res.Error != nil {
 		return nil, res.Error
 	}
+
+	user := new(models.PublicUserInfo)
+	err := commentStore.db.Model(&models.User{UID: comment.UID}).Find(user).Error
+	if err != nil {
+		return nil, err
+	}
+	comment.User = *user
 	return comment, nil
 }
