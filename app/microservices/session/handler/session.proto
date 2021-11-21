@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package handler;
+
+option go_package = "./handler";
+
+message SessionID {
+  string ID = 1;
+}
+
+message SessionInfo {
+  uint64 UID = 1;
+}
+
+message Nothing {
+  bool dummy = 1;
+}
+
+// grpc-сервис проверки авторизации
+service SessionChecker {
+  rpc Create (SessionInfo) returns (SessionID) {}
+  rpc Get (SessionID) returns (SessionInfo) {}
+  rpc Delete (SessionID) returns (Nothing) {}
+}

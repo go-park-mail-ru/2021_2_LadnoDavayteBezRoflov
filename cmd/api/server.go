@@ -1,15 +1,16 @@
 package main
 
 import (
-	"backendServer/app/handlers"
-	"backendServer/app/models"
-	"backendServer/app/repositories/stores"
-	"backendServer/app/usecases/impl"
+	"backendServer/app/api/handlers"
+	"backendServer/app/api/models"
+	"backendServer/app/api/repositories/stores"
+	"backendServer/app/api/usecases/impl"
+	"backendServer/app/microservices/session/handler"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
 	"backendServer/pkg/sessionCookieController"
 
-	"github.com/gomodule/redigo/redis"
+	"google.golang.org/grpc"
 
 	"gorm.io/driver/postgres"
 
@@ -39,17 +40,17 @@ func (server *Server) Run() {
 	defer everythingCloser.Close(logger.Sync)
 
 	// Redis
-	redisPool := &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial(server.settings.RedisProtocol, server.settings.RedisPort)
-			if err != nil {
-				logger.Error(err)
-				panic(err)
-			}
-			return c, err
-		},
-	}
-	defer everythingCloser.Close(redisPool.Close)
+	//redisPool := &redis.Pool{
+	//	Dial: func() (redis.Conn, error) {
+	//		c, err := redis.Dial(server.settings.RedisProtocol, server.settings.RedisPort)
+	//		if err != nil {
+	//			logger.Error(err)
+	//			panic(err)
+	//		}
+	//		return c, err
+	//	},
+	//}
+	//defer everythingCloser.Close(redisPool.Close)
 
 	// Postgres
 	postgresClient, err := gorm.Open(postgres.Open(server.settings.PostgresDsn), &gorm.Config{})
@@ -57,28 +58,53 @@ func (server *Server) Run() {
 		logger.Error(err)
 		return
 	}
-	err = postgresClient.AutoMigrate(&models.User{}, &models.Team{}, &models.Board{}, &models.CardList{}, &models.Card{})
+	err = postgresClient.AutoMigrate(
+		&models.User{},
+		&models.Team{},
+		&models.Board{},
+		&models.CardList{},
+		&models.Card{},
+		&models.Comment{},
+		&models.CheckList{},
+		&models.CheckListItem{},
+	)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
+	grpcConn, err := grpc.Dial(
+		"localhost:8081",
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	defer everythingCloser.Close(grpcConn.Close)
+
+	sessionManager := handler.NewSessionCheckerClient(grpcConn)
+
 	// Repositories
-	sessionRepo := stores.CreateSessionRepository(redisPool, uint64(sessionCookieController.SessionCookieLifeTimeInHours), everythingCloser)
+	sessionRepo := stores.CreateSessionRepository(sessionManager)
 	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
 	cardRepo := stores.CreateCardRepository(postgresClient)
 	commentRepo := stores.CreateCommentRepository(postgresClient)
+	checkListRepo := stores.CreateCheckListRepository(postgresClient)
+	checkListItemRepo := stores.CreateCheckListItemRepository(postgresClient)
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
-	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo)
+	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo, checkListRepo)
 	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo)
 	cardUseCase := impl.CreateCardUseCase(cardRepo, userRepo)
 	commentUseCase := impl.CreateCommentUseCase(commentRepo, userRepo)
+	checkListUseCase := impl.CreateCheckListUseCase(checkListRepo, userRepo)
+	checkListItemUseCase := impl.CreateCheckListItemUseCase(checkListItemRepo, userRepo)
 
 	// Middlewares
 	commonMiddleware := handlers.CreateCommonMiddleware(logger)
@@ -97,6 +123,8 @@ func (server *Server) Run() {
 	handlers.CreateCardListHandler(rootGroup, server.settings.CardListsURL, cardListUseCase, sessionMiddleware)
 	handlers.CreateCardHandler(rootGroup, server.settings.CardsURL, cardUseCase, sessionMiddleware)
 	handlers.CreateCommentHandler(rootGroup, server.settings.CommentsURL, commentUseCase, sessionMiddleware)
+	handlers.CreateCheckListHandler(rootGroup, server.settings.CheckListsURL, checkListUseCase, sessionMiddleware)
+	handlers.CreateCheckListItemHandler(rootGroup, server.settings.CheckListItemsURL, checkListItemUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)
 	if err != nil {

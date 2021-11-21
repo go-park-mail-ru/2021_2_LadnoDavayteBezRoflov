@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backendServer/app/models"
+	models2 "backendServer/app/api/models"
 	"fmt"
 	"regexp"
 	"sync"
@@ -9,15 +9,15 @@ import (
 	"github.com/bxcodec/faker/v3"
 )
 
-func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *models.Data, err error) {
-	data = &models.Data{
+func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *models2.Data, err error) {
+	data = &models2.Data{
 		Sessions: map[string]uint{},
-		Users:    map[string]models.User{},
-		Teams:    map[uint]models.Team{},
+		Users:    map[string]models2.User{},
+		Teams:    map[uint]models2.Team{},
 		Mu:       &sync.RWMutex{},
 	}
 	for i := 0; i < teamsAmount; i++ {
-		team := models.Team{}
+		team := models2.Team{}
 		err = faker.FakeData(&team)
 		if err != nil {
 			return
@@ -25,7 +25,7 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 		team.TID = uint(i)
 
 		for j := 0; j < boardsPerTeamAmount; j++ {
-			board := models.Board{}
+			board := models2.Board{}
 			err = faker.FakeData(&board)
 			if err != nil {
 				return
@@ -38,7 +38,7 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 	}
 
 	for i := 0; i < usersAmount; i++ {
-		user := models.User{}
+		user := models2.User{}
 		err = faker.FakeData(&user)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -59,7 +59,7 @@ func FillTestData(teamsAmount, boardsPerTeamAmount, usersAmount int) (data *mode
 	return
 }
 
-func ValidateUserData(user *models.User, isValidationEmailNeeded bool) (isValid bool) {
+func ValidateUserData(user *models2.User, isValidationEmailNeeded bool) (isValid bool) {
 	isValid = true
 	regLatinSymbols := regexp.MustCompile(".*[a-zA-Z].*")
 
@@ -83,7 +83,7 @@ func ValidateUserData(user *models.User, isValidationEmailNeeded bool) (isValid 
 	return
 }
 
-func GetSomeUser(data *models.Data) (user models.User) {
+func GetSomeUser(data *models2.Data) (user models2.User) {
 	data.Mu.RLock()
 	defer data.Mu.RUnlock()
 

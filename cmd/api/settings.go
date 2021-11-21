@@ -9,13 +9,15 @@ import (
 )
 
 type Settings struct {
-	RootURL      string
-	SessionURL   string
-	ProfileURL   string
-	BoardsURL    string
-	CardListsURL string
-	CardsURL     string
-	CommentsURL  string
+	RootURL           string
+	SessionURL        string
+	ProfileURL        string
+	BoardsURL         string
+	CardListsURL      string
+	CardsURL          string
+	CommentsURL       string
+	CheckListsURL     string
+	CheckListItemsURL string
 
 	ServerAddress string
 
@@ -30,15 +32,15 @@ type Settings struct {
 	AvatarsPath       string
 	DefaultAvatarName string
 
-	RedisProtocol string
-	RedisPort     string
+	// RedisProtocol string
+	// RedisPort     string
 
 	PostgresDsn string
 }
 
 type EnvironmentVariables struct {
-	DB_PORT           string `env:"DB_PORT,required"`
-	REDIS_PORT        string `env:"REDIS_PORT,required"`
+	DB_PORT string `env:"DB_PORT,required"`
+	// REDIS_PORT        string `env:"REDIS_PORT,required"`
 	POSTGRES_USER     string `env:"POSTGRES_USER,required"`
 	POSTGRES_PASSWORD string `env:"POSTGRES_PASSWORD,required"`
 	DATABASE_HOST     string `env:"DATABASE_HOST,required"`
@@ -55,13 +57,15 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
-		RootURL:      "/api",
-		SessionURL:   "/sessions",
-		ProfileURL:   "/profile",
-		BoardsURL:    "/boards",
-		CardListsURL: "/cardLists",
-		CardsURL:     "/cards",
-		CommentsURL:  "/comments",
+		RootURL:           "/api",
+		SessionURL:        "/sessions",
+		ProfileURL:        "/profile",
+		BoardsURL:         "/boards",
+		CardListsURL:      "/cardLists",
+		CardsURL:          "/cards",
+		CommentsURL:       "/comments",
+		CheckListsURL:     "/checkLists",
+		CheckListItemsURL: "/checkListItems",
 
 		ServerAddress: ":8000",
 
@@ -85,8 +89,8 @@ func InitSettings() (settings Settings) {
 		AvatarsPath:       env.FRONTEND_PATH,
 		DefaultAvatarName: "default_user_picture.webp",
 
-		RedisProtocol: "tcp",
-		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
+		// RedisProtocol: "tcp",
+		// RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
 
 		PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),
 	}
