@@ -5,6 +5,7 @@ import (
 	"backendServer/app/repositories"
 	"backendServer/app/usecases"
 	customErrors "backendServer/pkg/errors"
+	"time"
 )
 
 type BoardUseCaseImpl struct {
@@ -91,6 +92,9 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 			comments, err = boardUseCase.cardRepository.GetCardComments(card.CID)
 			if err != nil {
 				return
+			}
+			for _, comment := range *comments {
+				comment.DateParsed = comment.Date.Round(time.Second).String()
 			}
 			(*cards)[j].Comments = *comments
 
