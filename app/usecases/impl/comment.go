@@ -29,6 +29,13 @@ func (commentUseCase *CommentUseCaseImpl) CreateComment(comment *models.Comment)
 	if err != nil {
 		return nil, err
 	}
+
+	user, err := commentUseCase.userRepository.GetPublicData(comment.UID)
+	if err != nil {
+		return nil, err
+	}
+
+	comment.User = *user
 	comment.DateParsed = comment.Date.Round(time.Second).String()
 	return comment, nil
 }
@@ -48,6 +55,12 @@ func (commentUseCase *CommentUseCaseImpl) GetComment(uid, cmid uint) (comment *m
 		return
 	}
 
+	user, err := commentUseCase.userRepository.GetPublicData(comment.UID)
+	if err != nil {
+		return
+	}
+
+	comment.User = *user
 	comment.DateParsed = comment.Date.Round(time.Second).String()
 	return
 }

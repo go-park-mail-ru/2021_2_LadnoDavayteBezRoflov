@@ -94,6 +94,12 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 				return
 			}
 			for index, comment := range *comments {
+				user := new(models.PublicUserInfo)
+				user, err = boardUseCase.userRepository.GetPublicData(comment.UID)
+				if err != nil {
+					return
+				}
+				(*comments)[i].User = *user
 				(*comments)[index].DateParsed = comment.Date.Round(time.Second).String()
 			}
 			(*cards)[j].Comments = *comments

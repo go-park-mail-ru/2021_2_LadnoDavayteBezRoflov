@@ -87,19 +87,6 @@ func (cardStore *CardStore) GetByID(cid uint) (*models.Card, error) {
 func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Comment, err error) {
 	comments = new([]models.Comment)
 	err = cardStore.db.Where("c_id = ?", cid).Order("date").Find(comments).Error
-	if err != nil {
-		return
-	}
-
-	for i, comment := range *comments {
-		user := new(models.PublicUserInfo)
-		err = cardStore.db.Model(&models.User{UID: comment.UID}).Find(user).Error
-		if err != nil {
-			return
-		}
-		(*comments)[i].User = *user
-	}
-
 	return
 }
 

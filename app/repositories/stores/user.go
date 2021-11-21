@@ -174,6 +174,12 @@ func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
 	return userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(userStore.GetByID(uid))
 }
 
+func (userStore *UserStore) GetPublicData(uid uint) (user *models.PublicUserInfo, err error) {
+	user = new(models.PublicUserInfo)
+	err = userStore.db.Model(&models.User{UID: uid}).Find(user).Error
+	return
+}
+
 func (userStore *UserStore) IsUserExist(user *models.User) (bool, error) {
 	if res := userStore.db.Select("login").Where("login = ?", user.Login).Find(user); res.RowsAffected == 0 {
 		return false, nil
