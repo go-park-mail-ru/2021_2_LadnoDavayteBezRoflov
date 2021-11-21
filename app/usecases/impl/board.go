@@ -93,8 +93,8 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 			if err != nil {
 				return
 			}
-			for _, comment := range *comments {
-				comment.DateParsed = comment.Date.Round(time.Second).String()
+			for index, comment := range *comments {
+				(*comments)[index].DateParsed = comment.Date.Round(time.Second).String()
 			}
 			(*cards)[j].Comments = *comments
 
