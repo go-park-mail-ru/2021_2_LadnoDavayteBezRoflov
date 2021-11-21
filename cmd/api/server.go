@@ -74,7 +74,7 @@ func (server *Server) Run() {
 	}
 
 	grpcConn, err := grpc.Dial(
-		"localhost:8081",
+		"session:8081",
 		grpc.WithInsecure(),
 	)
 	if err != nil {

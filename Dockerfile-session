@@ -11,8 +11,6 @@ WORKDIR /session
 COPY go.mod ./
 COPY go.sum ./
 
-#RUN ipconfig
-
 RUN go mod download
 
 RUN go install github.com/githubnemo/CompileDaemon@latest && go mod tidy
