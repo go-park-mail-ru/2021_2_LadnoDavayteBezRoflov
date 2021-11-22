@@ -188,9 +188,7 @@ func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
 	if err != nil {
 		return
 	}
-	if isMember, err := userStore.IsUserInTeam(uid, tid); err != nil {
-		return err
-	} else if isMember {
+	if isMember, _ := userStore.IsUserInTeam(uid, tid); isMember {
 		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Delete(user)
 	} else {
 		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(user)
@@ -203,9 +201,7 @@ func (userStore *UserStore) AddUserToBoard(uid, bid uint) (err error) {
 	if err != nil {
 		return
 	}
-	if isAccessed, err := userStore.IsBoardAccessed(uid, bid); err != nil {
-		return err
-	} else if isAccessed {
+	if isAccessed, _ := userStore.IsBoardAccessed(uid, bid); isAccessed {
 		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Delete(user)
 	} else {
 		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Append(user)
@@ -218,9 +214,7 @@ func (userStore *UserStore) AddUserToCard(uid, cid uint) (err error) {
 	if err != nil {
 		return
 	}
-	if isAccessed, err := userStore.IsCardAccessed(uid, cid); err != nil {
-		return err
-	} else if isAccessed {
+	if isAccessed, _ := userStore.IsCardAccessed(uid, cid); isAccessed {
 		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Delete(user)
 	} else {
 		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Append(user)
