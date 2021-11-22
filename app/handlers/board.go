@@ -31,6 +31,7 @@ func CreateBoardHandler(router *gin.RouterGroup,
 		boards.GET("/:bid", mw.CheckAuth(), mw.CSRF(), handler.GetBoard)
 		boards.PUT("/:bid", mw.CheckAuth(), mw.CSRF(), handler.UpdateBoard)
 		boards.DELETE("/:bid", mw.CheckAuth(), mw.CSRF(), handler.DeleteBoard)
+		boards.PUT("/:bid/toggleuser/:uid", mw.CheckAuth(), mw.CSRF(), handler.ToggleUser)
 	}
 }
 
@@ -146,4 +147,34 @@ func (boardHandler *BoardHandler) DeleteBoard(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "board was successfully deleted"})
+}
+
+func (boardHandler *BoardHandler) ToggleUser(c *gin.Context) {
+	uid, exists := c.Get("uid")
+	if !exists {
+		_ = c.Error(customErrors.ErrNotAuthorized)
+		return
+	}
+
+	bid64 := c.Param("bid")
+	bid, err := strconv.ParseUint(bid64, 10, 32)
+	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
+		return
+	}
+
+	uid64 := c.Param("uid")
+	toggledUserID, err := strconv.ParseUint(uid64, 10, 32)
+	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
+		return
+	}
+
+	board, err := boardHandler.BoardUseCase.ToggleUser(uid.(uint), uint(bid), uint(toggledUserID))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, board)
 }

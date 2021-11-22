@@ -19,7 +19,7 @@ func CreateCardUseCase(cardRepository repositories.CardRepository, userRepositor
 func (cardUseCase *CardUseCaseImpl) CreateCard(card *models.Card) (cid uint, err error) {
 	err = cardUseCase.cardRepository.Create(card)
 	if err != nil {
-		return 0, err
+		return
 	}
 	return card.CID, nil
 }
@@ -43,7 +43,6 @@ func (cardUseCase *CardUseCaseImpl) GetCard(uid, cid uint) (card *models.Card, e
 	if err != nil {
 		return
 	}
-
 	for i, comment := range *comments {
 		user := new(models.PublicUserInfo)
 		user, err = cardUseCase.userRepository.GetPublicData(comment.UID)
@@ -52,8 +51,14 @@ func (cardUseCase *CardUseCaseImpl) GetCard(uid, cid uint) (card *models.Card, e
 		}
 		(*comments)[i].User = *user
 	}
-
 	card.Comments = *comments
+
+	assignees, err := cardUseCase.cardRepository.GetAssignedUsers(cid)
+	if err != nil {
+		return
+	}
+	card.Assignees = *assignees
+
 	return
 }
 
@@ -81,4 +86,22 @@ func (cardUseCase *CardUseCaseImpl) DeleteCard(uid, cid uint) (err error) {
 	}
 
 	return cardUseCase.cardRepository.Delete(cid)
+}
+
+func (cardUseCase *CardUseCaseImpl) ToggleUser(uid, cid, toggledUserID uint) (card *models.Card, err error) {
+	isAccessed, err := cardUseCase.userRepository.IsCardAccessed(uid, cid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
+
+	err = cardUseCase.userRepository.AddUserToCard(toggledUserID, cid)
+	if err != nil {
+		return
+	}
+
+	return cardUseCase.GetCard(uid, cid)
 }

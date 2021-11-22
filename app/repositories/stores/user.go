@@ -164,14 +164,68 @@ func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 	return user, nil
 }
 
+func (userStore *UserStore) FindAllByLogin(text string, amount int) (users *[]models.PublicUserInfo, err error) {
+	users = new([]models.PublicUserInfo)
+	text = strings.Join([]string{"%", text, "%"}, "")
+	err = userStore.db.Where("login LIKE ?", text).Limit(amount).Find(users).Error
+	return
+}
+
 func (userStore *UserStore) GetUserTeams(uid uint) (teams *[]models.Team, err error) {
 	teams = new([]models.Team)
 	err = userStore.db.Model(&models.User{UID: uid}).Association("Teams").Find(teams)
 	return
 }
 
+func (userStore *UserStore) GetUserToggledBoards(uid uint) (boards *[]models.Board, err error) {
+	boards = new([]models.Board)
+	err = userStore.db.Model(&models.User{UID: uid}).Association("Boards").Find(boards)
+	return
+}
+
 func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
-	return userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(userStore.GetByID(uid))
+	user, err := userStore.GetByID(uid)
+	if err != nil {
+		return
+	}
+	if isMember, err := userStore.IsUserInTeam(uid, tid); err != nil {
+		return err
+	} else if isMember {
+		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Delete(user)
+	} else {
+		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(user)
+	}
+	return
+}
+
+func (userStore *UserStore) AddUserToBoard(uid, bid uint) (err error) {
+	user, err := userStore.GetByID(uid)
+	if err != nil {
+		return
+	}
+	if isAccessed, err := userStore.IsBoardAccessed(uid, bid); err != nil {
+		return err
+	} else if isAccessed {
+		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Delete(user)
+	} else {
+		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Append(user)
+	}
+	return
+}
+
+func (userStore *UserStore) AddUserToCard(uid, cid uint) (err error) {
+	user, err := userStore.GetByID(uid)
+	if err != nil {
+		return
+	}
+	if isAccessed, err := userStore.IsCardAccessed(uid, cid); err != nil {
+		return err
+	} else if isAccessed {
+		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Delete(user)
+	} else {
+		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Append(user)
+	}
+	return
 }
 
 func (userStore *UserStore) GetPublicData(uid uint) (user *models.PublicUserInfo, err error) {
@@ -196,6 +250,16 @@ func (userStore *UserStore) IsEmailUsed(user *models.User) (bool, error) {
 		return true, res.Error
 	}
 	return true, customErrors.ErrEmailAlreadyUsed
+}
+
+func (userStore *UserStore) IsUserInTeam(uid uint, tid uint) (isMember bool, err error) {
+	user := new(models.User)
+	if err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Find(user, uid); err != nil {
+		return false, err
+	} else if user.UID == 0 {
+		return false, nil
+	}
+	return true, nil
 }
 
 func (userStore *UserStore) IsBoardAccessed(uid uint, bid uint) (isAccessed bool, err error) {

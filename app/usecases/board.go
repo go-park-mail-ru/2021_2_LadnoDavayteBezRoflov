@@ -10,4 +10,5 @@ type BoardUseCase interface {
 	GetBoard(uid, bid uint) (board *models.Board, err error)
 	UpdateBoard(uid uint, board *models.Board) (err error)
 	DeleteBoard(uid, bid uint) (err error)
+	ToggleUser(uid, bid, toggledUserID uint) (board *models.Board, err error)
 }

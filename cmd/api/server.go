@@ -86,12 +86,14 @@ func (server *Server) Run() {
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
+	teamUseCase := impl.CreateTeamUseCase(teamRepo, userRepo)
 	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo, checkListRepo)
 	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo)
 	cardUseCase := impl.CreateCardUseCase(cardRepo, userRepo)
 	commentUseCase := impl.CreateCommentUseCase(commentRepo, userRepo)
 	checkListUseCase := impl.CreateCheckListUseCase(checkListRepo, userRepo)
 	checkListItemUseCase := impl.CreateCheckListItemUseCase(checkListItemRepo, userRepo)
+	userSearchUseCase := impl.CreateUserSearchUseCase(userRepo, cardRepo, teamRepo, boardRepo)
 
 	// Middlewares
 	commonMiddleware := handlers.CreateCommonMiddleware(logger)
@@ -106,12 +108,14 @@ func (server *Server) Run() {
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
 	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware)
+	handlers.CreateTeamHandler(rootGroup, server.settings.TeamsURL, teamUseCase, sessionMiddleware)
 	handlers.CreateBoardHandler(rootGroup, server.settings.BoardsURL, boardUseCase, sessionMiddleware)
 	handlers.CreateCardListHandler(rootGroup, server.settings.CardListsURL, cardListUseCase, sessionMiddleware)
 	handlers.CreateCardHandler(rootGroup, server.settings.CardsURL, cardUseCase, sessionMiddleware)
 	handlers.CreateCommentHandler(rootGroup, server.settings.CommentsURL, commentUseCase, sessionMiddleware)
 	handlers.CreateCheckListHandler(rootGroup, server.settings.CheckListsURL, checkListUseCase, sessionMiddleware)
 	handlers.CreateCheckListItemHandler(rootGroup, server.settings.CheckListItemsURL, checkListItemUseCase, sessionMiddleware)
+	handlers.CreateUserSearchHandler(rootGroup, server.settings.UserSearchURL, userSearchUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)
 	if err != nil {

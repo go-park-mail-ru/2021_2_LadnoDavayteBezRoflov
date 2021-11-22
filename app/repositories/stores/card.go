@@ -84,6 +84,12 @@ func (cardStore *CardStore) GetByID(cid uint) (*models.Card, error) {
 	return card, nil
 }
 
+func (cardStore *CardStore) GetAssignedUsers(cid uint) (users *[]models.PublicUserInfo, err error) {
+	users = new([]models.PublicUserInfo)
+	err = cardStore.db.Model(&models.Card{CID: cid}).Association("Users").Find(users)
+	return
+}
+
 func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Comment, err error) {
 	comments = new([]models.Comment)
 	err = cardStore.db.Where("c_id = ?", cid).Order("date").Find(comments).Error
