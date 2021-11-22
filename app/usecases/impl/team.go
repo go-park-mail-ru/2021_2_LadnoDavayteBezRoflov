@@ -101,5 +101,9 @@ func (teamUseCase *TeamUseCaseImpl) ToggleUser(uid, tid, toggledUserID uint) (te
 		return
 	}
 
-	return teamUseCase.GetTeam(uid, tid)
+	team, err = teamUseCase.GetTeam(uid, tid)
+	if err == customErrors.ErrNoAccess {
+		return nil, nil
+	}
+	return
 }
