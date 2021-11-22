@@ -307,6 +307,7 @@ func (userStore *UserStore) IsCardListAccessed(uid uint, clid uint) (isAccessed 
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
+		return
 	}
 
 	result = userStore.db.Table("users").
@@ -344,6 +345,7 @@ func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool,
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
+		return
 	}
 
 	result = userStore.db.Table("users").
@@ -398,6 +400,7 @@ func (userStore *UserStore) IsCheckListAccessed(uid uint, chlid uint) (isAccesse
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
+		return
 	}
 
 	result = userStore.db.Table("users").
@@ -438,6 +441,7 @@ func (userStore *UserStore) IsCheckListItemAccessed(uid uint, chliid uint) (isAc
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
+		return
 	}
 
 	result = userStore.db.Table("users").
