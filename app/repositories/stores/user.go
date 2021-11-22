@@ -371,7 +371,10 @@ func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool,
 }
 
 func (userStore *UserStore) IsCardAssigned(uid uint, cid uint) (isAssigned bool, err error) {
-	result := userStore.db.Where("uid = ? AND c_id = ?", uid, cid).Find(&models.Card{})
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_cards ON users_cards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN cards ON users_cards.card_c_id = cards.c_id").
+		Where("users.uid = ? AND cards.c_id = ?", uid, cid).Find(&models.Card{})
 	err = result.Error
 	if err != nil {
 		return
