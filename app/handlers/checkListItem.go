@@ -84,7 +84,7 @@ func (checkListItemHandler *CheckListItemHandler) UpdateCheckListItem(c *gin.Con
 		return
 	}
 
-	chliid64 := c.Param("cmid")
+	chliid64 := c.Param("chliid")
 	chliid, err := strconv.ParseUint(chliid64, 10, 32)
 	if err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
@@ -114,7 +114,7 @@ func (checkListItemHandler *CheckListItemHandler) DeleteCheckListItem(c *gin.Con
 		return
 	}
 
-	chliid64 := c.Param("cmid")
+	chliid64 := c.Param("chliid")
 	chliid, err := strconv.ParseUint(chliid64, 10, 32)
 	if err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
