@@ -98,7 +98,7 @@ func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Commen
 
 func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models.CheckList, err error) {
 	checkLists = new([]models.CheckList)
-	err = cardStore.db.Where("c_id = ?", cid).Find(checkLists).Error
+	err = cardStore.db.Where("c_id = ?", cid).Order("chl_id").Find(checkLists).Error
 	return
 }
 
