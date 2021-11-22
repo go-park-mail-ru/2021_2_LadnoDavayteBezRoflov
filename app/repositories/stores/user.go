@@ -167,7 +167,7 @@ func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 func (userStore *UserStore) FindAllByLogin(text string, amount int) (users *[]models.PublicUserInfo, err error) {
 	users = new([]models.PublicUserInfo)
 	text = strings.Join([]string{"%", text, "%"}, "")
-	err = userStore.db.Where("login LIKE ?", text).Limit(amount).Find(users).Error
+	err = userStore.db.Model(&models.User{}).Where("login LIKE ?", text).Limit(amount).Find(users).Error
 	return
 }
 
