@@ -47,6 +47,7 @@ func (userSearchHandler *UserSearchHandler) FindForCard(c *gin.Context) {
 
 	users, err := userSearchHandler.UserSearchUseCase.FindForCard(uid.(uint), uint(cid), c.Param("text"))
 	if err != nil {
+		_ = c.Error(err)
 		return
 	}
 
@@ -69,6 +70,7 @@ func (userSearchHandler *UserSearchHandler) FindForTeam(c *gin.Context) {
 
 	users, err := userSearchHandler.UserSearchUseCase.FindForTeam(uid.(uint), uint(tid), c.Param("text"))
 	if err != nil {
+		_ = c.Error(err)
 		return
 	}
 
@@ -91,6 +93,7 @@ func (userSearchHandler *UserSearchHandler) FindForBoard(c *gin.Context) {
 
 	users, err := userSearchHandler.UserSearchUseCase.FindForBoard(uid.(uint), uint(bid), c.Param("text"))
 	if err != nil {
+		_ = c.Error(err)
 		return
 	}
 
