@@ -277,7 +277,7 @@ func (userStore *UserStore) IsBoardAccessed(uid uint, bid uint) (isAccessed bool
 		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
 		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
 		Where("users.uid = ? AND boards.b_id = ?", uid, bid).
-		Select("teams.t_id").Find(&models.Team{})
+		Select("boards.b_id").Find(&models.Board{})
 	err = result.Error
 	if err != nil {
 		return
@@ -314,7 +314,7 @@ func (userStore *UserStore) IsCardListAccessed(uid uint, clid uint) (isAccessed 
 		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
 		Joins("JOIN card_lists ON card_lists.b_id = boards.b_id").
 		Where("users.uid = ? AND card_lists.cl_id = ?", uid, clid).
-		Select("teams.t_id").Find(&models.Team{})
+		Select("boards.b_id").Find(&models.Board{})
 	err = result.Error
 	if err != nil {
 		return
@@ -351,7 +351,7 @@ func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool,
 		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
 		Joins("JOIN cards ON cards.b_id = boards.b_id").
 		Where("users.uid = ? AND cards.c_id = ?", uid, cid).
-		Select("teams.t_id").Find(&models.Team{})
+		Select("boards.b_id").Find(&models.Board{})
 	err = result.Error
 	if err != nil {
 		return
@@ -406,7 +406,7 @@ func (userStore *UserStore) IsCheckListAccessed(uid uint, chlid uint) (isAccesse
 		Joins("JOIN cards ON cards.b_id = boards.b_id").
 		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
 		Where("users.uid = ? AND check_lists.chl_id = ?", uid, chlid).
-		Select("teams.t_id").Find(&models.Team{})
+		Select("boards.b_id").Find(&models.Board{})
 	err = result.Error
 	if err != nil {
 		return
@@ -447,7 +447,7 @@ func (userStore *UserStore) IsCheckListItemAccessed(uid uint, chliid uint) (isAc
 		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
 		Joins("JOIN check_list_items ON check_list_items.chl_id = check_lists.chl_id").
 		Where("users.uid = ? AND check_list_items.chli_id = ?", uid, chliid).
-		Select("teams.t_id").Find(&models.Team{})
+		Select("boards.b_id").Find(&models.Board{})
 	err = result.Error
 	if err != nil {
 		return
