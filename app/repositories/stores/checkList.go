@@ -49,6 +49,6 @@ func (checkListStore *CheckListStore) GetByID(chlid uint) (*models.CheckList, er
 
 func (checkListStore *CheckListStore) GetCheckListItems(chlid uint) (checkListItems *[]models.CheckListItem, err error) {
 	checkListItems = new([]models.CheckListItem)
-	err = checkListStore.db.Where("chl_id = ?", chlid).Find(checkListItems).Error
+	err = checkListStore.db.Where("chl_id = ?", chlid).Order("chli_id").Find(checkListItems).Error
 	return
 }
