@@ -214,7 +214,12 @@ func (userStore *UserStore) AddUserToCard(uid, cid uint) (err error) {
 	if err != nil {
 		return
 	}
-	if isAccessed, _ := userStore.IsCardAccessed(uid, cid); isAccessed {
+
+	if isAccessed, err := userStore.IsCardAccessed(uid, cid); !isAccessed {
+		return err
+	}
+
+	if isAssigned, _ := userStore.IsCardAssigned(uid, cid); isAssigned {
 		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Delete(user)
 	} else {
 		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Append(user)
@@ -285,7 +290,6 @@ func (userStore *UserStore) IsBoardAccessed(uid uint, bid uint) (isAccessed bool
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
-		return
 	} else {
 		err = customErrors.ErrNoAccess
 	}
@@ -323,7 +327,6 @@ func (userStore *UserStore) IsCardListAccessed(uid uint, clid uint) (isAccessed 
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
-		return
 	} else {
 		err = customErrors.ErrNoAccess
 	}
@@ -361,7 +364,21 @@ func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool,
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCardAssigned(uid uint, cid uint) (isAssigned bool, err error) {
+	result := userStore.db.Where("uid = ? AND c_id = ?", uid, cid).Find(&models.Card{})
+	err = result.Error
+	if err != nil {
 		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAssigned = true
 	} else {
 		err = customErrors.ErrNoAccess
 	}
@@ -417,7 +434,6 @@ func (userStore *UserStore) IsCheckListAccessed(uid uint, chlid uint) (isAccesse
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
-		return
 	} else {
 		err = customErrors.ErrNoAccess
 	}
@@ -459,7 +475,6 @@ func (userStore *UserStore) IsCheckListItemAccessed(uid uint, chliid uint) (isAc
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
-		return
 	} else {
 		err = customErrors.ErrNoAccess
 	}
