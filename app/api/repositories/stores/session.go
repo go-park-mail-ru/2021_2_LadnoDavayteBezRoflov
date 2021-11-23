@@ -5,7 +5,6 @@ import (
 	"backendServer/app/microservices/session/handler"
 	customErrors "backendServer/pkg/errors"
 	"context"
-	"fmt"
 )
 
 type SessionStore struct {
@@ -22,8 +21,6 @@ func CreateSessionRepository(sessionManager handler.SessionCheckerClient) reposi
 
 func (sessionStore *SessionStore) Create(uid uint) (sid string, err error) {
 	session, err := sessionStore.sessionManager.Create(sessionStore.ctx, &handler.SessionInfo{UID: uint64(uid)})
-	fmt.Println(session)
-	fmt.Println(err)
 	if err != nil {
 		return "", err
 	} else if session == nil {

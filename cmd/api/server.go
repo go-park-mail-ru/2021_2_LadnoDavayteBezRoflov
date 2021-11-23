@@ -39,19 +39,6 @@ func (server *Server) Run() {
 	everythingCloser := closer.CreateCloser(&logger)
 	defer everythingCloser.Close(logger.Sync)
 
-	// Redis
-	//redisPool := &redis.Pool{
-	//	Dial: func() (redis.Conn, error) {
-	//		c, err := redis.Dial(server.settings.RedisProtocol, server.settings.RedisPort)
-	//		if err != nil {
-	//			logger.Error(err)
-	//			panic(err)
-	//		}
-	//		return c, err
-	//	},
-	//}
-	//defer everythingCloser.Close(redisPool.Close)
-
 	// Postgres
 	postgresClient, err := gorm.Open(postgres.Open(server.settings.PostgresDsn), &gorm.Config{})
 	if err != nil {
@@ -73,8 +60,9 @@ func (server *Server) Run() {
 		return
 	}
 
+	// Session microservice
 	grpcConn, err := grpc.Dial(
-		"session:8081",
+		server.settings.SessionServiceAddress,
 		grpc.WithInsecure(),
 	)
 	if err != nil {

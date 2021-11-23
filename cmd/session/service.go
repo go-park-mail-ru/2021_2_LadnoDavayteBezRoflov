@@ -10,6 +10,8 @@ import (
 	"net"
 	"time"
 
+	"google.golang.org/grpc/keepalive"
+
 	"google.golang.org/grpc"
 
 	"github.com/gomodule/redigo/redis"
@@ -57,7 +59,9 @@ func (service *Service) Run() {
 	}
 	defer everythingCloser.Close(listener.Close)
 
-	grpcSrv := grpc.NewServer()
+	grpcSrv := grpc.NewServer(
+		grpc.KeepaliveParams(keepalive.ServerParameters{MaxConnectionIdle: 5 * time.Minute}),
+	)
 	handler.RegisterSessionCheckerServer(grpcSrv, handlerImpl.CreateSessionCheckerServer(sessionUseCase))
 	if err = grpcSrv.Serve(listener); err != nil {
 		logger.Error(err)

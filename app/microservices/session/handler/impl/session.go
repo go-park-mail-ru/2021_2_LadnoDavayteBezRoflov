@@ -4,7 +4,6 @@ import (
 	handler "backendServer/app/microservices/session/handler"
 	"backendServer/app/microservices/session/usecase"
 	customErrors "backendServer/pkg/errors"
-	"fmt"
 
 	"golang.org/x/net/context"
 )
@@ -19,7 +18,6 @@ func CreateSessionCheckerServer(sessionUseCase usecase.SessionUseCase) handler.S
 }
 
 func (sessionChecker *SessionCheckerServerImpl) Create(ctx context.Context, in *handler.SessionInfo) (*handler.SessionID, error) {
-	fmt.Println("HERE TO CREATE")
 	if in == nil {
 		return &handler.SessionID{}, customErrors.ErrInternal
 	}

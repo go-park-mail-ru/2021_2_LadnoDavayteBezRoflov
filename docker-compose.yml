@@ -18,31 +18,6 @@ services:
             timeout: 10s
             retries: 5
 
-    session:
-        environment:
-            - REDIS_PORT=6380
-        build:
-            context: .
-            dockerfile: ./Dockerfile-session
-        container_name: "2021_2_LadnoDavayteBezRoflov_Session"
-        ports:
-            - "8081:8081"
-        expose:
-            - "8081"
-        volumes:
-            - ./:/session
-        restart: on-failure
-        depends_on:
-            - redis
-        links:
-            #            - "backend:backend"
-            - "redis:redis"
-        healthcheck:
-            test: [ "CMD", "curl", "-f", "http://localhost:8089" ]
-            interval: 30s
-            timeout: 10s
-            retries: 5
-
     postgres:
         image: postgres:latest
         container_name: db_postgres
@@ -63,10 +38,33 @@ services:
             timeout: 10s
             retries: 5
 
+    session:
+        environment:
+            - REDIS_PORT=6380
+        build:
+            context: .
+            dockerfile: ./Dockerfile-session
+        container_name: "2021_2_LadnoDavayteBezRoflov_Session"
+        ports:
+            - "8081:8081"
+        expose:
+            - "8081"
+        volumes:
+            - ./:/session
+        restart: on-failure
+        depends_on:
+            - redis
+        links:
+            - "redis:redis"
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost:8089" ]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+
     backend:
         environment:
             - DB_PORT=5433
-#            - REDIS_PORT=6380
             - POSTGRES_USER=backend_ldbr
             - POSTGRES_PASSWORD=backend_LDBR_password
             - POSTGRES_DB=backend_ldbr_db
@@ -87,14 +85,12 @@ services:
             - ./:/backend
             - /home/ubuntu/01-frontend/2021_2_LadnoDavayteBezRoflov/public/assets:/assets
         restart: on-failure
-        depends_on: 
-#            - redis
+        depends_on:
             - postgres
             - session
         links:
             - "postgres:db"
             - "session:session"
-#            - "redis:redis"
 
 volumes:
     api:

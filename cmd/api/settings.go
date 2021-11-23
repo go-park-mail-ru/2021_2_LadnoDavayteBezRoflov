@@ -19,7 +19,8 @@ type Settings struct {
 	CheckListsURL     string
 	CheckListItemsURL string
 
-	ServerAddress string
+	ServerAddress         string
+	SessionServiceAddress string
 
 	Origins        []string
 	AllowedMethods []string
@@ -32,15 +33,11 @@ type Settings struct {
 	AvatarsPath       string
 	DefaultAvatarName string
 
-	// RedisProtocol string
-	// RedisPort     string
-
 	PostgresDsn string
 }
 
 type EnvironmentVariables struct {
-	DB_PORT string `env:"DB_PORT,required"`
-	// REDIS_PORT        string `env:"REDIS_PORT,required"`
+	DB_PORT           string `env:"DB_PORT,required"`
 	POSTGRES_USER     string `env:"POSTGRES_USER,required"`
 	POSTGRES_PASSWORD string `env:"POSTGRES_PASSWORD,required"`
 	DATABASE_HOST     string `env:"DATABASE_HOST,required"`
@@ -67,7 +64,8 @@ func InitSettings() (settings Settings) {
 		CheckListsURL:     "/checkLists",
 		CheckListItemsURL: "/checkListItems",
 
-		ServerAddress: ":8000",
+		ServerAddress:         ":8000",
+		SessionServiceAddress: "session:8081",
 
 		Origins: []string{
 			"http://localhost:8000",
@@ -88,9 +86,6 @@ func InitSettings() (settings Settings) {
 		LogFilePath:       env.LOG_LOCATION,
 		AvatarsPath:       env.FRONTEND_PATH,
 		DefaultAvatarName: "default_user_picture.webp",
-
-		// RedisProtocol: "tcp",
-		// RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
 
 		PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),
 	}

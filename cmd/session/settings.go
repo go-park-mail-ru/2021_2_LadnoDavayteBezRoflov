@@ -29,7 +29,7 @@ func InitSettings() (settings Settings) {
 
 	settings = Settings{
 		ServiceProtocol: "tcp",
-		ServicePort:     "localhost:8081",
+		ServicePort:     "0.0.0.0:8081",
 
 		LogFilePath: env.SESSION_LOG_LOCATION,
 
