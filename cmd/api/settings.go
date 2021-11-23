@@ -12,12 +12,14 @@ type Settings struct {
 	RootURL           string
 	SessionURL        string
 	ProfileURL        string
+	TeamsURL          string
 	BoardsURL         string
 	CardListsURL      string
 	CardsURL          string
 	CommentsURL       string
 	CheckListsURL     string
 	CheckListItemsURL string
+	UserSearchURL     string
 
 	ServerAddress         string
 	SessionServiceAddress string
@@ -57,12 +59,14 @@ func InitSettings() (settings Settings) {
 		RootURL:           "/api",
 		SessionURL:        "/sessions",
 		ProfileURL:        "/profile",
+		TeamsURL:          "/teams",
 		BoardsURL:         "/boards",
 		CardListsURL:      "/cardLists",
 		CardsURL:          "/cards",
 		CommentsURL:       "/comments",
 		CheckListsURL:     "/checkLists",
 		CheckListItemsURL: "/checkListItems",
+		UserSearchURL:     "/usersearch",
 
 		ServerAddress:         ":8000",
 		SessionServiceAddress: "session:8081",

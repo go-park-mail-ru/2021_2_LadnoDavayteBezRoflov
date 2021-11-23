@@ -84,28 +84,21 @@ func (cardStore *CardStore) GetByID(cid uint) (*models.Card, error) {
 	return card, nil
 }
 
+func (cardStore *CardStore) GetAssignedUsers(cid uint) (users *[]models.PublicUserInfo, err error) {
+	users = new([]models.PublicUserInfo)
+	err = cardStore.db.Model(&models.Card{CID: cid}).Association("Users").Find(users)
+	return
+}
+
 func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Comment, err error) {
 	comments = new([]models.Comment)
 	err = cardStore.db.Where("c_id = ?", cid).Order("date").Find(comments).Error
-	if err != nil {
-		return
-	}
-
-	for i, comment := range *comments {
-		user := new(models.PublicUserInfo)
-		err = cardStore.db.Model(&models.User{UID: comment.UID}).Find(user).Error
-		if err != nil {
-			return
-		}
-		(*comments)[i].User = *user
-	}
-
 	return
 }
 
 func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models.CheckList, err error) {
 	checkLists = new([]models.CheckList)
-	err = cardStore.db.Where("c_id = ?", cid).Find(checkLists).Error
+	err = cardStore.db.Where("c_id = ?", cid).Order("chl_id").Find(checkLists).Error
 	return
 }
 
