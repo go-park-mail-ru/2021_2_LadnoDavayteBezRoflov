@@ -1,12 +1,14 @@
 server_address: ':8000'
 
-root_url:      '/api'
-session_url:   '/sessions'
-profile_url:   '/profile'
-boards_url:    '/boards'
-card_lists_url: '/cardLists'
-cards_url:     '/cards'
-comments_url:  '/comments'
+url: {
+  root_url:      '/api',
+  session_url:   '/sessions',
+  profile_url:   '/profile',
+  boards_url:    '/boards',
+  card_lists_url: '/cardLists',
+  cards_url:     '/cards',
+  comments_url:  '/comments'
+}
 
 allowed_methods:
   - 'GET'

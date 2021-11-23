@@ -10,16 +10,6 @@ import (
     "github.com/spf13/viper"
 )
 
-// type UrlConfig struct {
-//     RootURL      string `mapstructure:"root_url"`
-//     SessionURL   string `mapstructure:"session_url"`
-//     ProfileURL   string `mapstructure:"profile_url"`
-//     BoardsURL    string `mapstructure:"boards_url"`
-//     CardListsURL string `mapstructure:"card_lists_url"`
-//     CardsURL     string `mapstructure:"cards_url"`
-//     CommentsURL  string `mapstructure:"comments_url"`
-// }
-
 type Settings struct {
     RootURL      string `mapstructure:"root_url"`
 	SessionURL   string `mapstructure:"session_url"`
@@ -72,13 +62,13 @@ func InitSettings() (settings Settings) {
     }
 
 	settings = Settings{
-        RootURL:       viper.GetString("root_url"),
-        SessionURL:    viper.GetString("session_url"),
-        ProfileURL:    viper.GetString("profile_url"),
-        BoardsURL:     viper.GetString("boards_url"),
-        CardListsURL:  viper.GetString("card_lists_url"),
-        CardsURL:      viper.GetString("cards_url"),
-        CommentsURL:   viper.GetString("comments_url"),
+        RootURL:       viper.GetString("url.root_url"),
+        SessionURL:    viper.GetString("url.session_url"),
+        ProfileURL:    viper.GetString("url.profile_url"),
+        BoardsURL:     viper.GetString("url.boards_url"),
+        CardListsURL:  viper.GetString("url.card_lists_url"),
+        CardsURL:      viper.GetString("url.cards_url"),
+        CommentsURL:   viper.GetString("url.comments_url"),
         
         ServerAddress: viper.GetString("server_address"),
 
