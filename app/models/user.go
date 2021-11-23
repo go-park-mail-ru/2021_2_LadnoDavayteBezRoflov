@@ -10,5 +10,7 @@ type User struct {
 	Description    string    `json:"description" faker:"sentence"`
 	Avatar         string    `json:"avatar" faker:"uuid_digit"`
 	Teams          []Team    `json:"teams" faker:"-" gorm:"many2many:users_teams;"`
+	Boards         []Board   `json:"boards" faker:"-" gorm:"many2many:users_boards;"`
+	AssignedCards  []Card    `json:"-" faker:"-" gorm:"many2many:users_cards;"`
 	Comments       []Comment `json:"comments" gorm:"foreignKey:UID;constraint:OnDelete:CASCADE;"`
 }

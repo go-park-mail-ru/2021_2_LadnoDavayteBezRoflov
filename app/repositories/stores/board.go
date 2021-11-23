@@ -53,6 +53,27 @@ func (boardStore *BoardStore) GetByID(bid uint) (*models.Board, error) {
 	return board, nil
 }
 
+func (boardStore *BoardStore) GetBoardMembers(board *models.Board) (members *[]models.PublicUserInfo, err error) {
+	members = new([]models.PublicUserInfo)
+	err = boardStore.db.Model(&models.Board{BID: board.BID}).Association("Users").Find(members)
+	if err != nil {
+		return
+	}
+	teamMembers := new([]models.PublicUserInfo)
+	err = boardStore.db.Model(&models.Team{TID: board.TID}).Association("Users").Find(teamMembers)
+	if err != nil {
+		return
+	}
+	*members = append(*members, *teamMembers...)
+	return
+}
+
+func (boardStore *BoardStore) GetBoardInvitedMembers(bid uint) (members *[]models.PublicUserInfo, err error) {
+	members = new([]models.PublicUserInfo)
+	err = boardStore.db.Model(&models.Board{BID: bid}).Association("Users").Find(members)
+	return
+}
+
 func (boardStore *BoardStore) GetBoardCardLists(bid uint) (cardLists *[]models.CardList, err error) {
 	cardLists = new([]models.CardList)
 	err = boardStore.db.Where("b_id = ?", bid).Order("position_on_board").Find(cardLists).Error

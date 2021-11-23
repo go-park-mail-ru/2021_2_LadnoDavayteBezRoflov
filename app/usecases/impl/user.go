@@ -39,8 +39,7 @@ func (userUseCase *UserUseCaseImpl) Create(user *models.User) (sid string, err e
 		return
 	}
 
-	// TODO TEMP каждый пользователь в своей команде
-	privateTeam := &models.Team{Title: "Личное пространство " + user.Login}
+	privateTeam := &models.Team{Title: "Личное пространство " + user.Login, Type: models.PrivateSpaceTeam}
 
 	err = userUseCase.teamRepository.Create(privateTeam)
 	if err != nil {
@@ -51,7 +50,6 @@ func (userUseCase *UserUseCaseImpl) Create(user *models.User) (sid string, err e
 	if err != nil {
 		return
 	}
-	// TODO END TEMP
 
 	sid, err = userUseCase.sessionRepository.Create(user.UID)
 

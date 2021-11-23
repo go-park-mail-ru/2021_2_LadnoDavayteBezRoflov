@@ -5,14 +5,16 @@ import (
 	"backendServer/app/repositories"
 	"backendServer/app/usecases"
 	customErrors "backendServer/pkg/errors"
+	"time"
 )
 
 type BoardUseCaseImpl struct {
-	boardRepository    repositories.BoardRepository
-	userRepository     repositories.UserRepository
-	teamRepository     repositories.TeamRepository
-	cardListRepository repositories.CardListRepository
-	cardRepository     repositories.CardRepository
+	boardRepository     repositories.BoardRepository
+	userRepository      repositories.UserRepository
+	teamRepository      repositories.TeamRepository
+	cardListRepository  repositories.CardListRepository
+	cardRepository      repositories.CardRepository
+	checkListRepository repositories.CheckListRepository
 }
 
 func CreateBoardUseCase(
@@ -21,13 +23,15 @@ func CreateBoardUseCase(
 	teamRepository repositories.TeamRepository,
 	cardListRepository repositories.CardListRepository,
 	cardRepository repositories.CardRepository,
+	checkListRepository repositories.CheckListRepository,
 ) usecases.BoardUseCase {
 	return &BoardUseCaseImpl{
-		boardRepository:    boardRepository,
-		userRepository:     userRepository,
-		teamRepository:     teamRepository,
-		cardListRepository: cardListRepository,
-		cardRepository:     cardRepository,
+		boardRepository:     boardRepository,
+		userRepository:      userRepository,
+		teamRepository:      teamRepository,
+		cardListRepository:  cardListRepository,
+		cardRepository:      cardRepository,
+		checkListRepository: checkListRepository,
 	}
 }
 
@@ -43,7 +47,27 @@ func (boardUseCase *BoardUseCaseImpl) GetUserBoards(uid uint) (teams *[]models.T
 			err = boardsErr
 			return
 		}
+		members, err := boardUseCase.teamRepository.GetTeamMembers(team.TID)
+		if err != nil {
+			return nil, err
+		}
 		(*teams)[i].Boards = *boards
+		(*teams)[i].Users = *members
+	}
+
+	toggledBoards, err := boardUseCase.userRepository.GetUserToggledBoards(uid)
+	if err != nil {
+		return
+	}
+
+	if len(*toggledBoards) > 0 {
+		additionalTeam := models.Team{
+			Title:  "Остальные доски",
+			Boards: *toggledBoards,
+			Type:   models.InvitedBoardsTeam,
+		}
+
+		*teams = append(*teams, additionalTeam)
 	}
 
 	return
@@ -72,6 +96,12 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 		return
 	}
 
+	members, err := boardUseCase.boardRepository.GetBoardMembers(board)
+	if err != nil {
+		return
+	}
+	board.Members = *members
+
 	lists, err := boardUseCase.boardRepository.GetBoardCardLists(bid)
 	if err != nil {
 		return nil, err
@@ -89,7 +119,39 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 			if err != nil {
 				return
 			}
+			var users *[]models.PublicUserInfo
+			users, err = boardUseCase.cardRepository.GetAssignedUsers(card.CID)
+			if err != nil {
+				return
+			}
+			for index, comment := range *comments {
+				user := new(models.PublicUserInfo)
+				user, err = boardUseCase.userRepository.GetPublicData(comment.UID)
+				if err != nil {
+					return
+				}
+				(*comments)[i].User = *user
+				(*comments)[index].DateParsed = comment.Date.Round(time.Second).String()
+			}
+			(*cards)[j].Assignees = *users
 			(*cards)[j].Comments = *comments
+
+			var checkLists *[]models.CheckList
+			checkLists, err = boardUseCase.cardRepository.GetCardCheckLists(card.CID)
+			if err != nil {
+				return
+			}
+
+			for index, checkList := range *checkLists {
+				var checkListItems *[]models.CheckListItem
+				checkListItems, err = boardUseCase.checkListRepository.GetCheckListItems(checkList.CHLID)
+				if err != nil {
+					return
+				}
+				(*checkLists)[index].CheckListItems = *checkListItems
+			}
+
+			(*cards)[j].CheckLists = *checkLists
 		}
 		(*lists)[i].Cards = *cards
 	}
@@ -119,4 +181,22 @@ func (boardUseCase *BoardUseCaseImpl) DeleteBoard(uid, bid uint) (err error) {
 		return customErrors.ErrNoAccess
 	}
 	return boardUseCase.boardRepository.Delete(bid)
+}
+
+func (boardUseCase *BoardUseCaseImpl) ToggleUser(uid, bid, toggledUserID uint) (board *models.Board, err error) {
+	isAccessed, err := boardUseCase.userRepository.IsBoardAccessed(uid, bid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
+
+	err = boardUseCase.userRepository.AddUserToBoard(toggledUserID, bid)
+	if err != nil {
+		return
+	}
+
+	return boardUseCase.GetBoard(uid, bid)
 }

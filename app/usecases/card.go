@@ -7,4 +7,5 @@ type CardUseCase interface {
 	GetCard(uid, cid uint) (card *models.Card, err error)
 	UpdateCard(uid uint, card *models.Card) (err error)
 	DeleteCard(uid, cid uint) (err error)
+	ToggleUser(uid, cid, toggledUserID uint) (card *models.Card, err error)
 }
