@@ -1,7 +1,7 @@
 package stores
 
 import (
-	models2 "backendServer/app/api/models"
+	"backendServer/app/api/models"
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
 
@@ -17,9 +17,9 @@ func CreateCardListRepository(db *gorm.DB) repositories.CardListRepository {
 	return &CardListStore{db: db}
 }
 
-func (cardListStore *CardListStore) Create(cardList *models2.CardList) (err error) {
+func (cardListStore *CardListStore) Create(cardList *models.CardList) (err error) {
 	var currentMaxPos int64
-	err = cardListStore.db.Model(&models2.CardList{}).Where("b_id = ?", cardList.BID).Count(&currentMaxPos).Error
+	err = cardListStore.db.Model(&models.CardList{}).Where("b_id = ?", cardList.BID).Count(&currentMaxPos).Error
 	if err != nil {
 		return
 	}
@@ -27,7 +27,7 @@ func (cardListStore *CardListStore) Create(cardList *models2.CardList) (err erro
 	return cardListStore.db.Create(cardList).Error
 }
 
-func (cardListStore *CardListStore) Update(cardList *models2.CardList) (err error) {
+func (cardListStore *CardListStore) Update(cardList *models.CardList) (err error) {
 	oldCardList, err := cardListStore.GetByID(cardList.CID)
 	if err != nil {
 		return
@@ -57,12 +57,12 @@ func (cardListStore *CardListStore) Delete(clid uint) (err error) {
 	if err != nil {
 		return
 	}
-	err = cardListStore.db.Delete(&models2.CardList{}, clid).Error
+	err = cardListStore.db.Delete(&models.CardList{}, clid).Error
 	return
 }
 
-func (cardListStore *CardListStore) GetByID(clid uint) (*models2.CardList, error) {
-	cardList := new(models2.CardList)
+func (cardListStore *CardListStore) GetByID(clid uint) (*models.CardList, error) {
+	cardList := new(models.CardList)
 	if res := cardListStore.db.First(cardList, clid); res.RowsAffected == 0 {
 		return nil, customErrors.ErrCardListNotFound
 	} else if res.Error != nil {
@@ -71,14 +71,14 @@ func (cardListStore *CardListStore) GetByID(clid uint) (*models2.CardList, error
 	return cardList, nil
 }
 
-func (cardListStore *CardListStore) GetCardListCards(clid uint) (cards *[]models2.Card, err error) {
-	cards = new([]models2.Card)
+func (cardListStore *CardListStore) GetCardListCards(clid uint) (cards *[]models.Card, err error) {
+	cards = new([]models.Card)
 	err = cardListStore.db.Where("cl_id = ?", clid).Order("position_on_card_list").Find(cards).Error
 	return
 }
 
 func (cardListStore *CardListStore) move(from, to, bid uint, isToLeftMove bool) (err error) {
-	subQuery := cardListStore.db.Model(&models2.CardList{}).Where("b_id = ? AND position_on_board BETWEEN ? AND ?",
+	subQuery := cardListStore.db.Model(&models.CardList{}).Where("b_id = ? AND position_on_board BETWEEN ? AND ?",
 		bid,
 		from,
 		to,

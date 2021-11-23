@@ -1,7 +1,7 @@
 package stores
 
 import (
-	models2 "backendServer/app/api/models"
+	"backendServer/app/api/models"
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
 
@@ -17,11 +17,11 @@ func CreateBoardRepository(db *gorm.DB) repositories.BoardRepository {
 	return &BoardStore{db: db}
 }
 
-func (boardStore *BoardStore) Create(board *models2.Board) (err error) {
+func (boardStore *BoardStore) Create(board *models.Board) (err error) {
 	return boardStore.db.Create(board).Error
 }
 
-func (boardStore *BoardStore) Update(board *models2.Board) (err error) {
+func (boardStore *BoardStore) Update(board *models.Board) (err error) {
 	oldBoard, err := boardStore.GetByID(board.BID)
 	if err != nil {
 		return
@@ -39,11 +39,11 @@ func (boardStore *BoardStore) Update(board *models2.Board) (err error) {
 }
 
 func (boardStore *BoardStore) Delete(bid uint) (err error) {
-	return boardStore.db.Delete(&models2.Board{}, bid).Error
+	return boardStore.db.Delete(&models.Board{}, bid).Error
 }
 
-func (boardStore *BoardStore) GetByID(bid uint) (*models2.Board, error) {
-	board := new(models2.Board)
+func (boardStore *BoardStore) GetByID(bid uint) (*models.Board, error) {
+	board := new(models.Board)
 	if res := boardStore.db.Find(board, bid); res.RowsAffected == 0 {
 		err := customErrors.ErrBoardNotFound
 		return nil, err
@@ -53,14 +53,14 @@ func (boardStore *BoardStore) GetByID(bid uint) (*models2.Board, error) {
 	return board, nil
 }
 
-func (boardStore *BoardStore) GetBoardCardLists(bid uint) (cardLists *[]models2.CardList, err error) {
-	cardLists = new([]models2.CardList)
+func (boardStore *BoardStore) GetBoardCardLists(bid uint) (cardLists *[]models.CardList, err error) {
+	cardLists = new([]models.CardList)
 	err = boardStore.db.Where("b_id = ?", bid).Order("position_on_board").Find(cardLists).Error
 	return
 }
 
-func (boardStore *BoardStore) GetBoardCards(bid uint) (cards *[]models2.Card, err error) {
-	cards = new([]models2.Card)
-	err = boardStore.db.Model(&models2.Board{BID: bid}).Association("Cards").Find(cards)
+func (boardStore *BoardStore) GetBoardCards(bid uint) (cards *[]models.Card, err error) {
+	cards = new([]models.Card)
+	err = boardStore.db.Model(&models.Board{BID: bid}).Association("Cards").Find(cards)
 	return
 }

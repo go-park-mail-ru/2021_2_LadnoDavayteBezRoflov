@@ -1,7 +1,7 @@
 package stores
 
 import (
-	models2 "backendServer/app/api/models"
+	"backendServer/app/api/models"
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
 
@@ -17,9 +17,9 @@ func CreateCardRepository(db *gorm.DB) repositories.CardRepository {
 	return &CardStore{db: db}
 }
 
-func (cardStore *CardStore) Create(card *models2.Card) (err error) {
+func (cardStore *CardStore) Create(card *models.Card) (err error) {
 	var currentMaxPos int64
-	err = cardStore.db.Model(&models2.Card{}).Where("cl_id = ?", card.CLID).Count(&currentMaxPos).Error
+	err = cardStore.db.Model(&models.Card{}).Where("cl_id = ?", card.CLID).Count(&currentMaxPos).Error
 	if err != nil {
 		return
 	}
@@ -27,7 +27,7 @@ func (cardStore *CardStore) Create(card *models2.Card) (err error) {
 	return cardStore.db.Create(card).Error
 }
 
-func (cardStore *CardStore) Update(card *models2.Card) (err error) {
+func (cardStore *CardStore) Update(card *models.Card) (err error) {
 	oldCard, err := cardStore.GetByID(card.CID)
 	if err != nil {
 		return
@@ -70,12 +70,12 @@ func (cardStore *CardStore) Delete(cid uint) (err error) {
 	if err != nil {
 		return
 	}
-	err = cardStore.db.Delete(&models2.Card{}, cid).Error
+	err = cardStore.db.Delete(&models.Card{}, cid).Error
 	return
 }
 
-func (cardStore *CardStore) GetByID(cid uint) (*models2.Card, error) {
-	card := new(models2.Card)
+func (cardStore *CardStore) GetByID(cid uint) (*models.Card, error) {
+	card := new(models.Card)
 	if res := cardStore.db.Find(card, cid); res.RowsAffected == 0 {
 		return nil, customErrors.ErrCardNotFound
 	} else if res.Error != nil {
@@ -84,16 +84,16 @@ func (cardStore *CardStore) GetByID(cid uint) (*models2.Card, error) {
 	return card, nil
 }
 
-func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models2.Comment, err error) {
-	comments = new([]models2.Comment)
+func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Comment, err error) {
+	comments = new([]models.Comment)
 	err = cardStore.db.Where("c_id = ?", cid).Order("date").Find(comments).Error
 	if err != nil {
 		return
 	}
 
 	for i, comment := range *comments {
-		user := new(models2.PublicUserInfo)
-		err = cardStore.db.Model(&models2.User{UID: comment.UID}).Find(user).Error
+		user := new(models.PublicUserInfo)
+		err = cardStore.db.Model(&models.User{UID: comment.UID}).Find(user).Error
 		if err != nil {
 			return
 		}
@@ -103,14 +103,14 @@ func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models2.Comme
 	return
 }
 
-func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models2.CheckList, err error) {
-	checkLists = new([]models2.CheckList)
+func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models.CheckList, err error) {
+	checkLists = new([]models.CheckList)
 	err = cardStore.db.Where("c_id = ?", cid).Find(checkLists).Error
 	return
 }
 
 func (cardStore *CardStore) move(from, to, clid uint, isToLeftMove bool) (err error) {
-	subQuery := cardStore.db.Model(&models2.Card{}).Where(
+	subQuery := cardStore.db.Model(&models.Card{}).Where(
 		"cl_id = ? AND position_on_card_list BETWEEN ? AND ?",
 		clid,
 		from,

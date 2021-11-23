@@ -1,7 +1,7 @@
 package impl
 
 import (
-	handler "backendServer/app/microservices/session/handler"
+	"backendServer/app/microservices/session/handler"
 	"backendServer/app/microservices/session/usecase"
 	customErrors "backendServer/pkg/errors"
 

@@ -1,7 +1,7 @@
 package stores
 
 import (
-	models2 "backendServer/app/api/models"
+	"backendServer/app/api/models"
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
 
@@ -16,11 +16,11 @@ func CreateCheckListRepository(db *gorm.DB) repositories.CheckListRepository {
 	return &CheckListStore{db: db}
 }
 
-func (checkListStore *CheckListStore) Create(checkList *models2.CheckList) (err error) {
+func (checkListStore *CheckListStore) Create(checkList *models.CheckList) (err error) {
 	return checkListStore.db.Create(checkList).Error
 }
 
-func (checkListStore *CheckListStore) Update(checkList *models2.CheckList) (err error) {
+func (checkListStore *CheckListStore) Update(checkList *models.CheckList) (err error) {
 	oldCheckList, err := checkListStore.GetByID(checkList.CHLID)
 	if err != nil {
 		return
@@ -34,11 +34,11 @@ func (checkListStore *CheckListStore) Update(checkList *models2.CheckList) (err 
 }
 
 func (checkListStore *CheckListStore) Delete(chlid uint) (err error) {
-	return checkListStore.db.Delete(&models2.CheckList{}, chlid).Error
+	return checkListStore.db.Delete(&models.CheckList{}, chlid).Error
 }
 
-func (checkListStore *CheckListStore) GetByID(chlid uint) (*models2.CheckList, error) {
-	checkList := new(models2.CheckList)
+func (checkListStore *CheckListStore) GetByID(chlid uint) (*models.CheckList, error) {
+	checkList := new(models.CheckList)
 	if res := checkListStore.db.Find(checkList, chlid); res.RowsAffected == 0 {
 		return nil, customErrors.ErrCheckListNotFound
 	} else if res.Error != nil {
@@ -47,8 +47,8 @@ func (checkListStore *CheckListStore) GetByID(chlid uint) (*models2.CheckList, e
 	return checkList, nil
 }
 
-func (checkListStore *CheckListStore) GetCheckListItems(chlid uint) (checkListItems *[]models2.CheckListItem, err error) {
-	checkListItems = new([]models2.CheckListItem)
+func (checkListStore *CheckListStore) GetCheckListItems(chlid uint) (checkListItems *[]models.CheckListItem, err error) {
+	checkListItems = new([]models.CheckListItem)
 	err = checkListStore.db.Where("chl_id = ?", chlid).Find(checkListItems).Error
 	return
 }
