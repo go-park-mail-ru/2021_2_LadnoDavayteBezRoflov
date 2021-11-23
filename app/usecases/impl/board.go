@@ -64,6 +64,7 @@ func (boardUseCase *BoardUseCaseImpl) GetUserBoards(uid uint) (teams *[]models.T
 		additionalTeam := models.Team{
 			Title:  "Остальные доски",
 			Boards: *toggledBoards,
+			Type:   models.InvitedBoardsTeam,
 		}
 
 		*teams = append(*teams, additionalTeam)

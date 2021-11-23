@@ -171,6 +171,27 @@ func (userStore *UserStore) FindAllByLogin(text string, amount int) (users *[]mo
 	return
 }
 
+func (userStore *UserStore) FindBoardMembersByLogin(bid uint, text string, amount int) (users *[]models.PublicUserInfo, err error) {
+	users = new([]models.PublicUserInfo)
+	text = strings.Join([]string{"%", text, "%"}, "")
+
+	err = userStore.db.Raw("? UNION ?",
+		userStore.db.Table("users").
+			Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+			Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+			Joins("JOIN boards ON teams.t_id = boards.t_id").
+			Where("boards.b_id = ? AND LOWER(users.login) LIKE ?", bid, strings.ToLower(text)).
+			Select("users.uid, users.login, users.avatar"),
+		userStore.db.Table("users").
+			Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+			Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+			Where("boards.b_id = ? AND LOWER(users.login) LIKE ?", bid, strings.ToLower(text)).
+			Select("users.uid, users.login, users.avatar"),
+	).Limit(amount).Find(users).Error
+
+	return
+}
+
 func (userStore *UserStore) GetUserTeams(uid uint) (teams *[]models.Team, err error) {
 	teams = new([]models.Team)
 	err = userStore.db.Model(&models.User{UID: uid}).Association("Teams").Find(teams)
@@ -189,6 +210,30 @@ func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
 		return
 	}
 	if isMember, _ := userStore.IsUserInTeam(uid, tid); isMember {
+
+		boards := new([]models.Board)
+		err = userStore.db.Model(&models.Team{TID: tid}).Association("Boards").Find(boards)
+		if err != nil {
+			return
+		}
+
+		for _, board := range *boards {
+			cards := new([]models.Card)
+			err = userStore.db.Model(&models.Board{BID: board.BID}).Association("Cards").Find(cards)
+			if err != nil {
+				return
+			}
+
+			for _, card := range *cards {
+				if isAssigned, _ := userStore.IsCardAssigned(uid, card.CID); isAssigned {
+					err = userStore.AddUserToCard(uid, card.CID)
+					if err != nil {
+						return
+					}
+				}
+			}
+		}
+
 		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Delete(user)
 	} else {
 		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(user)
@@ -202,7 +247,25 @@ func (userStore *UserStore) AddUserToBoard(uid, bid uint) (err error) {
 		return
 	}
 	if isAccessed, _ := userStore.IsBoardAccessed(uid, bid); isAccessed {
+		cards := new([]models.Card)
+		err = userStore.db.Model(&models.Board{BID: bid}).Association("Cards").Find(cards)
+		if err != nil {
+			return
+		}
+
+		for _, card := range *cards {
+			if isAssigned, _ := userStore.IsCardAssigned(uid, card.CID); isAssigned {
+				err = userStore.AddUserToCard(uid, card.CID)
+				if err != nil {
+					return
+				}
+			}
+		}
+
 		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Delete(user)
+		if err != nil {
+			return
+		}
 	} else {
 		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Append(user)
 	}

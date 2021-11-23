@@ -38,7 +38,12 @@ func (userSearchUseCase *UserSearchUseCaseImpl) FindForCard(uid, cid uint, text 
 		return
 	}
 
-	matchedUsers, err := userSearchUseCase.userRepository.FindAllByLogin(text, 15)
+	card, err := userSearchUseCase.cardRepository.GetByID(cid)
+	if err != nil {
+		return
+	}
+
+	matchedUsers, err := userSearchUseCase.userRepository.FindBoardMembersByLogin(card.BID, text, 15)
 	if err != nil {
 		return
 	}
