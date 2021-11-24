@@ -130,7 +130,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 				if err != nil {
 					return
 				}
-				(*comments)[i].User = *user
+				(*comments)[index].User = *user
 				(*comments)[index].DateParsed = comment.Date.Round(time.Second).String()
 			}
 			(*cards)[j].Assignees = *users
