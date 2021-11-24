@@ -1,20 +1,18 @@
 package main
 
 import (
+	handlerImpl "backendServer/app/microservices/email/handler/impl"
+	"backendServer/app/microservices/email/repository/store"
+	usecaseImpl "backendServer/app/microservices/email/usecase/impl"
 	"backendServer/app/microservices/session/handler"
-	handlerImpl "backendServer/app/microservices/session/handler/impl"
-	"backendServer/app/microservices/session/repository/store"
-	usecaseImpl "backendServer/app/microservices/session/usecase/impl"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
 	"net"
 	"time"
 
-	"google.golang.org/grpc/keepalive"
-
-	"google.golang.org/grpc"
-
 	"github.com/gomodule/redigo/redis"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 type Service struct {
@@ -46,10 +44,10 @@ func (service *Service) Run() {
 	defer everythingCloser.Close(redisPool.Close)
 
 	// Repository
-	sessionRepo := store.CreateSessionRepository(redisPool, uint64(24*(3*time.Hour)), everythingCloser)
+	emailRepo := store.CreateSessionRepository(redisPool, uint64(24*(3*time.Hour)), everythingCloser)
 
 	// UseCase
-	sessionUseCase := usecaseImpl.CreateSessionUseCase(sessionRepo)
+	emailUseCase := usecaseImpl.CreateEmailUseCase(emailRepo)
 
 	// Handler
 	listener, err := net.Listen(service.settings.ServiceProtocol, service.settings.ServicePort)
@@ -62,7 +60,7 @@ func (service *Service) Run() {
 	grpcSrv := grpc.NewServer(
 		grpc.KeepaliveParams(keepalive.ServerParameters{MaxConnectionIdle: 5 * time.Minute}),
 	)
-	handler.RegisterSessionCheckerServer(grpcSrv, handlerImpl.CreateSessionCheckerServer(sessionUseCase))
+	handler.RegisterEmailSenderServer(grpcSrv, handlerImpl.CreateEmailSenderServer(emailUseCase))
 	if err = grpcSrv.Serve(listener); err != nil {
 		logger.Error(err)
 	}
