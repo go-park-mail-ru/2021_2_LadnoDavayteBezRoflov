@@ -11,14 +11,18 @@ import (
 )
 
 type Settings struct {
-	RootURL       string `mapstructure:"root_url"`
-	SessionURL    string `mapstructure:"session_url"`
-	ProfileURL    string `mapstructure:"profile_url"`
-	BoardsURL     string `mapstructure:"boards_url"`
-	CardListsURL  string `mapstructure:"card_lists_url"`
-	CardsURL      string `mapstructure:"cards_url"`
-	CommentsURL   string `mapstructure:"comments_url"`
-	ServerAddress string `mapstructure:"server_address"`
+	RootURL           string `mapstructure:"root_url"`
+	SessionURL        string `mapstructure:"session_url"`
+	ProfileURL        string `mapstructure:"profile_url"`
+	BoardsURL         string `mapstructure:"boards_url"`
+	CardListsURL      string `mapstructure:"card_lists_url"`
+	CardsURL          string `mapstructure:"cards_url"`
+	CommentsURL       string `mapstructure:"comments_url"`
+	CheckListsURL     string `mapstructure:"check_lists_url"`
+	CheckListItemsURL string `mapstructure:"check_list_items_url"`
+	UserSearchURL     string `mapstructure:"user_search_url"`
+
+	ServerAddress     string `mapstructure:"server_address"`
 
 	Origins        []string
 	AllowedMethods []string `mapstructure:"allowed_methods"`
@@ -62,13 +66,16 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
-		RootURL:      viper.GetString("url.root_url"),
-		SessionURL:   viper.GetString("url.session_url"),
-		ProfileURL:   viper.GetString("url.profile_url"),
-		BoardsURL:    viper.GetString("url.boards_url"),
-		CardListsURL: viper.GetString("url.card_lists_url"),
-		CardsURL:     viper.GetString("url.cards_url"),
-		CommentsURL:  viper.GetString("url.comments_url"),
+		RootURL:           viper.GetString("url.root_url"),
+		SessionURL:        viper.GetString("url.session_url"),
+		ProfileURL:        viper.GetString("url.profile_url"),
+		BoardsURL:         viper.GetString("url.boards_url"),
+		CardListsURL:      viper.GetString("url.card_lists_url"),
+		CardsURL:          viper.GetString("url.cards_url"),
+		CommentsURL:       viper.GetString("url.comments_url"),
+		CheckListsURL:     viper.GetString("url.check_lists"),
+		CheckListItemsURL: viper.GetString("url.check_list_items"),
+		UserSearchURL:     viper.GetString("url.user_search"),
 
 		ServerAddress: viper.GetString("server_address"),
 

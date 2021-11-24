@@ -164,14 +164,136 @@ func (userStore *UserStore) GetByID(uid uint) (*models.User, error) {
 	return user, nil
 }
 
+func (userStore *UserStore) FindAllByLogin(text string, amount int) (users *[]models.PublicUserInfo, err error) {
+	users = new([]models.PublicUserInfo)
+	text = strings.Join([]string{"%", text, "%"}, "")
+	err = userStore.db.Model(&models.User{}).Where("LOWER(login) LIKE ?", strings.ToLower(text)).Limit(amount).Find(users).Error
+	return
+}
+
+func (userStore *UserStore) FindBoardMembersByLogin(bid uint, text string, amount int) (users *[]models.PublicUserInfo, err error) {
+	users = new([]models.PublicUserInfo)
+	text = strings.Join([]string{"%", text, "%"}, "")
+
+	err = userStore.db.Raw("? UNION ?",
+		userStore.db.Table("users").
+			Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+			Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+			Joins("JOIN boards ON teams.t_id = boards.t_id").
+			Where("boards.b_id = ? AND LOWER(users.login) LIKE ?", bid, strings.ToLower(text)).
+			Select("users.uid, users.login, users.avatar"),
+		userStore.db.Table("users").
+			Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+			Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+			Where("boards.b_id = ? AND LOWER(users.login) LIKE ?", bid, strings.ToLower(text)).
+			Select("users.uid, users.login, users.avatar"),
+	).Limit(amount).Find(users).Error
+
+	return
+}
+
 func (userStore *UserStore) GetUserTeams(uid uint) (teams *[]models.Team, err error) {
 	teams = new([]models.Team)
 	err = userStore.db.Model(&models.User{UID: uid}).Association("Teams").Find(teams)
 	return
 }
 
+func (userStore *UserStore) GetUserToggledBoards(uid uint) (boards *[]models.Board, err error) {
+	boards = new([]models.Board)
+	err = userStore.db.Model(&models.User{UID: uid}).Association("Boards").Find(boards)
+	return
+}
+
 func (userStore *UserStore) AddUserToTeam(uid, tid uint) (err error) {
-	return userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(userStore.GetByID(uid))
+	user, err := userStore.GetByID(uid)
+	if err != nil {
+		return
+	}
+	if isMember, _ := userStore.IsUserInTeam(uid, tid); isMember {
+
+		boards := new([]models.Board)
+		err = userStore.db.Model(&models.Team{TID: tid}).Association("Boards").Find(boards)
+		if err != nil {
+			return
+		}
+
+		for _, board := range *boards {
+			cards := new([]models.Card)
+			err = userStore.db.Model(&models.Board{BID: board.BID}).Association("Cards").Find(cards)
+			if err != nil {
+				return
+			}
+
+			for _, card := range *cards {
+				if isAssigned, _ := userStore.IsCardAssigned(uid, card.CID); isAssigned {
+					err = userStore.AddUserToCard(uid, card.CID)
+					if err != nil {
+						return
+					}
+				}
+			}
+		}
+
+		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Delete(user)
+	} else {
+		err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Append(user)
+	}
+	return
+}
+
+func (userStore *UserStore) AddUserToBoard(uid, bid uint) (err error) {
+	user, err := userStore.GetByID(uid)
+	if err != nil {
+		return
+	}
+	if isAccessed, _ := userStore.IsBoardAccessed(uid, bid); isAccessed {
+		cards := new([]models.Card)
+		err = userStore.db.Model(&models.Board{BID: bid}).Association("Cards").Find(cards)
+		if err != nil {
+			return
+		}
+
+		for _, card := range *cards {
+			if isAssigned, _ := userStore.IsCardAssigned(uid, card.CID); isAssigned {
+				err = userStore.AddUserToCard(uid, card.CID)
+				if err != nil {
+					return
+				}
+			}
+		}
+
+		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Delete(user)
+		if err != nil {
+			return
+		}
+	} else {
+		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Append(user)
+	}
+	return
+}
+
+func (userStore *UserStore) AddUserToCard(uid, cid uint) (err error) {
+	user, err := userStore.GetByID(uid)
+	if err != nil {
+		return
+	}
+
+	if isAccessed, err := userStore.IsCardAccessed(uid, cid); !isAccessed {
+		return err
+	}
+
+	if isAssigned, _ := userStore.IsCardAssigned(uid, cid); isAssigned {
+		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Delete(user)
+	} else {
+		err = userStore.db.Model(&models.Card{CID: cid}).Association("Users").Append(user)
+	}
+	return
+}
+
+func (userStore *UserStore) GetPublicData(uid uint) (user *models.PublicUserInfo, err error) {
+	user = new(models.PublicUserInfo)
+	err = userStore.db.Model(&models.User{UID: uid}).Find(user).Error
+	return
 }
 
 func (userStore *UserStore) IsUserExist(user *models.User) (bool, error) {
@@ -192,6 +314,16 @@ func (userStore *UserStore) IsEmailUsed(user *models.User) (bool, error) {
 	return true, customErrors.ErrEmailAlreadyUsed
 }
 
+func (userStore *UserStore) IsUserInTeam(uid uint, tid uint) (isMember bool, err error) {
+	user := new(models.User)
+	if err = userStore.db.Model(&models.Team{TID: tid}).Association("Users").Find(user, uid); err != nil {
+		return false, err
+	} else if user.UID == 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
 func (userStore *UserStore) IsBoardAccessed(uid uint, bid uint) (isAccessed bool, err error) {
 	result := userStore.db.Table("users").
 		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
@@ -199,6 +331,21 @@ func (userStore *UserStore) IsBoardAccessed(uid uint, bid uint) (isAccessed bool
 		Joins("JOIN boards ON teams.t_id = boards.t_id").
 		Where("users.uid = ? AND boards.b_id = ?", uid, bid).
 		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+		return
+	}
+
+	result = userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+		Where("users.uid = ? AND boards.b_id = ?", uid, bid).
+		Select("boards.b_id").Find(&models.Board{})
 	err = result.Error
 	if err != nil {
 		return
@@ -227,6 +374,22 @@ func (userStore *UserStore) IsCardListAccessed(uid uint, clid uint) (isAccessed 
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
+		return
+	}
+
+	result = userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+		Joins("JOIN card_lists ON card_lists.b_id = boards.b_id").
+		Where("users.uid = ? AND card_lists.cl_id = ?", uid, clid).
+		Select("boards.b_id").Find(&models.Board{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
 	} else {
 		err = customErrors.ErrNoAccess
 	}
@@ -248,6 +411,41 @@ func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool,
 
 	if result.RowsAffected > 0 {
 		isAccessed = true
+		return
+	}
+
+	result = userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Where("users.uid = ? AND cards.c_id = ?", uid, cid).
+		Select("boards.b_id").Find(&models.Board{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCardAssigned(uid uint, cid uint) (isAssigned bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_cards ON users_cards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN cards ON users_cards.card_c_id = cards.c_id").
+		Where("users.uid = ? AND cards.c_id = ?", uid, cid).
+		Select("cards.c_id").Find(&models.Card{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAssigned = true
 	} else {
 		err = customErrors.ErrNoAccess
 	}
@@ -257,6 +455,86 @@ func (userStore *UserStore) IsCardAccessed(uid uint, cid uint) (isAccessed bool,
 func (userStore *UserStore) IsCommentAccessed(uid uint, cmid uint) (isAccessed bool, err error) {
 	result := userStore.db.Where("cm_id = ? AND uid = ?", cmid, uid).Find(&models.Comment{})
 
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCheckListAccessed(uid uint, chlid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
+		Where("users.uid = ? AND check_lists.chl_id = ?", uid, chlid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+		return
+	}
+
+	result = userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
+		Where("users.uid = ? AND check_lists.chl_id = ?", uid, chlid).
+		Select("boards.b_id").Find(&models.Board{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+	} else {
+		err = customErrors.ErrNoAccess
+	}
+	return
+}
+
+func (userStore *UserStore) IsCheckListItemAccessed(uid uint, chliid uint) (isAccessed bool, err error) {
+	result := userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
+		Joins("JOIN check_list_items ON check_list_items.chl_id = check_lists.chl_id").
+		Where("users.uid = ? AND check_list_items.chli_id = ?", uid, chliid).
+		Select("teams.t_id").Find(&models.Team{})
+	err = result.Error
+	if err != nil {
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		isAccessed = true
+		return
+	}
+
+	result = userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+		Joins("JOIN cards ON cards.b_id = boards.b_id").
+		Joins("JOIN check_lists ON check_lists.c_id = cards.c_id").
+		Joins("JOIN check_list_items ON check_list_items.chl_id = check_lists.chl_id").
+		Where("users.uid = ? AND check_list_items.chli_id = ?", uid, chliid).
+		Select("boards.b_id").Find(&models.Board{})
 	err = result.Error
 	if err != nil {
 		return
