@@ -60,7 +60,7 @@ func InitSettings() (settings Settings) {
 		fmt.Printf("%+v\n", err)
 	}
 
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("./cmd/api")
 	viper.SetConfigName("config")
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("%+v\n", err)
@@ -75,9 +75,9 @@ func InitSettings() (settings Settings) {
 		CardListsURL:      viper.GetString("url.card_lists_url"),
 		CardsURL:          viper.GetString("url.cards_url"),
 		CommentsURL:       viper.GetString("url.comments_url"),
-		CheckListsURL:     viper.GetString("url.check_lists"),
-		CheckListItemsURL: viper.GetString("url.check_list_items"),
-		UserSearchURL:     viper.GetString("url.user_search"),
+		CheckListsURL:     viper.GetString("url.check_lists_url"),
+		CheckListItemsURL: viper.GetString("url.check_list_items_url"),
+		UserSearchURL:     viper.GetString("url.user_search_url"),
 
 		ServerAddress:         viper.GetString("server_address"),
 		SessionServiceAddress: viper.GetString("session_service_address"),

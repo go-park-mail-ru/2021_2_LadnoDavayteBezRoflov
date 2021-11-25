@@ -30,6 +30,12 @@ func InitSettings() (settings Settings) {
 		fmt.Printf("%+v\n", err)
 	}
 
+	viper.AddConfigPath("./cmd/email")
+	viper.SetConfigName("config")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("%+v\n", err)
+	}
+
 	settings = Settings{
 		MailHost:     viper.GetString("mail.host"),
 		MailPort:     viper.GetInt("mail.port"),
