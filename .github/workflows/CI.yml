@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Lint Go Code
-        run: export PATH=$PATH:$(go env GOPATH)/bin; go install golang.org/x/lint/golint; go get -a; make lint
+        run: export PATH=$PATH:$(go env GOPATH)/bin; go install golang.org/x/lint/golint; go mod tidy; make lint
 
 #      - name: Run golangci-lint
 #        uses: golangci/golangci-lint-action@v2.5.2
