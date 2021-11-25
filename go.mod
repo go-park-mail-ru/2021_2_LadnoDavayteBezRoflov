@@ -66,6 +66,10 @@ require (
 )
 
 require (
+	github.com/gin-contrib/expvar v0.0.1 // indirect
+	github.com/streadway/amqp v1.0.0 // indirect
+	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
+	golang.org/x/net v0.0.0-20211118161319-6a13c67c3ce4 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect

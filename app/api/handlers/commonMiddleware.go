@@ -3,6 +3,7 @@ package handlers
 import (
 	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/logger"
+	"expvar"
 	"strings"
 	"time"
 
@@ -17,10 +18,11 @@ type CommonMiddleware interface {
 
 type CommonMiddlewareImpl struct {
 	logger logger.Logger
+	hits   *expvar.Map
 }
 
-func CreateCommonMiddleware(logger logger.Logger) CommonMiddleware {
-	return &CommonMiddlewareImpl{logger: logger}
+func CreateCommonMiddleware(logger logger.Logger, hits *expvar.Map) CommonMiddleware {
+	return &CommonMiddlewareImpl{logger: logger, hits: hits}
 }
 
 func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
@@ -30,6 +32,7 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 		path := c.Request.URL.Path
 		raw := c.Request.URL.RawQuery
 
+		middleware.hits.Add(path, 1)
 		if raw != "" {
 			path = strings.Join([]string{path, "?", raw}, "; ")
 		}
