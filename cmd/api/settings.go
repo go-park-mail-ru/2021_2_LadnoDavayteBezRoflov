@@ -25,7 +25,7 @@ type Settings struct {
 
 	ServerAddress         string `mapstructure:"server_address"`
 	SessionServiceAddress string `mapstructure:"session_service_address"`
-  RabbitMQAddress       string `mapstructure:"rabbitmq_address"`
+	RabbitMQAddress       string `mapstructure:"rabbitmq_address"`
 
 	QueueName string `mapstructure:"queue_name"`
 
@@ -81,9 +81,9 @@ func InitSettings() (settings Settings) {
 
 		ServerAddress:         viper.GetString("server_address"),
 		SessionServiceAddress: viper.GetString("session_service_address"),
-    RabbitMQAddress:       "amqp://guest:guest@rabbitmq:5672/",
+		RabbitMQAddress:       viper.GetString("rabbitmq_address"),
 
-		QueueName: "queue",
+		QueueName: viper.GetString("queue"),
 
 		Origins: []string{
 			"http://localhost:8000",

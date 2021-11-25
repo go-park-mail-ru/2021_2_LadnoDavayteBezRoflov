@@ -1,6 +1,10 @@
 server_address: ':8000'
 session_service_address: 'session:8081'
 
+rabbitmq_address: 'amqp://guest:guest@rabbitmq:5672/'
+
+queue_name: 'queue'
+
 url: {
   root_url:             '/api',
   session_url:          '/sessions',
