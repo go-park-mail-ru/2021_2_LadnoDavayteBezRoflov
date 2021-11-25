@@ -26,11 +26,13 @@ jobs:
 #      - name: Lint Go Code
 #        run: export PATH=$PATH:$(go env GOPATH)/bin; go install golang.org/x/lint/golint; go mod tidy; make lint
 
-      - name: golangci-lint
+      - name: Set up linter
         run: sudo apt-get update;
           sudo apt-get install libwebp-dev;
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.43.0;
-          golangci-lint run
+
+      - name: golangci-lint
+        run: golangci-lint run
 
       - name: golangci-lint-dog
         uses: reviewdog/action-golangci-lint@v2
