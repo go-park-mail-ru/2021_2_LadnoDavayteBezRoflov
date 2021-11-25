@@ -1,5 +1,19 @@
 version: "3"
-services: 
+services:
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        container_name: 'rabbitmq'
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - $PWD/rabbitmq/data/:/var/lib/rabbitmq/
+            - $PWD/rabbitmq/log/:/var/log/rabbitmq
+        healthcheck:
+            test: rabbitmq-diagnostics -q ping
+            interval: 30s
+            timeout: 30s
+            retries: 3
 
     redis:
         image: "redis:alpine"
@@ -38,6 +52,28 @@ services:
             timeout: 10s
             retries: 5
 
+    email:
+        build:
+            context: .
+            dockerfile: ./Dockerfile-email
+        container_name: "2021_2_LadnoDavayteBezRoflov_Email"
+        ports:
+            - "8082:8082"
+        expose:
+            - "8082"
+        volumes:
+            - ./:/email
+        restart: on-failure
+        depends_on:
+            - rabbitmq
+        links:
+            - "rabbitmq:rabbitmq"
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost:8082" ]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+
     session:
         environment:
             - REDIS_PORT=6380
@@ -57,7 +93,7 @@ services:
         links:
             - "redis:redis"
         healthcheck:
-            test: [ "CMD", "curl", "-f", "http://localhost:8089" ]
+            test: [ "CMD", "curl", "-f", "http://localhost:8081" ]
             interval: 30s
             timeout: 10s
             retries: 5
@@ -91,6 +127,7 @@ services:
         links:
             - "postgres:db"
             - "session:session"
+            - "rabbitmq:rabbitmq"
 
 volumes:
     api:

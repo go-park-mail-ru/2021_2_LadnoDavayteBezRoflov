@@ -40,7 +40,7 @@ func (checkListHandler *CheckListHandler) GetCheckList(c *gin.Context) {
 		return
 	}
 
-	chlid64 := c.Param("cid")
+	chlid64 := c.Param("chlid")
 	chlid, err := strconv.ParseUint(chlid64, 10, 32)
 	if err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
