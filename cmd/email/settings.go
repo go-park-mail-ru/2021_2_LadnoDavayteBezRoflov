@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	envParser "github.com/caarlos0/env"
+	"github.com/spf13/viper"
 )
 
 type Settings struct {
@@ -30,16 +31,16 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
-		MailHost:     "smtp.mail.ru",
-		MailPort:     587,
-		MailUsername: "brrrello-notify@mail.ru",
-		MailPassword: "B1GmLskQvzhubYNKxKq0",
+		MailHost:     viper.GetString("mail.host"),
+		MailPort:     viper.GetInt("mail.port"),
+		MailUsername: viper.GetString("mail.username"),
+		MailPassword: viper.GetString("mail.password"),
 
 		LogFilePath: env.EMAIL_LOG_LOCATION,
 
-		RabbitMQPath: "amqp://guest:guest@rabbitmq:5672/",
-		QueueName:    "queue",
-		ConsumerName: "consumer",
+		RabbitMQPath: viper.GetString("rabbitmq_path"),
+		QueueName:    viper.GetString("queue_name"),
+		ConsumerName: viper.GetString("consumer_name"),
 	}
 
 	return

@@ -6,37 +6,39 @@ import (
 
 	envParser "github.com/caarlos0/env"
 	"github.com/gin-contrib/cors"
+
+	"github.com/spf13/viper"
 )
 
 type Settings struct {
-	RootURL           string
-	SessionURL        string
-	ProfileURL        string
-	TeamsURL          string
-	BoardsURL         string
-	CardListsURL      string
-	CardsURL          string
-	CommentsURL       string
-	CheckListsURL     string
-	CheckListItemsURL string
-	UserSearchURL     string
+	RootURL           string `mapstructure:"root_url"`
+	SessionURL        string `mapstructure:"session_url"`
+	ProfileURL        string `mapstructure:"profile_url"`
+	TeamsURL          string `mapstructure:"teams_url"`
+	BoardsURL         string `mapstructure:"boards_url"`
+	CardListsURL      string `mapstructure:"card_lists_url"`
+	CardsURL          string `mapstructure:"cards_url"`
+	CommentsURL       string `mapstructure:"comments_url"`
+	CheckListsURL     string `mapstructure:"check_lists_url"`
+	CheckListItemsURL string `mapstructure:"check_list_items_url"`
+	UserSearchURL     string `mapstructure:"user_search_url"`
 
-	ServerAddress         string
-	SessionServiceAddress string
-	RabbitMQAddress       string
+	ServerAddress         string `mapstructure:"server_address"`
+	SessionServiceAddress string `mapstructure:"session_service_address"`
+	RabbitMQAddress       string `mapstructure:"rabbitmq_address"`
 
-	QueueName string
+	QueueName string `mapstructure:"queue_name"`
 
 	Origins        []string
-	AllowedMethods []string
+	AllowedMethods []string `mapstructure:"allowed_methods"`
 
-	SessionCookieLifeTimeInDays time.Duration
+	SessionCookieLifeTimeInDays time.Duration `mapstructure:"session_cookie_life_time_in_days"`
 
 	corsConfig cors.Config
 
 	LogFilePath       string
 	AvatarsPath       string
-	DefaultAvatarName string
+	DefaultAvatarName string `mapstructure:"default_avatar_name"`
 
 	PostgresDsn string
 }
@@ -58,48 +60,48 @@ func InitSettings() (settings Settings) {
 		fmt.Printf("%+v\n", err)
 	}
 
+	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("%+v\n", err)
+	}
+
 	settings = Settings{
-		RootURL:           "/api",
-		SessionURL:        "/sessions",
-		ProfileURL:        "/profile",
-		TeamsURL:          "/teams",
-		BoardsURL:         "/boards",
-		CardListsURL:      "/cardLists",
-		CardsURL:          "/cards",
-		CommentsURL:       "/comments",
-		CheckListsURL:     "/checkLists",
-		CheckListItemsURL: "/checkListItems",
-		UserSearchURL:     "/usersearch",
+		RootURL:           viper.GetString("url.root_url"),
+		SessionURL:        viper.GetString("url.session_url"),
+		ProfileURL:        viper.GetString("url.profile_url"),
+		TeamsURL:          viper.GetString("url.teams_url"),
+		BoardsURL:         viper.GetString("url.boards_url"),
+		CardListsURL:      viper.GetString("url.card_lists_url"),
+		CardsURL:          viper.GetString("url.cards_url"),
+		CommentsURL:       viper.GetString("url.comments_url"),
+		CheckListsURL:     viper.GetString("url.check_lists"),
+		CheckListItemsURL: viper.GetString("url.check_list_items"),
+		UserSearchURL:     viper.GetString("url.user_search"),
 
-		ServerAddress:         ":8000",
-		SessionServiceAddress: "session:8081",
-		RabbitMQAddress:       "amqp://guest:guest@rabbitmq:5672/",
+		ServerAddress:         viper.GetString("server_address"),
+		SessionServiceAddress: viper.GetString("session_service_address"),
+		RabbitMQAddress:       viper.GetString("rabbitmq_address"),
 
-		QueueName: "queue",
+		QueueName: viper.GetString("queue"),
 
 		Origins: []string{
 			"http://localhost:8000",
 			fmt.Sprintf("http://%s", env.FRONTEND_ADDRESS),
 		},
-		AllowedMethods: []string{
-			"GET",
-			"POST",
-			"PUT",
-			"DELETE",
-			"OPTIONS",
-		},
 
-		SessionCookieLifeTimeInDays: 3,
+		AllowedMethods: viper.GetStringSlice("allowed_methods"),
+
+		SessionCookieLifeTimeInDays: viper.GetDuration("session_cookie_life_time_in_days"),
 
 		corsConfig: cors.DefaultConfig(),
 
 		LogFilePath:       env.LOG_LOCATION,
 		AvatarsPath:       env.FRONTEND_PATH,
-		DefaultAvatarName: "default_user_picture.webp",
+		DefaultAvatarName: viper.GetString("default_avatar_name"),
 
 		PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),
 	}
-
 	settings.corsConfig.AllowOrigins = settings.Origins
 	settings.corsConfig.AllowCredentials = true
 

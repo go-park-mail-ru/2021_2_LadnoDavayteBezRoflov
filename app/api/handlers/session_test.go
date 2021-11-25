@@ -1,262 +1,198 @@
 package handlers
 
-//
-//type status struct {
-//	StatusDescription string `json:"status"`
-//}
-//
-//type errorResponse struct {
-//	ErrDescription string `json:"error"`
-//}
-//
-//var (
-//	rootURL    = "/api"
-//	sessionURL = "/sessions"
-//
-//	data, _     = utils.FillTestData(10, 3, 100)
-//	router      = gin.New()
-//	routerGroup = router.Group(rootURL)
-//	sessionRepo = stores.CreateSessionRepository(data)
-//
-//	notExpectedErrStatus      = http.StatusNotFound
-//	testsCreateSessionHandler = []struct {
-//		testName   string
-//		methodType string
-//	}{
-//		{
-//			testName:   "POST request",
-//			methodType: "POST",
-//		},
-//		{
-//			testName:   "GET request",
-//			methodType: "GET",
-//		},
-//		{
-//			testName:   "DELETE request",
-//			methodType: "DELETE",
-//		},
-//	}
-//
-//	testsCreateSessionFail = []struct {
-//		testName      string
-//		body          *bytes.Reader
-//		expectedError string
-//	}{
-//		{
-//			testName:      "not json",
-//			body:          bytes.NewReader([]byte(`{"someWrongData"}`)),
-//			expectedError: customErrors.ErrBadRequest.Error(),
-//		},
-//		{
-//			testName:      "not user json",
-//			body:          bytes.NewReader([]byte(`{"name": "Anthony", "title": "qwerty"}`)),
-//			expectedError: customErrors.ErrBadInputData.Error(),
-//		},
-//		{
-//			testName:      "invalid user data",
-//			body:          bytes.NewReader([]byte(`{"login": "РусскийЛогин", "password": "qwerty"}`)),
-//			expectedError: customErrors.ErrBadInputData.Error(),
-//		},
-//		{
-//			testName:      "user don't exist",
-//			body:          bytes.NewReader([]byte(`{"login": "AnthonyChum", "password": "qwerty"}`)),
-//			expectedError: customErrors.ErrBadInputData.Error(),
-//		},
-//	}
-//)
-//
-//func TestMain(m *testing.M) {
-//	CreateSessionHandler(routerGroup, sessionURL, sessionRepo)
-//	CreateUserHandler(routerGroup, userURL, userRepo, sessionRepo)
-//	CreateBoardHandler(routerGroup, boardURL, boardRepo, sessionRepo)
-//
-//	code := m.Run()
-//	os.Exit(code)
-//}
-//
-//func TestCreateSessionHandler(t *testing.T) {
-//	t.Parallel()
-//
-//	for _, tt := range testsCreateSessionHandler {
-//		tt := tt
-//		t.Run(tt.testName, func(t *testing.T) {
-//			t.Parallel()
-//
-//			request, _ := http.NewRequest(tt.methodType, rootURL+sessionURL, nil)
-//			writer := httptest.NewRecorder()
-//
-//			router.ServeHTTP(writer, request)
-//
-//			require.NotEqual(t, notExpectedErrStatus, writer.Code)
-//		})
-//	}
-//}
-//
-//func TestSessionHandlerCreateSuccess(t *testing.T) {
-//	t.Parallel()
-//
-//	newUser := &models.User{}
-//	err := faker.FakeData(newUser)
-//	if err != nil {
-//		t.Error(err)
-//	}
-//
-//	data.Mu.RLock()
-//	usersAmount := len(data.Users)
-//	data.Mu.RUnlock()
-//
-//	newUser.UID = uint(usersAmount + 1)
-//
-//	data.Mu.Lock()
-//	data.Users[newUser.Login] = *newUser
-//	data.Mu.Unlock()
-//
-//	jsonNewUser, _ := json.Marshal(newUser)
-//
-//	body := bytes.NewReader(jsonNewUser)
-//	request, _ := http.NewRequest("POST", rootURL+sessionURL, body)
-//	writer := httptest.NewRecorder()
-//	expectedStatus := status{StatusDescription: "you are logged in"}
-//
-//	router.ServeHTTP(writer, request)
-//
-//	if writer.Code != http.StatusOK {
-//		t.Error("status is not ok")
-//	}
-//
-//	returnedStatus := &status{}
-//	err = json.Unmarshal(writer.Body.Bytes(), returnedStatus)
-//	if err != nil {
-//		t.Error(err)
-//	}
-//
-//	require.Equal(t, expectedStatus.StatusDescription, returnedStatus.StatusDescription)
-//}
-//
-//func TestSessionHandlerCreateFail(t *testing.T) {
-//	t.Parallel()
-//
-//	for _, tt := range testsCreateSessionFail {
-//		tt := tt
-//		t.Run(tt.testName, func(t *testing.T) {
-//			t.Parallel()
-//
-//			request, _ := http.NewRequest("POST", rootURL+sessionURL, tt.body)
-//			writer := httptest.NewRecorder()
-//
-//			router.ServeHTTP(writer, request)
-//
-//			returnedErr := &errorResponse{}
-//			err := json.Unmarshal(writer.Body.Bytes(), returnedErr)
-//			if err != nil {
-//				t.Error(err)
-//			}
-//
-//			require.Equal(t, tt.expectedError, returnedErr.ErrDescription)
-//		})
-//	}
-//}
-//
-//func TestSessionHandlerGetSuccess(t *testing.T) {
-//	t.Parallel()
-//
-//	user := utils.GetSomeUser(data)
-//	SID := strconv.Itoa(int(user.UID + 1))
-//
-//	data.Mu.Lock()
-//	data.Sessions[SID] = user.UID
-//	data.Mu.Unlock()
-//
-//	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
-//	cookie := &http.Cookie{
-//		Name:  "session_id",
-//		Value: SID,
-//	}
-//	request.AddCookie(cookie)
-//	writer := httptest.NewRecorder()
-//	router.ServeHTTP(writer, request)
-//
-//	if writer.Code != http.StatusOK {
-//		t.Error("status is not ok")
-//	}
-//
-//	reflect.DeepEqual(user.Login, writer.Body.String())
-//}
-//
-//func TestSessionHandlerGetFailNoCookie(t *testing.T) {
-//	t.Parallel()
-//
-//	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
-//	writer := httptest.NewRecorder()
-//	router.ServeHTTP(writer, request)
-//
-//	require.Equal(t, http.StatusUnauthorized, writer.Code)
-//}
-//
-//func TestSessionHandlerGetFailNoLogin(t *testing.T) {
-//	t.Parallel()
-//
-//	user := utils.GetSomeUser(data)
-//	SID := strconv.Itoa(int(user.UID + 1))
-//
-//	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
-//	cookie := &http.Cookie{
-//		Name:  "session_id",
-//		Value: SID,
-//	}
-//	request.AddCookie(cookie)
-//	writer := httptest.NewRecorder()
-//	router.ServeHTTP(writer, request)
-//
-//	require.Equal(t, http.StatusUnauthorized, writer.Code)
-//}
-//
-//func TestSessionHandlerDeleteSuccess(t *testing.T) {
-//	t.Parallel()
-//
-//	user := utils.GetSomeUser(data)
-//	SID := strconv.Itoa(int(user.UID + 1))
-//
-//	data.Mu.Lock()
-//	data.Sessions[SID] = user.UID
-//	data.Mu.Unlock()
-//
-//	request, _ := http.NewRequest("GET", rootURL+sessionURL, nil)
-//	cookie := &http.Cookie{
-//		Name:  "session_id",
-//		Value: SID,
-//	}
-//	request.AddCookie(cookie)
-//	writer := httptest.NewRecorder()
-//	router.ServeHTTP(writer, request)
-//
-//	require.Equal(t, http.StatusOK, writer.Code)
-//}
-//
-//func TestSessionHandlerDeleteFailNoCookie(t *testing.T) {
-//	t.Parallel()
-//
-//	request, _ := http.NewRequest("DELETE", rootURL+sessionURL, nil)
-//	writer := httptest.NewRecorder()
-//	router.ServeHTTP(writer, request)
-//
-//	require.Equal(t, http.StatusUnauthorized, writer.Code)
-//}
-//
-//func TestSessionHandlerDeleteFailNoSession(t *testing.T) {
-//	t.Parallel()
-//
-//	user := utils.GetSomeUser(data)
-//	SID := strconv.Itoa(int(user.UID + 1))
-//
-//	request, _ := http.NewRequest("DELETE", rootURL+sessionURL, nil)
-//	cookie := &http.Cookie{
-//		Name:  "session_id",
-//		Value: SID,
-//	}
-//	request.AddCookie(cookie)
-//	writer := httptest.NewRecorder()
-//	router.ServeHTTP(writer, request)
-//
-//	require.Equal(t, http.StatusUnauthorized, writer.Code)
-//}
+import (
+	"backendServer/app/api/models"
+	"backendServer/app/api/usecases/mocks"
+	"backendServer/pkg/closer"
+	customErrors "backendServer/pkg/errors"
+	zapLogger "backendServer/pkg/logger"
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/golang/mock/gomock"
+
+	"github.com/bxcodec/faker/v3"
+	"github.com/gin-gonic/gin"
+)
+
+func TestCreateSession(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	useCaseMock := mocks.NewMockSessionUseCase(ctrl)
+
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	var logger zapLogger.Logger
+	logger.InitLogger("./logs.log")
+	everythingCloser := closer.CreateCloser(&logger)
+	defer everythingCloser.Close(logger.Sync)
+	commonMW := CreateCommonMiddleware(logger)
+	router.Use(commonMW.Logger())
+	mw := CreateSessionMiddleware(useCaseMock)
+	api := router.Group("/api")
+	CreateSessionHandler(api, "/sessions", useCaseMock, mw)
+
+	testUser := new(models.User)
+	err := faker.FakeData(testUser)
+	assert.NoError(t, err)
+
+	body, err := json.Marshal(testUser)
+
+	// success
+	useCaseMock.EXPECT().Create(testUser).Return("testSid", nil)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/sessions", bytes.NewBuffer(body))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// can't bind json
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("POST", "/api/sessions", bytes.NewBuffer(body[:1]))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// not authorized
+	useCaseMock.EXPECT().Create(testUser).Return("", customErrors.ErrUserNotFound)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("POST", "/api/sessions", bytes.NewBuffer(body))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+func TestGetSession(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	useCaseMock := mocks.NewMockSessionUseCase(ctrl)
+
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	var logger zapLogger.Logger
+	logger.InitLogger("./logs.log")
+	everythingCloser := closer.CreateCloser(&logger)
+	defer everythingCloser.Close(logger.Sync)
+
+	commonMW := CreateCommonMiddleware(logger)
+	router.Use(commonMW.Logger())
+	mw := CreateSessionMiddleware(useCaseMock)
+	api := router.Group("/api")
+	CreateSessionHandler(api, "/sessions", useCaseMock, mw)
+
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: "1",
+	}
+
+	testUID := uint(1)
+	testLogin := "login"
+
+	// success
+	useCaseMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
+	useCaseMock.EXPECT().Get(cookie.Value).Return(testLogin, nil)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/sessions", nil)
+	req.AddCookie(cookie)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// not authorized
+	useCaseMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
+	useCaseMock.EXPECT().Get(cookie.Value).Return("", customErrors.ErrNotAuthorized)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/api/sessions", nil)
+	req.AddCookie(cookie)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// session not found
+	useCaseMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/api/sessions", nil)
+	req.AddCookie(cookie)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+func TestDeleteSession(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	useCaseMock := mocks.NewMockSessionUseCase(ctrl)
+
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	var logger zapLogger.Logger
+	logger.InitLogger("./logs.log")
+	everythingCloser := closer.CreateCloser(&logger)
+	defer everythingCloser.Close(logger.Sync)
+
+	commonMW := CreateCommonMiddleware(logger)
+	router.Use(commonMW.Logger())
+	mw := CreateSessionMiddleware(useCaseMock)
+	api := router.Group("/api")
+	CreateSessionHandler(api, "/sessions", useCaseMock, mw)
+
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: "1",
+	}
+
+	csrfToken := &http.Cookie{
+		Name:  "csrf_token",
+		Value: "1",
+	}
+
+	testUID := uint(1)
+
+	// success
+	useCaseMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
+	useCaseMock.EXPECT().Delete(cookie.Value).Return(nil)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/api/sessions", nil)
+	req.AddCookie(cookie)
+	req.AddCookie(csrfToken)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// not authorized
+	useCaseMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
+	useCaseMock.EXPECT().Delete(cookie.Value).Return(customErrors.ErrNotAuthorized)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("DELETE", "/api/sessions", nil)
+	req.AddCookie(cookie)
+	req.AddCookie(csrfToken)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// session not found
+	useCaseMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("DELETE", "/api/sessions", nil)
+	req.AddCookie(cookie)
+	req.AddCookie(csrfToken)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}

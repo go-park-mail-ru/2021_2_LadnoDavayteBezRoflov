@@ -1,0 +1,31 @@
+server_address: ':8000'
+session_service_address: 'session:8081'
+
+rabbitmq_address: 'amqp://guest:guest@rabbitmq:5672/'
+
+queue_name: 'queue'
+
+url: {
+  root_url:             '/api',
+  session_url:          '/sessions',
+  profile_url:          '/profile',
+  teams_url:            '/teams',
+  boards_url:           '/boards',
+  card_lists_url:       '/cardLists',
+  cards_url:            '/cards',
+  comments_url:         '/comments',
+  check_lists_url:      '/checkLists',
+  check_list_items_url: '/checkListItems',
+  user_search_url:      '/usersearch'
+}
+
+allowed_methods:
+  - 'GET'
+  - 'POST'
+  - 'PUT'
+  - 'DELETE'
+  - 'OPTIONS'
+
+session_cookie_life_time_in_days: 3
+
+default_avatar_name: "default_user_picture.webp"
