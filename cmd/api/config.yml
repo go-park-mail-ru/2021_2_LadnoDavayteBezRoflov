@@ -1,13 +1,13 @@
 server_address: ':8000'
 
 url: {
-  root_url:      '/api',
-  session_url:   '/sessions',
-  profile_url:   '/profile',
-  boards_url:    '/boards',
+  root_url:       '/api',
+  session_url:    '/sessions',
+  profile_url:    '/profile',
+  boards_url:     '/boards',
   card_lists_url: '/cardLists',
-  cards_url:     '/cards',
-  comments_url:  '/comments'
+  cards_url:      '/cards',
+  comments_url:   '/comments'
 }
 
 allowed_methods:
@@ -17,7 +17,7 @@ allowed_methods:
   - 'DELETE'
   - 'OPTIONS'
 
-session_cookie_life_time_in_days: 72h
+session_cookie_life_time_in_days: 3
 
 default_avatar_name: "default_user_picture.webp"
 
