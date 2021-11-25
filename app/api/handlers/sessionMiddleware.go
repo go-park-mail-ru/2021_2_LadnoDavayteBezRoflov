@@ -40,21 +40,6 @@ func (middleware *SessionMiddlewareImpl) CheckAuth() gin.HandlerFunc {
 			return
 		}
 
-		//if sessionCookieController.IsSessionCookieExpiresSoon(session) {
-		//	fmt.Println("TEST")
-		//	err := middleware.sessionUseCase.AddTime(sid, uint(sessionCookieController.SessionCookieLifeTimeInHours))
-		//	if err != nil {
-		//		_ = c.Error(err)
-		//		return
-		//	}
-		//
-		//	// sessionCookieController.SetSessionCookieExpired(session)
-		//	// http.SetCookie(c.Writer, session)
-		//
-		//	sessionCookieController.UpdateSessionCookieExpires(session)
-		//	http.SetCookie(c.Writer, session)
-		//}
-
 		c.Set("uid", uid)
 		c.Set("sid", sid)
 	}
