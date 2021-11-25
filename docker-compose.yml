@@ -124,7 +124,6 @@ services:
         depends_on:
             - postgres
             - session
-            - rabbitmq
         links:
             - "postgres:db"
             - "session:session"
