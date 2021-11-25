@@ -32,7 +32,7 @@ func InitSettings() (settings Settings) {
 
 	settings = Settings{
 		MailHost:     viper.GetString("mail.host"),
-		MailPort:     viper.GetString("mail.port"),
+		MailPort:     viper.GetInt("mail.port"),
 		MailUsername: viper.GetString("mail.username"),
 		MailPassword: viper.GetString("mail.password"),
 
