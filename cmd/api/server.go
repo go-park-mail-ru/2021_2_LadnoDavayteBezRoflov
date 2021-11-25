@@ -9,7 +9,8 @@ import (
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
 	"backendServer/pkg/sessionCookieController"
-	exp "expvar"
+
+	"github.com/penglongli/gin-metrics/ginmetrics"
 
 	"github.com/gin-contrib/expvar"
 
@@ -28,8 +29,6 @@ import (
 type Server struct {
 	settings Settings
 }
-
-var hits = exp.NewMap("hits")
 
 func CreateServer() *Server {
 	settings := InitSettings()
@@ -132,12 +131,19 @@ func (server *Server) Run() {
 	userSearchUseCase := impl.CreateUserSearchUseCase(userRepo, cardRepo, teamRepo, boardRepo)
 
 	// Middlewares
-	commonMiddleware := handlers.CreateCommonMiddleware(logger, hits)
+	commonMiddleware := handlers.CreateCommonMiddleware(logger)
 	sessionMiddleware := handlers.CreateSessionMiddleware(sessionUseCase)
 
 	router.Use(commonMiddleware.Logger())
 	router.Use(gin.Recovery())
 	router.Use(cors.New(server.settings.corsConfig))
+
+	// get global Monitor object
+	monitor := ginmetrics.GetMonitor()
+	monitor.SetMetricPath("/metrics")
+	monitor.SetSlowTime(10)
+	monitor.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})
+	monitor.Use(router)
 
 	// Handlers
 	router.NoRoute(handlers.NoRouteHandler)

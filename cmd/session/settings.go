@@ -28,6 +28,12 @@ func InitSettings() (settings Settings) {
 		fmt.Printf("%+v\n", err)
 	}
 
+	viper.AddConfigPath("./cmd/session")
+	viper.SetConfigName("config")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("%+v\n", err)
+	}
+
 	settings = Settings{
 		ServiceProtocol: viper.GetString("service_protocol"),
 		ServicePort:     viper.GetString("service_port"),
