@@ -3,7 +3,7 @@ package handlers
 import (
 	"backendServer/app/api/models"
 	"backendServer/app/api/usecases"
-	"backendServer/pkg/errors"
+	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/sessionCookieController"
 	"net/http"
 
