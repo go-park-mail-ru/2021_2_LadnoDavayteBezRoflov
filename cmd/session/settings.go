@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	envParser "github.com/caarlos0/env"
+<<<<<<< HEAD
 )
 
 type Settings struct {
@@ -13,6 +14,18 @@ type Settings struct {
 	LogFilePath string
 
 	RedisProtocol string
+=======
+	"github.com/spf13/viper"
+)
+
+type Settings struct {
+	ServiceProtocol string `mapstructure:"service_protocol"`
+	ServicePort     string `mapstructure:"service_port"`
+
+	LogFilePath string
+
+	RedisProtocol string `mapstructure:"redis_protocol"`
+>>>>>>> main
 	RedisPort     string
 }
 
@@ -28,12 +41,21 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
+<<<<<<< HEAD
 		ServiceProtocol: "tcp",
 		ServicePort:     "0.0.0.0:8081",
 
 		LogFilePath: env.SESSION_LOG_LOCATION,
 
 		RedisProtocol: "tcp",
+=======
+		ServiceProtocol: viper.GetString("service_protocol"),
+		ServicePort:     viper.GetString("service_port"),
+
+		LogFilePath: env.SESSION_LOG_LOCATION,
+
+		RedisProtocol: viper.GetString("redis_protocol"),
+>>>>>>> main
 		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
 	}
 
