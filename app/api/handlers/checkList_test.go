@@ -20,12 +20,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TestCreateBoard(t *testing.T) {
+func TestCreateCheckList(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
-	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
+	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -37,7 +37,7 @@ func TestCreateBoard(t *testing.T) {
 	router.Use(commonMW.Logger())
 	mw := CreateSessionMiddleware(sessionMock)
 	api := router.Group("/api")
-	CreateBoardHandler(api, "/boards", useCaseMock, mw)
+	CreateCheckListHandler(api, "/CheckLists", useCaseMock, mw)
 
 	cookie := &http.Cookie{
 		Name:  "session_id",
@@ -51,17 +51,17 @@ func TestCreateBoard(t *testing.T) {
 
 	testUID := uint(1)
 
-	testBoard := new(models.Board)
-	err := faker.FakeData(testBoard)
-	body, err := json.Marshal(testBoard)
+	testCheckList := new(models.CheckList)
+	err := faker.FakeData(testCheckList)
+	body, err := json.Marshal(testCheckList)
 	assert.NoError(t, err)
 
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().CreateBoard(testBoard).Return(testBoard.BID, nil)
+	useCaseMock.EXPECT().CreateCheckList(testCheckList).Return(testCheckList.CHLID, nil)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/boards", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/CheckLists", bytes.NewBuffer(body))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -72,7 +72,7 @@ func TestCreateBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("POST", "/api/boards", bytes.NewBuffer(body[:1]))
+	req, _ = http.NewRequest("POST", "/api/CheckLists", bytes.NewBuffer(body[:1]))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -83,7 +83,7 @@ func TestCreateBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("POST", "/api/boards", bytes.NewBuffer(body))
+	req, _ = http.NewRequest("POST", "/api/CheckLists", bytes.NewBuffer(body))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -92,10 +92,10 @@ func TestCreateBoard(t *testing.T) {
 
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().CreateBoard(testBoard).Return(uint(0), customErrors.ErrInternal)
+	useCaseMock.EXPECT().CreateCheckList(testCheckList).Return(uint(0), customErrors.ErrInternal)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("POST", "/api/boards", bytes.NewBuffer(body))
+	req, _ = http.NewRequest("POST", "/api/CheckLists", bytes.NewBuffer(body))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -103,12 +103,12 @@ func TestCreateBoard(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-func TestGetBoard(t *testing.T) {
+func TestGetCheckList(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
-	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
+	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -120,7 +120,7 @@ func TestGetBoard(t *testing.T) {
 	router.Use(commonMW.Logger())
 	mw := CreateSessionMiddleware(sessionMock)
 	api := router.Group("/api")
-	CreateBoardHandler(api, "/boards", useCaseMock, mw)
+	CreateCheckListHandler(api, "/CheckLists", useCaseMock, mw)
 
 	cookie := &http.Cookie{
 		Name:  "session_id",
@@ -134,18 +134,18 @@ func TestGetBoard(t *testing.T) {
 
 	testUID := uint(2)
 
-	testBoard := new(models.Board)
-	err := faker.FakeData(testBoard)
-	testBoard.BID = uint(2)
-	testBoard.BID = uint(2)
+	testCheckList := new(models.CheckList)
+	err := faker.FakeData(testCheckList)
+	testCheckList.CHLID = uint(2)
+	testCheckList.CID = uint(2)
 	assert.NoError(t, err)
 
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().GetBoard(testUID, testBoard.BID).Return(testBoard, nil)
+	useCaseMock.EXPECT().GetCheckList(testUID, testCheckList.CHLID).Return(testCheckList, nil)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/boards/2", nil)
+	req, _ := http.NewRequest("GET", "/api/CheckLists/2", nil)
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -156,7 +156,7 @@ func TestGetBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", "/api/boards/test", nil)
+	req, _ = http.NewRequest("GET", "/api/CheckLists/test", nil)
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -167,20 +167,33 @@ func TestGetBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", "/api/boards/2", nil)
+	req, _ = http.NewRequest("GET", "/api/CheckLists/2", nil)
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// fail
+	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
+	testCheckList.CHLID = uint(2)
+	useCaseMock.EXPECT().GetCheckList(testUID, testCheckList.CHLID).Return(nil, customErrors.ErrNoAccess)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/api/CheckLists/2", nil)
+	req.AddCookie(cookie)
+	req.AddCookie(csrfToken)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestDeleteBoard(t *testing.T) {
+func TestDeleteCheckList(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
-	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
+	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -192,7 +205,7 @@ func TestDeleteBoard(t *testing.T) {
 	router.Use(commonMW.Logger())
 	mw := CreateSessionMiddleware(sessionMock)
 	api := router.Group("/api")
-	CreateBoardHandler(api, "/boards", useCaseMock, mw)
+	CreateCheckListHandler(api, "/CheckLists", useCaseMock, mw)
 
 	cookie := &http.Cookie{
 		Name:  "session_id",
@@ -206,18 +219,17 @@ func TestDeleteBoard(t *testing.T) {
 
 	testUID := uint(3)
 
-	testBoard := new(models.Board)
-	err := faker.FakeData(testBoard)
-	testBoard.BID = uint(3)
-	testBoard.BID = uint(3)
+	testCheckList := new(models.CheckList)
+	err := faker.FakeData(testCheckList)
+	testCheckList.CHLID = uint(3)
 	assert.NoError(t, err)
 
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().DeleteBoard(testUID, testBoard.BID).Return(nil)
+	useCaseMock.EXPECT().DeleteCheckList(testUID, testCheckList.CHLID).Return(nil)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/api/boards/3", nil)
+	req, _ := http.NewRequest("DELETE", "/api/CheckLists/3", nil)
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -228,7 +240,7 @@ func TestDeleteBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("DELETE", "/api/boards/test", nil)
+	req, _ = http.NewRequest("DELETE", "/api/CheckLists/test", nil)
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -239,20 +251,32 @@ func TestDeleteBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("DELETE", "/api/boards/3", nil)
+	req, _ = http.NewRequest("DELETE", "/api/CheckLists/3", nil)
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// fail
+	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
+	useCaseMock.EXPECT().DeleteCheckList(testUID, testCheckList.CHLID).Return(customErrors.ErrNoAccess)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("DELETE", "/api/CheckLists/3", nil)
+	req.AddCookie(cookie)
+	req.AddCookie(csrfToken)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
-func TestUpdateBoard(t *testing.T) {
+func TestUpdateCheckList(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
-	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
+	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -264,7 +288,7 @@ func TestUpdateBoard(t *testing.T) {
 	router.Use(commonMW.Logger())
 	mw := CreateSessionMiddleware(sessionMock)
 	api := router.Group("/api")
-	CreateBoardHandler(api, "/boards", useCaseMock, mw)
+	CreateCheckListHandler(api, "/CheckLists", useCaseMock, mw)
 
 	cookie := &http.Cookie{
 		Name:  "session_id",
@@ -278,18 +302,18 @@ func TestUpdateBoard(t *testing.T) {
 
 	testUID := uint(4)
 
-	testBoard := new(models.Board)
-	err := faker.FakeData(testBoard)
-	body, err := json.Marshal(testBoard)
+	testCheckList := new(models.CheckList)
+	err := faker.FakeData(testCheckList)
+	body, err := json.Marshal(testCheckList)
 	assert.NoError(t, err)
 
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	testBoard.BID = uint(4)
-	useCaseMock.EXPECT().UpdateBoard(testUID, testBoard).Return(nil)
+	testCheckList.CHLID = uint(4)
+	useCaseMock.EXPECT().UpdateCheckList(testUID, testCheckList).Return(nil)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/api/boards/4", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/api/CheckLists/4", bytes.NewBuffer(body))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -300,7 +324,7 @@ func TestUpdateBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/test", bytes.NewBuffer(body))
+	req, _ = http.NewRequest("PUT", "/api/CheckLists/test", bytes.NewBuffer(body))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -311,7 +335,7 @@ func TestUpdateBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/4", bytes.NewBuffer(body))
+	req, _ = http.NewRequest("PUT", "/api/CheckLists/4", bytes.NewBuffer(body))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -320,11 +344,11 @@ func TestUpdateBoard(t *testing.T) {
 
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	testBoard.BID = uint(4)
-	useCaseMock.EXPECT().UpdateBoard(testUID, testBoard).Return(customErrors.ErrNoAccess)
+	testCheckList.CHLID = uint(4)
+	useCaseMock.EXPECT().UpdateCheckList(testUID, testCheckList).Return(customErrors.ErrNoAccess)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/4", bytes.NewBuffer(body))
+	req, _ = http.NewRequest("PUT", "/api/CheckLists/4", bytes.NewBuffer(body))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
@@ -335,106 +359,10 @@ func TestUpdateBoard(t *testing.T) {
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/4", bytes.NewBuffer(body[:1]))
+	req, _ = http.NewRequest("PUT", "/api/CheckLists/4", bytes.NewBuffer(body[:1]))
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-}
-
-func TestToggleUserBoard(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	sessionMock := mocks.NewMockSessionUseCase(ctrl)
-	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
-
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	var logger zapLogger.Logger
-	logger.InitLogger("./logs.log")
-	everythingCloser := closer.CreateCloser(&logger)
-	defer everythingCloser.Close(logger.Sync)
-	commonMW := CreateCommonMiddleware(logger)
-	router.Use(commonMW.Logger())
-	mw := CreateSessionMiddleware(sessionMock)
-	api := router.Group("/api")
-	CreateBoardHandler(api, "/boards", useCaseMock, mw)
-
-	cookie := &http.Cookie{
-		Name:  "session_id",
-		Value: "5",
-	}
-
-	csrfToken := &http.Cookie{
-		Name:  "csrf_token",
-		Value: "5",
-	}
-
-	testUID := uint(4)
-
-	testBoard := new(models.Board)
-	err := faker.FakeData(testBoard)
-	assert.NoError(t, err)
-
-	// success
-	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	testBoard.BID = uint(5)
-	toggledUserID := uint(5)
-	useCaseMock.EXPECT().ToggleUser(testUID, testBoard.BID, toggledUserID).Return(testBoard, nil)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/api/boards/5/toggleuser/5", nil)
-	req.AddCookie(cookie)
-	req.AddCookie(csrfToken)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	// ParseUint not parsing
-	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/5/toggleuser/test", nil)
-	req.AddCookie(cookie)
-	req.AddCookie(csrfToken)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	// ParseUint not parsing
-	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/test/toggleuser/5", nil)
-	req.AddCookie(cookie)
-	req.AddCookie(csrfToken)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	// not authorized
-	sessionMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
-
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/5/toggleuser/5", nil)
-	req.AddCookie(cookie)
-	req.AddCookie(csrfToken)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-
-	// fail
-	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	testBoard.BID = uint(5)
-	useCaseMock.EXPECT().ToggleUser(testUID, testBoard.BID, toggledUserID).Return(nil, customErrors.ErrNoAccess)
-
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("PUT", "/api/boards/5/toggleuser/5", nil)
-	req.AddCookie(cookie)
-	req.AddCookie(csrfToken)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusForbidden, w.Code)
 }
