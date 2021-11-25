@@ -1,11 +1,7 @@
 package main
 
 import (
-<<<<<<< HEAD
 	"backendServer/app/microservices/session/handler"
-=======
-	handler "backendServer/app/microservices/session/handler"
->>>>>>> main
 	handlerImpl "backendServer/app/microservices/session/handler/impl"
 	"backendServer/app/microservices/session/repository/store"
 	usecaseImpl "backendServer/app/microservices/session/usecase/impl"
