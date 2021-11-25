@@ -38,10 +38,6 @@ jobs:
         run: sudo apt-get install libwebp-dev; go clean -testcache; go test -cover ./...
 
       - name: Run Unit tests.
-          run: make test-coverage
-
-            - name: Upload Coverage report to CodeCov
-              uses: codecov/codecov-action@v1.0.0
-              with:
-                #token: ${{secrets.CODECOV_TOKEN}}
-                file: ./coverage.txt
+          run: |
+            CVPKG=$(go list ./... | grep -v mocks | tr '\n' ',')
+            go test -coverpkg=${CVPKG} -coverprofile=coverage.out -covermode=count  ./...
