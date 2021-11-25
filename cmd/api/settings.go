@@ -86,7 +86,7 @@ func InitSettings() (settings Settings) {
 
 		AllowedMethods: viper.GetStringSlice("allowed_methods"),
 
-		SessionCookieLifeTimeInDays: viper.GetNumber("session_cookie_life_time_in_days"),
+		SessionCookieLifeTimeInDays: viper.GetDuration("session_cookie_life_time_in_days"),
 
 		corsConfig: cors.DefaultConfig(),
 
