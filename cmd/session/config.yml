@@ -1,0 +1,5 @@
+service_protocol: 'tcp'
+
+service_port: '0.0.0.0:8081'
+
+redis_protocol: 'tcp'

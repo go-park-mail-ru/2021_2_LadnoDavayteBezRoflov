@@ -1,0 +1,10 @@
+mail: {
+  host:     'smtp.mail.ru',
+  port:     587,
+  username: 'brrrello-notify@mail.ru',
+  password: 'B1GmLskQvzhubYNKxKq0',
+}
+
+rabbitmq_path: 'amqp://guest:guest@rabbitmq:5672/'
+queue_name:    'queue'
+consumer_name: 'consumer'
