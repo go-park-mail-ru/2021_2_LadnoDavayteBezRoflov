@@ -4,6 +4,7 @@ url: {
   root_url:       '/api',
   session_url:    '/sessions',
   profile_url:    '/profile',
+  teams_url:      '/teams',
   boards_url:     '/boards',
   card_lists_url: '/cardLists',
   cards_url:      '/cards',

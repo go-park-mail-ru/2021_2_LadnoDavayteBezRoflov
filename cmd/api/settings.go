@@ -14,6 +14,7 @@ type Settings struct {
 	RootURL           string `mapstructure:"root_url"`
 	SessionURL        string `mapstructure:"session_url"`
 	ProfileURL        string `mapstructure:"profile_url"`
+    	TeamsURL          string `mapstructure:"teams_url"`
 	BoardsURL         string `mapstructure:"boards_url"`
 	CardListsURL      string `mapstructure:"card_lists_url"`
 	CardsURL          string `mapstructure:"cards_url"`
@@ -69,6 +70,7 @@ func InitSettings() (settings Settings) {
 		RootURL:           viper.GetString("url.root_url"),
 		SessionURL:        viper.GetString("url.session_url"),
 		ProfileURL:        viper.GetString("url.profile_url"),
+        	TeamsURL:          viper.GetString("url.teams_url"),
 		BoardsURL:         viper.GetString("url.boards_url"),
 		CardListsURL:      viper.GetString("url.card_lists_url"),
 		CardsURL:          viper.GetString("url.cards_url"),
