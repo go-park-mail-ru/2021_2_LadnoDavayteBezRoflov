@@ -5,6 +5,7 @@ import (
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/hasher"
+	"encoding/json"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -12,6 +13,8 @@ import (
 	"mime/multipart"
 	"os"
 	"strings"
+
+	"github.com/streadway/amqp"
 
 	_ "golang.org/x/image/bmp"
 
@@ -27,10 +30,12 @@ type UserStore struct {
 	db                *gorm.DB
 	avatarPath        string
 	defaultAvatarName string
+	channel           *amqp.Channel
+	queue             amqp.Queue
 }
 
-func CreateUserRepository(db *gorm.DB, avatarPath, defaultAvatarName string) repositories.UserRepository {
-	return &UserStore{db: db, avatarPath: avatarPath, defaultAvatarName: defaultAvatarName}
+func CreateUserRepository(db *gorm.DB, avatarPath, defaultAvatarName string, channel *amqp.Channel, queue amqp.Queue) repositories.UserRepository {
+	return &UserStore{db: db, avatarPath: avatarPath, defaultAvatarName: defaultAvatarName, channel: channel, queue: queue}
 }
 
 func (userStore *UserStore) Create(user *models.User) (err error) {
@@ -52,6 +57,24 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	user.Avatar = strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
 	user.Avatar = strings.Replace(user.Avatar, "/backend", "", -1)
 	err = userStore.db.Create(user).Error
+	if err != nil {
+		return
+	}
+
+	publicData, err := userStore.GetPublicData(user.UID)
+	if err != nil {
+		return
+	}
+	body, err := json.Marshal(publicData)
+	if err != nil {
+		return
+	}
+
+	err = userStore.channel.Publish("", userStore.queue.Name, false, false, amqp.Publishing{
+		DeliveryMode: amqp.Persistent,
+		ContentType:  "text/plain",
+		Body:         body,
+	})
 	return
 }
 
