@@ -35,7 +35,7 @@ jobs:
         run: sudo apt-get install libwebp-dev; go clean -testcache; go test -cover ./...
 
       - name: Count test coverage
-        run: go test -coverpkg=./... | grep -v mocks -coverprofile=c.out -covermode=count ./... #; go tool cover -func=c.out
+        run: CVPKG=$(go list ./... | grep -v mocks | tr '\n' ','); go test -coverpkg=CVPKG -coverprofile=c.out -covermode=count ./... #; go tool cover -func=c.out
 #
 #
 #      - name: Run Unit tests.
