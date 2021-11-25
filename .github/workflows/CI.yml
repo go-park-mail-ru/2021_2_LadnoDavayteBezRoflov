@@ -23,9 +23,6 @@ jobs:
       - name: Checkout code 
         uses: actions/checkout@v2
 
-#      - name: Lint Go Code
-#        run: export PATH=$PATH:$(go env GOPATH)/bin; go install golang.org/x/lint/golint; go mod tidy; make lint
-
       - name: Set up linter
         run: sudo apt-get update;
           sudo apt-get install libwebp-dev;
@@ -34,16 +31,8 @@ jobs:
       - name: golangci-lint
         run: golangci-lint run
 
-      - name: golangci-lint-dog
-        uses: reviewdog/action-golangci-lint@v2
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v2.5.2
-        with:
-          skip-go-installation: true
-
-      - name: Run tests
-        run: sudo apt-get install libwebp-dev; go clean -testcache; go test -cover ./...
+#      - name: Run tests
+#        run: sudo apt-get install libwebp-dev; go clean -testcache; go test -cover ./...
 
       - name: Run Unit tests.
         run: CVPKG=$(go list ./... | grep -v mocks | tr '\n' ','); go test -coverpkg=${CVPKG} -coverprofile=coverage.out -covermode=count  ./...
