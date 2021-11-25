@@ -26,6 +26,10 @@ redis-data/
 # redis.conf
 refis.conf/
 
+# rabbitmq
+rabbitmq/
+
 # microservices
 /api
 /session
+/email

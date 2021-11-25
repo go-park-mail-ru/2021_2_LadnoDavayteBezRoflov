@@ -7,18 +7,20 @@ import (
 )
 
 type Settings struct {
-	ServiceProtocol string
-	ServicePort     string
+	MailHost     string
+	MailPort     int
+	MailUsername string
+	MailPassword string
 
 	LogFilePath string
 
-	RedisProtocol string
-	RedisPort     string
+	RabbitMQPath string
+	QueueName    string
+	ConsumerName string
 }
 
 type EnvironmentVariables struct {
-	REDIS_PORT           string `env:"REDIS_PORT,required" envDefault:":6380"`
-	SESSION_LOG_LOCATION string `env:"SESSION_LOG_LOCATION" envDefault:"/var/log/emailLogs.log"`
+	EMAIL_LOG_LOCATION string `env:"SESSION_LOG_LOCATION" envDefault:"/var/log/emailLogs.log"`
 }
 
 func InitSettings() (settings Settings) {
@@ -28,13 +30,16 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
-		ServiceProtocol: "tcp",
-		ServicePort:     "0.0.0.0:8082",
+		MailHost:     "smtp.mail.ru",
+		MailPort:     587,
+		MailUsername: "brrrello-notify@mail.ru",
+		MailPassword: "B1GmLskQvzhubYNKxKq0",
 
-		LogFilePath: env.SESSION_LOG_LOCATION,
+		LogFilePath: env.EMAIL_LOG_LOCATION,
 
-		RedisProtocol: "tcp",
-		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
+		RabbitMQPath: "amqp://guest:guest@rabbitmq:5672/",
+		QueueName:    "queue",
+		ConsumerName: "consumer",
 	}
 
 	return

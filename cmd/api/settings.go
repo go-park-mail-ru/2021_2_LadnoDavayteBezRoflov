@@ -23,6 +23,9 @@ type Settings struct {
 
 	ServerAddress         string
 	SessionServiceAddress string
+	RabbitMQAddress       string
+
+	QueueName string
 
 	Origins        []string
 	AllowedMethods []string
@@ -70,6 +73,9 @@ func InitSettings() (settings Settings) {
 
 		ServerAddress:         ":8000",
 		SessionServiceAddress: "session:8081",
+		RabbitMQAddress:       "amqp://guest:guest@rabbitmq:5672/",
+
+		QueueName: "queue",
 
 		Origins: []string{
 			"http://localhost:8000",

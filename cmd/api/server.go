@@ -10,6 +10,8 @@ import (
 	zapLogger "backendServer/pkg/logger"
 	"backendServer/pkg/sessionCookieController"
 
+	"github.com/streadway/amqp"
+
 	"google.golang.org/grpc"
 
 	"gorm.io/driver/postgres"
@@ -60,6 +62,34 @@ func (server *Server) Run() {
 		return
 	}
 
+	// RabbitMQ
+	conn, err := amqp.Dial(server.settings.RabbitMQAddress)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	defer everythingCloser.Close(conn.Close)
+
+	channel, err := conn.Channel()
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	defer everythingCloser.Close(channel.Close)
+
+	queue, err := channel.QueueDeclare(
+		server.settings.QueueName, // name
+		false,                     // durable
+		false,                     // delete when unused
+		false,                     // exclusive
+		false,                     // no-wait
+		nil,                       // arguments
+	)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
 	// Session microservice
 	grpcConn, err := grpc.Dial(
 		server.settings.SessionServiceAddress,
@@ -75,7 +105,7 @@ func (server *Server) Run() {
 
 	// Repositories
 	sessionRepo := stores.CreateSessionRepository(sessionManager)
-	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName)
+	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName, channel, queue)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
