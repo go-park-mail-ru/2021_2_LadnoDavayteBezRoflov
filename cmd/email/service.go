@@ -6,6 +6,7 @@ import (
 	zapLogger "backendServer/pkg/logger"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 
 	"gopkg.in/gomail.v2"
 
@@ -89,13 +90,14 @@ func (service *Service) Run() {
 				logger.Error(err)
 				break
 			}
-
+			fmt.Println(userInfo)
 			emailLetter := gomail.NewMessage()
 			emailLetter.SetHeader("From", service.settings.MailUsername)
 			emailLetter.SetHeader("To", userInfo.Email)
 			emailLetter.SetHeader("Subject", "Добро пожаловать в Brrrello!")
 			emailLetter.SetBody("text/plain", "Рады вас видеть у себя на сайте!")
 			if err = mailDealer.DialAndSend(emailLetter); err != nil {
+				fmt.Println(err)
 				logger.Error(err)
 			}
 

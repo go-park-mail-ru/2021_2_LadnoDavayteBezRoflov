@@ -9,6 +9,9 @@ import (
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
 	"backendServer/pkg/sessionCookieController"
+	exp "expvar"
+
+	"github.com/gin-contrib/expvar"
 
 	"github.com/streadway/amqp"
 
@@ -25,6 +28,8 @@ import (
 type Server struct {
 	settings Settings
 }
+
+var hits = exp.NewMap("hits")
 
 func CreateServer() *Server {
 	settings := InitSettings()
@@ -127,7 +132,7 @@ func (server *Server) Run() {
 	userSearchUseCase := impl.CreateUserSearchUseCase(userRepo, cardRepo, teamRepo, boardRepo)
 
 	// Middlewares
-	commonMiddleware := handlers.CreateCommonMiddleware(logger)
+	commonMiddleware := handlers.CreateCommonMiddleware(logger, hits)
 	sessionMiddleware := handlers.CreateSessionMiddleware(sessionUseCase)
 
 	router.Use(commonMiddleware.Logger())
@@ -136,6 +141,7 @@ func (server *Server) Run() {
 
 	// Handlers
 	router.NoRoute(handlers.NoRouteHandler)
+	router.GET("/debug/vars", expvar.Handler())
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
 	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware)
