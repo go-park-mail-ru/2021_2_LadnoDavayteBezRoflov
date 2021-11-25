@@ -25,3 +25,7 @@ redis-data/
 
 # redis.conf
 refis.conf/
+
+# microservices
+/api
+/session

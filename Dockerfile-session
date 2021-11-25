@@ -1,0 +1,30 @@
+# syntax=docker/dockerfile:1
+##############################
+# Dockerfile to run backend  #
+# Based on golang:latest     #
+##############################
+
+FROM golang:latest
+
+WORKDIR /session
+
+COPY go.mod ./
+COPY go.sum ./
+
+RUN go mod download
+
+RUN go install github.com/githubnemo/CompileDaemon@latest && go mod tidy
+
+COPY . .
+
+CMD /bin/bash -c '$GOPATH/bin/CompileDaemon -log-prefix=false -polling=true -polling-interval=500 -build="go build ./cmd/session/" -command="./session"'
+
+EXPOSE 8081
+
+HEALTHCHECK CMD netstat -an | grep 8081 > /dev/null; if [ 0 != $? ]; then exit 1; fi;
+
+LABEL \
+      name="2021_2_LadnoDavayteBezRoflov_Session" \
+      description="Launch LadnoDavayteBezRoflov_Session" \
+      version="1.0" \
+      maintainer=""

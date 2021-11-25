@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backendServer/app/models"
+	"backendServer/app/api/models"
 	"fmt"
 	"regexp"
 	"sync"
