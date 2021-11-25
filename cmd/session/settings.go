@@ -28,12 +28,12 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
-		ServiceProtocol: viper.GetString('service_protocol'),
-		ServicePort:     viper.GetString('service_port'),
+		ServiceProtocol: viper.GetString("service_protocol"),
+		ServicePort:     viper.GetString("service_port"),
 
 		LogFilePath: env.SESSION_LOG_LOCATION,
 
-		RedisProtocol: viper.GetString('redis_protocol'),
+		RedisProtocol: viper.GetString("redis_protocol"),
 		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
 	}
 
