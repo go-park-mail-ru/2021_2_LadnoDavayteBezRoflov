@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	envParser "github.com/caarlos0/env"
+	"github.com/spf13/viper"
 )
 
 type Settings struct {
