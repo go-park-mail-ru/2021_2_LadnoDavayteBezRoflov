@@ -23,10 +23,25 @@ jobs:
       - name: Checkout code 
         uses: actions/checkout@v2
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v2.5.2
-        with:
-          skip-go-installation: true
+      - name: Lint Go Code
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          go get -u golang.org/x/lint/golint
+          make lint
+
+#      - name: Run golangci-lint
+#        uses: golangci/golangci-lint-action@v2.5.2
+#        with:
+#          skip-go-installation: true
 
       - name: Run tests
         run: sudo apt-get install libwebp-dev; go clean -testcache; go test -cover ./...
+
+      - name: Run Unit tests.
+          run: make test-coverage
+
+            - name: Upload Coverage report to CodeCov
+              uses: codecov/codecov-action@v1.0.0
+              with:
+                #token: ${{secrets.CODECOV_TOKEN}}
+                file: ./coverage.txt
