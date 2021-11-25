@@ -14,7 +14,7 @@ type Settings struct {
 	RootURL               string `mapstructure:"root_url"`
 	SessionURL            string `mapstructure:"session_url"`
 	ProfileURL            string `mapstructure:"profile_url"`
-  TeamsURL              string `mapstructure:"teams_url"`
+    TeamsURL              string `mapstructure:"teams_url"`
 	BoardsURL             string `mapstructure:"boards_url"`
 	CardListsURL          string `mapstructure:"card_lists_url"`
 	CardsURL              string `mapstructure:"cards_url"`
@@ -24,7 +24,7 @@ type Settings struct {
 	UserSearchURL         string `mapstructure:"user_search_url"`
 
 	ServerAddress         string `mapstructure:"server_address"`
-  SessionServiceAddress string `mapstructure:"session_service_address"`
+    SessionServiceAddress string `mapstructure:"session_service_address"`
 
 	Origins        []string
 	AllowedMethods []string `mapstructure:"allowed_methods"`
@@ -67,7 +67,7 @@ func InitSettings() (settings Settings) {
 		RootURL:               viper.GetString("url.root_url"),
 		SessionURL:            viper.GetString("url.session_url"),
 		ProfileURL:            viper.GetString("url.profile_url"),
-    TeamsURL:              viper.GetString("url.teams_url"),
+        TeamsURL:              viper.GetString("url.teams_url"),
 		BoardsURL:             viper.GetString("url.boards_url"),
 		CardListsURL:          viper.GetString("url.card_lists_url"),
 		CardsURL:              viper.GetString("url.cards_url"),
@@ -77,7 +77,7 @@ func InitSettings() (settings Settings) {
 		UserSearchURL:         viper.GetString("url.user_search"),
 
 		ServerAddress:         viper.GetString("server_address"),
-    SessionServiceAddress: viper.GetString("session_service_address"),
+        SessionServiceAddress: viper.GetString("session_service_address"),
 
 		Origins: []string{
 			"http://localhost:8000",
