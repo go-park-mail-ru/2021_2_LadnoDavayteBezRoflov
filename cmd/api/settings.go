@@ -11,19 +11,20 @@ import (
 )
 
 type Settings struct {
-	RootURL           string `mapstructure:"root_url"`
-	SessionURL        string `mapstructure:"session_url"`
-	ProfileURL        string `mapstructure:"profile_url"`
-    	TeamsURL          string `mapstructure:"teams_url"`
-	BoardsURL         string `mapstructure:"boards_url"`
-	CardListsURL      string `mapstructure:"card_lists_url"`
-	CardsURL          string `mapstructure:"cards_url"`
-	CommentsURL       string `mapstructure:"comments_url"`
-	CheckListsURL     string `mapstructure:"check_lists_url"`
-	CheckListItemsURL string `mapstructure:"check_list_items_url"`
-	UserSearchURL     string `mapstructure:"user_search_url"`
+	RootURL               string `mapstructure:"root_url"`
+	SessionURL            string `mapstructure:"session_url"`
+	ProfileURL            string `mapstructure:"profile_url"`
+  TeamsURL              string `mapstructure:"teams_url"`
+	BoardsURL             string `mapstructure:"boards_url"`
+	CardListsURL          string `mapstructure:"card_lists_url"`
+	CardsURL              string `mapstructure:"cards_url"`
+	CommentsURL           string `mapstructure:"comments_url"`
+	CheckListsURL         string `mapstructure:"check_lists_url"`
+	CheckListItemsURL     string `mapstructure:"check_list_items_url"`
+	UserSearchURL         string `mapstructure:"user_search_url"`
 
-	ServerAddress     string `mapstructure:"server_address"`
+	ServerAddress         string `mapstructure:"server_address"`
+  SessionServiceAddress string `mapstructure:"session_service_address"`
 
 	Origins        []string
 	AllowedMethods []string `mapstructure:"allowed_methods"`
@@ -36,15 +37,11 @@ type Settings struct {
 	AvatarsPath       string
 	DefaultAvatarName string `mapstructure:"default_avatar_name"`
 
-	RedisProtocol string `mapstructure:"redis_protocol"`
-	RedisPort     string
-
 	PostgresDsn string
 }
 
 type EnvironmentVariables struct {
 	DB_PORT           string `env:"DB_PORT,required"`
-	REDIS_PORT        string `env:"REDIS_PORT,required"`
 	POSTGRES_USER     string `env:"POSTGRES_USER,required"`
 	POSTGRES_PASSWORD string `env:"POSTGRES_PASSWORD,required"`
 	DATABASE_HOST     string `env:"DATABASE_HOST,required"`
@@ -67,19 +64,20 @@ func InitSettings() (settings Settings) {
 	}
 
 	settings = Settings{
-		RootURL:           viper.GetString("url.root_url"),
-		SessionURL:        viper.GetString("url.session_url"),
-		ProfileURL:        viper.GetString("url.profile_url"),
-        	TeamsURL:          viper.GetString("url.teams_url"),
-		BoardsURL:         viper.GetString("url.boards_url"),
-		CardListsURL:      viper.GetString("url.card_lists_url"),
-		CardsURL:          viper.GetString("url.cards_url"),
-		CommentsURL:       viper.GetString("url.comments_url"),
-		CheckListsURL:     viper.GetString("url.check_lists"),
-		CheckListItemsURL: viper.GetString("url.check_list_items"),
-		UserSearchURL:     viper.GetString("url.user_search"),
+		RootURL:               viper.GetString("url.root_url"),
+		SessionURL:            viper.GetString("url.session_url"),
+		ProfileURL:            viper.GetString("url.profile_url"),
+    TeamsURL:              viper.GetString("url.teams_url"),
+		BoardsURL:             viper.GetString("url.boards_url"),
+		CardListsURL:          viper.GetString("url.card_lists_url"),
+		CardsURL:              viper.GetString("url.cards_url"),
+		CommentsURL:           viper.GetString("url.comments_url"),
+		CheckListsURL:         viper.GetString("url.check_lists"),
+		CheckListItemsURL:     viper.GetString("url.check_list_items"),
+		UserSearchURL:         viper.GetString("url.user_search"),
 
-		ServerAddress: viper.GetString("server_address"),
+		ServerAddress:         viper.GetString("server_address"),
+    SessionServiceAddress: viper.GetString("session_service_address"),
 
 		Origins: []string{
 			"http://localhost:8000",
@@ -95,9 +93,6 @@ func InitSettings() (settings Settings) {
 		LogFilePath:       env.LOG_LOCATION,
 		AvatarsPath:       env.FRONTEND_PATH,
 		DefaultAvatarName: viper.GetString("default_avatar_name"),
-
-		RedisProtocol: viper.GetString("redis_protocol"),
-		RedisPort:     fmt.Sprintf("redis:%s", env.REDIS_PORT),
 
 		PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),
 	}

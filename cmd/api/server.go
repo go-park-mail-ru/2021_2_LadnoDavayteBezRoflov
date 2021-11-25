@@ -1,15 +1,16 @@
 package main
 
 import (
-	"backendServer/app/handlers"
-	"backendServer/app/models"
-	"backendServer/app/repositories/stores"
-	"backendServer/app/usecases/impl"
+	"backendServer/app/api/handlers"
+	"backendServer/app/api/models"
+	"backendServer/app/api/repositories/stores"
+	"backendServer/app/api/usecases/impl"
+	"backendServer/app/microservices/session/handler"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
 	"backendServer/pkg/sessionCookieController"
 
-	"github.com/gomodule/redigo/redis"
+	"google.golang.org/grpc"
 
 	"gorm.io/driver/postgres"
 
@@ -38,19 +39,6 @@ func (server *Server) Run() {
 	everythingCloser := closer.CreateCloser(&logger)
 	defer everythingCloser.Close(logger.Sync)
 
-	// Redis
-	redisPool := &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial(server.settings.RedisProtocol, server.settings.RedisPort)
-			if err != nil {
-				logger.Error(err)
-				panic(err)
-			}
-			return c, err
-		},
-	}
-	defer everythingCloser.Close(redisPool.Close)
-
 	// Postgres
 	postgresClient, err := gorm.Open(postgres.Open(server.settings.PostgresDsn), &gorm.Config{})
 	if err != nil {
@@ -72,8 +60,21 @@ func (server *Server) Run() {
 		return
 	}
 
+	// Session microservice
+	grpcConn, err := grpc.Dial(
+		server.settings.SessionServiceAddress,
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	defer everythingCloser.Close(grpcConn.Close)
+
+	sessionManager := handler.NewSessionCheckerClient(grpcConn)
+
 	// Repositories
-	sessionRepo := stores.CreateSessionRepository(redisPool, uint64(sessionCookieController.SessionCookieLifeTimeInHours), everythingCloser)
+	sessionRepo := stores.CreateSessionRepository(sessionManager)
 	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
