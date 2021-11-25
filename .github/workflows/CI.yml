@@ -24,10 +24,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Lint Go Code
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          go get -u golang.org/x/lint/golint
-          make lint
+        run: export PATH=$PATH:$(go env GOPATH)/bin; go get -u golang.org/x/lint/golint; make lint
 
 #      - name: Run golangci-lint
 #        uses: golangci/golangci-lint-action@v2.5.2
@@ -38,6 +35,4 @@ jobs:
         run: sudo apt-get install libwebp-dev; go clean -testcache; go test -cover ./...
 
       - name: Run Unit tests.
-          run: |
-            CVPKG=$(go list ./... | grep -v mocks | tr '\n' ',')
-            go test -coverpkg=${CVPKG} -coverprofile=coverage.out -covermode=count  ./...
+          run: CVPKG=$(go list ./... | grep -v mocks | tr '\n' ','); go test -coverpkg=${CVPKG} -coverprofile=coverage.out -covermode=count  ./...
