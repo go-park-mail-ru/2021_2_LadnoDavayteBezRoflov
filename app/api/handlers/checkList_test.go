@@ -53,6 +53,7 @@ func TestCreateCheckList(t *testing.T) {
 
 	testCheckList := new(models.CheckList)
 	err := faker.FakeData(testCheckList)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testCheckList)
 	assert.NoError(t, err)
 
@@ -304,6 +305,7 @@ func TestUpdateCheckList(t *testing.T) {
 
 	testCheckList := new(models.CheckList)
 	err := faker.FakeData(testCheckList)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testCheckList)
 	assert.NoError(t, err)
 

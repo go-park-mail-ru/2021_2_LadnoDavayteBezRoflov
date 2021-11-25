@@ -53,6 +53,7 @@ func TestCreateTeam(t *testing.T) {
 
 	testTeam := new(models.Team)
 	err := faker.FakeData(testTeam)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testTeam)
 	assert.NoError(t, err)
 

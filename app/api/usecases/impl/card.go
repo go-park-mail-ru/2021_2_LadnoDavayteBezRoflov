@@ -44,7 +44,7 @@ func (cardUseCase *CardUseCaseImpl) GetCard(uid, cid uint) (card *models.Card, e
 		return
 	}
 	for i, comment := range *comments {
-		user := new(models.PublicUserInfo)
+		var user *models.PublicUserInfo
 		user, err = cardUseCase.userRepository.GetPublicData(comment.UID)
 		if err != nil {
 			return

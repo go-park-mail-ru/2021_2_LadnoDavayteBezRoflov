@@ -53,6 +53,7 @@ func TestCreateComment(t *testing.T) {
 
 	testComment := new(models.Comment)
 	err := faker.FakeData(testComment)
+	assert.NoError(t, err)
 	testComment.UID = testUID
 	body, err := json.Marshal(testComment)
 	assert.NoError(t, err)
@@ -281,6 +282,7 @@ func TestUpdateComment(t *testing.T) {
 
 	testComment := new(models.Comment)
 	err := faker.FakeData(testComment)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testComment)
 	assert.NoError(t, err)
 

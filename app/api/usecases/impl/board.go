@@ -125,7 +125,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 				return
 			}
 			for index, comment := range *comments {
-				user := new(models.PublicUserInfo)
+				var user *models.PublicUserInfo
 				user, err = boardUseCase.userRepository.GetPublicData(comment.UID)
 				if err != nil {
 					return

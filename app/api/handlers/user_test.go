@@ -53,6 +53,7 @@ func TestCreateUser(t *testing.T) {
 
 	testUser := new(models.User)
 	err := faker.FakeData(testUser)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testUser)
 	assert.NoError(t, err)
 
@@ -185,6 +186,7 @@ func TestUpdateUser(t *testing.T) {
 
 	testUser := new(models.User)
 	err := faker.FakeData(testUser)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testUser)
 	assert.NoError(t, err)
 

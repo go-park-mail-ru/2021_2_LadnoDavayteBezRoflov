@@ -53,6 +53,7 @@ func TestCreateCardList(t *testing.T) {
 
 	testCardList := new(models.CardList)
 	err := faker.FakeData(testCardList)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testCardList)
 	assert.NoError(t, err)
 
@@ -291,6 +292,7 @@ func TestUpdateCardList(t *testing.T) {
 
 	testCardList := new(models.CardList)
 	err := faker.FakeData(testCardList)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testCardList)
 	assert.NoError(t, err)
 
