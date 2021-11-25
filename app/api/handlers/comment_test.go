@@ -21,7 +21,7 @@ import (
 )
 
 func TestCreateComment(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
@@ -88,12 +88,12 @@ func TestCreateComment(t *testing.T) {
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
 func TestGetComment(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
@@ -152,7 +152,7 @@ func TestGetComment(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
- 	// not authorized
+	// not authorized
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
 
 	w = httptest.NewRecorder()
@@ -160,12 +160,12 @@ func TestGetComment(t *testing.T) {
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
 func TestDeleteComment(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
@@ -224,7 +224,7 @@ func TestDeleteComment(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
- 	// not authorized
+	// not authorized
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(uint(0), customErrors.ErrNotAuthorized)
 
 	w = httptest.NewRecorder()
@@ -232,18 +232,18 @@ func TestDeleteComment(t *testing.T) {
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 	useCaseMock.EXPECT().DeleteComment(testUID, testComment.CMID).Return(customErrors.ErrNoAccess)
-	
+
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("DELETE", "/api/comments/1", nil)
 	req.AddCookie(cookie)
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
