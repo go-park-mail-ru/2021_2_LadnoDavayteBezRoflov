@@ -28,7 +28,7 @@ func (cardListStore *CardListStore) Create(cardList *models.CardList) (err error
 }
 
 func (cardListStore *CardListStore) Update(cardList *models.CardList) (err error) {
-	oldCardList, err := cardListStore.GetByID(cardList.CID)
+	oldCardList, err := cardListStore.GetByID(cardList.CLID)
 	if err != nil {
 		return
 	}

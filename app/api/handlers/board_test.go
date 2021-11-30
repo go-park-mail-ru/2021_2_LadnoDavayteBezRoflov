@@ -53,6 +53,7 @@ func TestCreateBoard(t *testing.T) {
 
 	testBoard := new(models.Board)
 	err := faker.FakeData(testBoard)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testBoard)
 	assert.NoError(t, err)
 
@@ -280,6 +281,7 @@ func TestUpdateBoard(t *testing.T) {
 
 	testBoard := new(models.Board)
 	err := faker.FakeData(testBoard)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testBoard)
 	assert.NoError(t, err)
 

@@ -104,6 +104,9 @@ func (userStore *UserStore) Update(user *models.User) (err error) {
 
 	if user.Password != "" && !hasher.IsPasswordsEqual(user.Password, oldUser.HashedPassword) {
 		oldUser.HashedPassword, err = hasher.HashPassword(user.Password)
+		if err != nil {
+			return
+		}
 	}
 
 	if user.Description != "" && user.Description != oldUser.Description {

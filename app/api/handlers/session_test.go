@@ -43,6 +43,7 @@ func TestCreateSession(t *testing.T) {
 	assert.NoError(t, err)
 
 	body, err := json.Marshal(testUser)
+	assert.NoError(t, err)
 
 	// success
 	useCaseMock.EXPECT().Create(testUser).Return("testSid", nil)

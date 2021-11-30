@@ -53,6 +53,7 @@ func TestCreateCardList(t *testing.T) {
 
 	testCardList := new(models.CardList)
 	err := faker.FakeData(testCardList)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testCardList)
 	assert.NoError(t, err)
 
@@ -291,12 +292,13 @@ func TestUpdateCardList(t *testing.T) {
 
 	testCardList := new(models.CardList)
 	err := faker.FakeData(testCardList)
+	assert.NoError(t, err)
 	body, err := json.Marshal(testCardList)
 	assert.NoError(t, err)
 
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	testCardList.CID = uint(4)
+	testCardList.CLID = uint(4)
 	useCaseMock.EXPECT().UpdateCardList(testUID, testCardList).Return(nil)
 
 	w := httptest.NewRecorder()
@@ -331,7 +333,7 @@ func TestUpdateCardList(t *testing.T) {
 
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	testCardList.CID = uint(4)
+	testCardList.CLID = uint(4)
 	useCaseMock.EXPECT().UpdateCardList(testUID, testCardList).Return(customErrors.ErrNoAccess)
 
 	w = httptest.NewRecorder()
