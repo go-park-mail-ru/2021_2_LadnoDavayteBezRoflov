@@ -333,7 +333,7 @@ func TestUpdateCardList(t *testing.T) {
 
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	testCardList.CID = uint(4)
+	testCardList.CLID = uint(4)
 	useCaseMock.EXPECT().UpdateCardList(testUID, testCardList).Return(customErrors.ErrNoAccess)
 
 	w = httptest.NewRecorder()
