@@ -96,7 +96,7 @@ func (cardListHandler *CardListHandler) UpdateCardList(c *gin.Context) {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
-	cardList.CID = uint(clid)
+	cardList.CLID = uint(clid)
 	err = cardListHandler.CardListUseCase.UpdateCardList(uid.(uint), cardList)
 	if err != nil {
 		_ = c.Error(err)
