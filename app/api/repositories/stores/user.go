@@ -14,6 +14,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/aofei/cameron"
+
 	"github.com/streadway/amqp"
 
 	_ "golang.org/x/image/bmp"
@@ -54,8 +56,33 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 		return
 	}
 
-	user.Avatar = strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
-	user.Avatar = strings.Replace(user.Avatar, "/backend", "", -1)
+	isCustomAvatarCreated := false
+
+	fileNameID := uuid.NewString()
+	fileName := strings.Join([]string{userStore.avatarPath, "/", fileNameID, ".webp"}, "")
+
+	out, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+
+	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+
+	if err == nil {
+		err = webp.Encode(out, cameron.Identicon([]byte(fileNameID), 540, 60), options)
+	}
+
+	if err == nil {
+		fileName = strings.Replace(fileName, "/backend", "", -1)
+		user.Avatar = fileName
+		isCustomAvatarCreated = true
+	}
+
+	if !isCustomAvatarCreated {
+		user.Avatar = strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
+		user.Avatar = strings.Replace(user.Avatar, "/backend", "", -1)
+	}
+
 	err = userStore.db.Create(user).Error
 	if err != nil {
 		return
@@ -318,7 +345,7 @@ func (userStore *UserStore) AddUserToCard(uid, cid uint) (err error) {
 
 func (userStore *UserStore) GetPublicData(uid uint) (user *models.PublicUserInfo, err error) {
 	user = new(models.PublicUserInfo)
-	err = userStore.db.Model(&models.User{UID: uid}).Find(user).Error
+	err = userStore.db.Model(&models.User{}).Find(user, uid).Error
 	return
 }
 
