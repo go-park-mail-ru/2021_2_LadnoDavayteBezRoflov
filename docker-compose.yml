@@ -105,7 +105,7 @@ services:
             - POSTGRES_PASSWORD=backend_LDBR_password
             - POSTGRES_DB=backend_ldbr_db
             - DATABASE_HOST=db
-            - FRONTEND_ADDRESS=localhost:95.163.213.142
+            - FRONTEND_ADDRESS=95.163.213.142
             - GIN_MODE=debug
             - TZ=Europe/Moscow
             - PUBLIC_DIR=/assets
