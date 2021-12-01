@@ -8,14 +8,7 @@ FROM golang:latest
 
 WORKDIR /session
 
-COPY go.mod ./
-COPY go.sum ./
-
-RUN go mod download
-
-RUN go install github.com/githubnemo/CompileDaemon@latest && go mod tidy
-
-COPY . .
+RUN go install github.com/githubnemo/CompileDaemon@latest
 
 CMD /bin/bash -c '$GOPATH/bin/CompileDaemon -log-prefix=false -polling=true -polling-interval=500 -build="go build ./cmd/session/" -command="./session"'
 
