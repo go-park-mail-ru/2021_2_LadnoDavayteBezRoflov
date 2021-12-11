@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,12 @@ import (
 	"github.com/bxcodec/faker/v3"
 	"github.com/gin-gonic/gin"
 )
+
+func TestMain(m *testing.M) {
+	_ = faker.SetRandomMapAndSliceSize(1)
+	exitVal := m.Run()
+	os.Exit(exitVal)
+}
 
 func TestCreateSession(t *testing.T) {
 	t.Parallel()

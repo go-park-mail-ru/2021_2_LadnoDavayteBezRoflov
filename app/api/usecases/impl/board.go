@@ -45,7 +45,7 @@ func (boardUseCase *BoardUseCaseImpl) GetUserBoards(uid uint) (teams *[]models.T
 		boards, boardsErr := boardUseCase.teamRepository.GetTeamBoards(team.TID)
 		if boardsErr != nil {
 			err = boardsErr
-			return
+			return nil, err
 		}
 		members, err := boardUseCase.teamRepository.GetTeamMembers(team.TID)
 		if err != nil {

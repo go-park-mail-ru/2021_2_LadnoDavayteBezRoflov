@@ -59,7 +59,7 @@ func TestCreateBoard(t *testing.T) {
 
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().CreateBoard(testBoard).Return(testBoard.BID, nil)
+	useCaseMock.EXPECT().CreateBoard(gomock.Any()).Return(testBoard.BID, nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/boards", bytes.NewBuffer(body))
@@ -93,7 +93,7 @@ func TestCreateBoard(t *testing.T) {
 
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().CreateBoard(testBoard).Return(uint(0), customErrors.ErrInternal)
+	useCaseMock.EXPECT().CreateBoard(gomock.Any()).Return(uint(0), customErrors.ErrInternal)
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("POST", "/api/boards", bytes.NewBuffer(body))
@@ -288,7 +288,7 @@ func TestUpdateBoard(t *testing.T) {
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 	testBoard.BID = uint(4)
-	useCaseMock.EXPECT().UpdateBoard(testUID, testBoard).Return(nil)
+	useCaseMock.EXPECT().UpdateBoard(testUID, gomock.Any()).Return(nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("PUT", "/api/boards/4", bytes.NewBuffer(body))
@@ -323,7 +323,7 @@ func TestUpdateBoard(t *testing.T) {
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 	testBoard.BID = uint(4)
-	useCaseMock.EXPECT().UpdateBoard(testUID, testBoard).Return(customErrors.ErrNoAccess)
+	useCaseMock.EXPECT().UpdateBoard(testUID, gomock.Any()).Return(customErrors.ErrNoAccess)
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("PUT", "/api/boards/4", bytes.NewBuffer(body))
