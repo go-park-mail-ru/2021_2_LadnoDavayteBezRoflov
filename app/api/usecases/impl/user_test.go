@@ -156,6 +156,7 @@ func TestUpdateUser(t *testing.T) {
 	// can't update
 	testUser.OldPassword = "some old password"
 	testUser.HashedPassword, err = hasher.HashPassword(testUser.OldPassword)
+	assert.NoError(t, err)
 	userRepoMock.EXPECT().GetByID(uid).Return(testUser, nil)
 	userRepoMock.EXPECT().Update(testUser).Return(customErrors.ErrInternal)
 	err = userUseCase.Update(testUser)
