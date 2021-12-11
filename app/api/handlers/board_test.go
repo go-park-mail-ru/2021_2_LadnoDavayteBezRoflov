@@ -27,7 +27,6 @@ func TestCreateBoard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -111,7 +110,6 @@ func TestGetBoard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -183,7 +181,6 @@ func TestDeleteBoard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -255,7 +252,6 @@ func TestUpdateBoard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -352,7 +348,6 @@ func TestToggleUserBoard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockBoardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")

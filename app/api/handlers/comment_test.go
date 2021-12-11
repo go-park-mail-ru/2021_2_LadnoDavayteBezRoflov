@@ -27,7 +27,6 @@ func TestCreateComment(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCommentUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -100,7 +99,6 @@ func TestGetComment(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCommentUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -172,7 +170,6 @@ func TestDeleteComment(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCommentUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -256,7 +253,6 @@ func TestUpdateComment(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCommentUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
