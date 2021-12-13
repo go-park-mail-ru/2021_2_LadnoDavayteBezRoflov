@@ -61,13 +61,21 @@ services:
             - "8082:8082"
         expose:
             - "8082"
+        environment:
+            - DB_PORT=5433
+            - POSTGRES_USER=backend_ldbr
+            - POSTGRES_PASSWORD=backend_LDBR_password
+            - POSTGRES_DB=backend_ldbr_db
+            - DATABASE_HOST=db
         volumes:
             - ./:/email
         restart: on-failure
         depends_on:
             - rabbitmq
+            - postgres
         links:
             - "rabbitmq:rabbitmq"
+            - "postgres:db"
         healthcheck:
             test: [ "CMD", "curl", "-f", "http://localhost:8082" ]
             interval: 30s

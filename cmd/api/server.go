@@ -81,7 +81,7 @@ func (server *Server) Run() {
 	}
 	defer everythingCloser.Close(channel.Close)
 
-	queue, err := channel.QueueDeclare(
+	_, err = channel.QueueDeclare(
 		server.settings.QueueName, // name
 		false,                     // durable
 		false,                     // delete when unused
@@ -109,7 +109,7 @@ func (server *Server) Run() {
 
 	// Repositories
 	sessionRepo := stores.CreateSessionRepository(sessionManager)
-	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName, channel, queue)
+	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName, channel, server.settings.QueueName)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)

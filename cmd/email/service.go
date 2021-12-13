@@ -2,13 +2,16 @@ package main
 
 import (
 	"backendServer/app/api/models"
+	"backendServer/app/microservices/email/handler"
+	"backendServer/app/microservices/email/repository/store"
+	"backendServer/app/microservices/email/usecase/impl"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
 
 	"gopkg.in/gomail.v2"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/streadway/amqp"
 )
@@ -24,10 +27,31 @@ func CreateService() *Service {
 
 func (service *Service) Run() {
 	// Logger and Closer
-	var logger zapLogger.Logger
+	logger := new(zapLogger.Logger)
 	logger.InitLogger(service.settings.LogFilePath)
-	everythingCloser := closer.CreateCloser(&logger)
+	everythingCloser := closer.CreateCloser(logger)
 	defer everythingCloser.Close(logger.Sync)
+
+	// Postgres
+	postgresClient, err := gorm.Open(postgres.Open(service.settings.PostgresDsn), &gorm.Config{})
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	err = postgresClient.AutoMigrate(
+		&models.User{},
+		&models.Team{},
+		&models.Board{},
+		&models.CardList{},
+		&models.Card{},
+		&models.Comment{},
+		&models.CheckList{},
+		&models.CheckListItem{},
+	)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 
 	// Mail
 	mailDealer := gomail.NewDialer(
@@ -66,47 +90,8 @@ func (service *Service) Run() {
 		return
 	}
 
-	msgs, err := channel.Consume(
-		queue.Name,                    // queue
-		service.settings.ConsumerName, // consumer
-		false,                         // auto-ack
-		false,                         // exclusive
-		false,                         // no-local
-		false,                         // no-wait
-		nil,                           // args
-	)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-
-	foreverChannel := make(chan bool)
-
-	go func() {
-		for d := range msgs {
-			userInfo := new(models.PublicUserInfo)
-			err = json.Unmarshal(d.Body, userInfo)
-			if err != nil {
-				logger.Error(err)
-				break
-			}
-			fmt.Println(userInfo)
-			emailLetter := gomail.NewMessage()
-			emailLetter.SetHeader("From", service.settings.MailUsername)
-			emailLetter.SetHeader("To", userInfo.Email)
-			emailLetter.SetHeader("Subject", "Добро пожаловать в Brrrello!")
-			emailLetter.SetBody("text/plain", "Рады вас видеть у себя на сайте!")
-			if err = mailDealer.DialAndSend(emailLetter); err != nil {
-				fmt.Println(err)
-				logger.Error(err)
-			}
-
-			err = d.Ack(false)
-			if err != nil {
-				return
-			}
-		}
-	}()
-
-	<-foreverChannel
+	emailRepo := store.CreateEmailRepository(postgresClient)
+	emailUseCase := impl.CreateEmailUseCase(emailRepo, service.settings.MailUsername)
+	emailHandler := handler.CreateEmailServer(emailUseCase, logger, mailDealer, channel, queue.Name, service.settings.ConsumerName)
+	emailHandler.Run()
 }

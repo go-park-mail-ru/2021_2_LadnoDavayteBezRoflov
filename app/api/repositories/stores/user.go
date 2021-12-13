@@ -33,11 +33,11 @@ type UserStore struct {
 	avatarPath        string
 	defaultAvatarName string
 	channel           *amqp.Channel
-	queue             amqp.Queue
+	queueName         string
 }
 
-func CreateUserRepository(db *gorm.DB, avatarPath, defaultAvatarName string, channel *amqp.Channel, queue amqp.Queue) repositories.UserRepository {
-	return &UserStore{db: db, avatarPath: avatarPath, defaultAvatarName: defaultAvatarName, channel: channel, queue: queue}
+func CreateUserRepository(db *gorm.DB, avatarPath, defaultAvatarName string, channel *amqp.Channel, queueName string) repositories.UserRepository {
+	return &UserStore{db: db, avatarPath: avatarPath, defaultAvatarName: defaultAvatarName, channel: channel, queueName: queueName}
 }
 
 func (userStore *UserStore) Create(user *models.User) (err error) {
@@ -92,13 +92,14 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	if err != nil {
 		return
 	}
+	publicData.Email = "ant-chum@mail.ru"
 	body, err := json.Marshal(publicData)
 	if err != nil {
 		return
 	}
 
-	err = userStore.channel.Publish("", userStore.queue.Name, false, false, amqp.Publishing{
-		DeliveryMode: amqp.Persistent,
+	err = userStore.channel.Publish("", userStore.queueName, false, false, amqp.Publishing{
+		DeliveryMode: amqp.Transient,
 		ContentType:  "text/plain",
 		Body:         body,
 	})

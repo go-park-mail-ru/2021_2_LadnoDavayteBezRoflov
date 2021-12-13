@@ -7,4 +7,4 @@ mail: {
 
 rabbitmq_path: 'amqp://guest:guest@rabbitmq:5672/'
 queue_name:    'queue'
-consumer_name: 'consumer'
+consumer_name: ''
