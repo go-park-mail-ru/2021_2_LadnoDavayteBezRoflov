@@ -90,7 +90,7 @@ func (emailServer *EmailServer) SendFirstLetter(channel *amqp.Channel) {
 }
 
 func (emailServer *EmailServer) SendNotifications() {
-	for true {
+	for {
 		go func() {
 			emailLetters, err := emailServer.EmailUseCase.SendNotifications()
 			if err != nil {
