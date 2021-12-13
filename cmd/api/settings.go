@@ -83,7 +83,7 @@ func InitSettings() (settings Settings) {
 		SessionServiceAddress: viper.GetString("session_service_address"),
 		RabbitMQAddress:       viper.GetString("rabbitmq_address"),
 
-		QueueName: viper.GetString("queue"),
+		QueueName: viper.GetString("queue_name"),
 
 		Origins: []string{
 			"http://localhost:8000",

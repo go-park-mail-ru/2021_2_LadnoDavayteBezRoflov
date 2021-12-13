@@ -18,10 +18,17 @@ type Settings struct {
 	RabbitMQPath string
 	QueueName    string
 	ConsumerName string
+
+	PostgresDsn string
 }
 
 type EnvironmentVariables struct {
 	EMAIL_LOG_LOCATION string `env:"SESSION_LOG_LOCATION" envDefault:"/var/log/emailLogs.log"`
+	DB_PORT            string `env:"DB_PORT,required"`
+	POSTGRES_USER      string `env:"POSTGRES_USER,required"`
+	POSTGRES_PASSWORD  string `env:"POSTGRES_PASSWORD,required"`
+	DATABASE_HOST      string `env:"DATABASE_HOST,required"`
+	POSTGRES_DB        string `env:"POSTGRES_DB,required"`
 }
 
 func InitSettings() (settings Settings) {
@@ -47,6 +54,8 @@ func InitSettings() (settings Settings) {
 		RabbitMQPath: viper.GetString("rabbitmq_path"),
 		QueueName:    viper.GetString("queue_name"),
 		ConsumerName: viper.GetString("consumer_name"),
+
+		PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),
 	}
 
 	return
