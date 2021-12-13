@@ -5,6 +5,8 @@ import (
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
 
+	"github.com/google/uuid"
+
 	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -83,5 +85,34 @@ func (boardStore *BoardStore) GetBoardCardLists(bid uint) (cardLists *[]models.C
 func (boardStore *BoardStore) GetBoardCards(bid uint) (cards *[]models.Card, err error) {
 	cards = new([]models.Card)
 	err = boardStore.db.Model(&models.Board{BID: bid}).Association("Cards").Find(cards)
+	return
+}
+
+func (boardStore *BoardStore) UpdateAccessPath(bid uint) (newAccessPath string, err error) {
+	newAccessPath = uuid.NewString()
+
+	oldBoard, err := boardStore.GetByID(bid)
+	if err != nil {
+		return
+	}
+	oldBoard.AccessPath = newAccessPath
+
+	err = boardStore.db.Save(oldBoard).Error
+	return
+}
+
+func (boardStore *BoardStore) FindBoardIDByPath(accessPath string) (bid uint, err error) {
+	board := new(models.Board)
+	err = boardStore.db.Where("access_path = ?", accessPath).Take(board).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return
+	}
+
+	if board.BID != 0 {
+		bid = board.BID
+	} else {
+		err = customErrors.ErrBoardNotFound
+	}
+
 	return
 }
