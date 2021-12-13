@@ -27,7 +27,6 @@ func TestCreateCardList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -99,7 +98,6 @@ func TestGetCardList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -183,7 +181,6 @@ func TestDeleteCardList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -266,7 +263,6 @@ func TestUpdateCardList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")

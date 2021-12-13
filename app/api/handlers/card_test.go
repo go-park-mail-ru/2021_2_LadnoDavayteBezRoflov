@@ -27,7 +27,6 @@ func TestCreateCard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -59,7 +58,7 @@ func TestCreateCard(t *testing.T) {
 
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().CreateCard(testCard).Return(testCard.CID, nil)
+	useCaseMock.EXPECT().CreateCard(gomock.Any()).Return(testCard.CID, nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/cards", bytes.NewBuffer(body))
@@ -93,7 +92,7 @@ func TestCreateCard(t *testing.T) {
 
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
-	useCaseMock.EXPECT().CreateCard(testCard).Return(uint(0), customErrors.ErrInternal)
+	useCaseMock.EXPECT().CreateCard(gomock.Any()).Return(uint(0), customErrors.ErrInternal)
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("POST", "/api/cards", bytes.NewBuffer(body))
@@ -111,7 +110,6 @@ func TestGetCard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -196,7 +194,6 @@ func TestDeleteCard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -268,7 +265,6 @@ func TestUpdateCard(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -301,7 +297,7 @@ func TestUpdateCard(t *testing.T) {
 	// success
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 	testCard.CID = uint(4)
-	useCaseMock.EXPECT().UpdateCard(testUID, testCard).Return(nil)
+	useCaseMock.EXPECT().UpdateCard(testUID, gomock.Any()).Return(nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("PUT", "/api/cards/4", bytes.NewBuffer(body))
@@ -336,7 +332,7 @@ func TestUpdateCard(t *testing.T) {
 	// fail
 	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
 	testCard.CID = uint(4)
-	useCaseMock.EXPECT().UpdateCard(testUID, testCard).Return(customErrors.ErrNoAccess)
+	useCaseMock.EXPECT().UpdateCard(testUID, gomock.Any()).Return(customErrors.ErrNoAccess)
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("PUT", "/api/cards/4", bytes.NewBuffer(body))
@@ -365,7 +361,6 @@ func TestToggleUser(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCardUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")

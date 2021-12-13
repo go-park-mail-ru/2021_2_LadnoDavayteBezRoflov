@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,13 +21,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func TestMain(m *testing.M) {
+	_ = faker.SetRandomMapAndSliceSize(1)
+	gin.SetMode(gin.ReleaseMode)
+	exitVal := m.Run()
+	os.Exit(exitVal)
+}
+
 func TestCreateSession(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	useCaseMock := mocks.NewMockSessionUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -77,7 +84,6 @@ func TestGetSession(t *testing.T) {
 	defer ctrl.Finish()
 	useCaseMock := mocks.NewMockSessionUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -137,7 +143,6 @@ func TestDeleteSession(t *testing.T) {
 	defer ctrl.Finish()
 	useCaseMock := mocks.NewMockSessionUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")

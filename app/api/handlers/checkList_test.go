@@ -27,7 +27,6 @@ func TestCreateCheckList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -111,7 +110,6 @@ func TestGetCheckList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -196,7 +194,6 @@ func TestDeleteCheckList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")
@@ -279,7 +276,6 @@ func TestUpdateCheckList(t *testing.T) {
 	sessionMock := mocks.NewMockSessionUseCase(ctrl)
 	useCaseMock := mocks.NewMockCheckListUseCase(ctrl)
 
-	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	var logger zapLogger.Logger
 	logger.InitLogger("./logs.log")

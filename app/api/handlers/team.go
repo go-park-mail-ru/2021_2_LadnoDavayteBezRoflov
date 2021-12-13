@@ -85,7 +85,7 @@ func (teamHandler *TeamHandler) UpdateTeam(c *gin.Context) {
 		return
 	}
 
-	tid64 := c.Param("cid")
+	tid64 := c.Param("tid")
 	tid, err := strconv.ParseUint(tid64, 10, 32)
 	if err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
@@ -115,7 +115,7 @@ func (teamHandler *TeamHandler) DeleteTeam(c *gin.Context) {
 		return
 	}
 
-	tid64 := c.Param("cid")
+	tid64 := c.Param("tid")
 	tid, err := strconv.ParseUint(tid64, 10, 32)
 	if err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
