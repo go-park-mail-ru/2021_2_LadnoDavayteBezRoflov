@@ -34,6 +34,21 @@ func (m *MockBoardUseCase) EXPECT() *MockBoardUseCaseMockRecorder {
 	return m.recorder
 }
 
+// AddUserViaLink mocks base method.
+func (m *MockBoardUseCase) AddUserViaLink(uid uint, accessPath string) (*models.Board, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddUserViaLink", uid, accessPath)
+	ret0, _ := ret[0].(*models.Board)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddUserViaLink indicates an expected call of AddUserViaLink.
+func (mr *MockBoardUseCaseMockRecorder) AddUserViaLink(uid, accessPath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserViaLink", reflect.TypeOf((*MockBoardUseCase)(nil).AddUserViaLink), uid, accessPath)
+}
+
 // CreateBoard mocks base method.
 func (m *MockBoardUseCase) CreateBoard(board *models.Board) (uint, error) {
 	m.ctrl.T.Helper()
@@ -106,6 +121,21 @@ func (m *MockBoardUseCase) ToggleUser(uid, bid, toggledUserID uint) (*models.Boa
 func (mr *MockBoardUseCaseMockRecorder) ToggleUser(uid, bid, toggledUserID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToggleUser", reflect.TypeOf((*MockBoardUseCase)(nil).ToggleUser), uid, bid, toggledUserID)
+}
+
+// UpdateAccessPath mocks base method.
+func (m *MockBoardUseCase) UpdateAccessPath(uid, bid uint) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccessPath", uid, bid)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAccessPath indicates an expected call of UpdateAccessPath.
+func (mr *MockBoardUseCaseMockRecorder) UpdateAccessPath(uid, bid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccessPath", reflect.TypeOf((*MockBoardUseCase)(nil).UpdateAccessPath), uid, bid)
 }
 
 // UpdateBoard mocks base method.
