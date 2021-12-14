@@ -7,8 +7,14 @@ import (
 	usecaseImpl "backendServer/app/microservices/session/usecase/impl"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
+	"backendServer/pkg/metrics"
 	"net"
+	"net/http"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"google.golang.org/grpc/keepalive"
 
@@ -45,6 +51,9 @@ func (service *Service) Run() {
 	}
 	defer everythingCloser.Close(redisPool.Close)
 
+	// Prometheus metrics
+	prometheus.MustRegister(metrics.SessionHits)
+
 	// Repository
 	sessionRepo := store.CreateSessionRepository(redisPool, uint64(24*(3*time.Hour)), everythingCloser)
 
@@ -59,6 +68,13 @@ func (service *Service) Run() {
 	}
 	defer everythingCloser.Close(listener.Close)
 
+	// Prometheus server
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		logger.Error(http.ListenAndServe(service.settings.ServiceMetricsPort, nil))
+	}()
+
+	// GRPC server
 	grpcSrv := grpc.NewServer(
 		grpc.KeepaliveParams(keepalive.ServerParameters{MaxConnectionIdle: 5 * time.Minute}),
 	)

@@ -7,7 +7,13 @@ import (
 	"backendServer/app/microservices/email/usecase/impl"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
+	"backendServer/pkg/metrics"
 	"crypto/tls"
+	"net/http"
+
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"gopkg.in/gomail.v2"
 	"gorm.io/driver/postgres"
@@ -90,8 +96,23 @@ func (service *Service) Run() {
 		return
 	}
 
+	// Prometheus metrics
+	prometheus.MustRegister(metrics.EmailHits)
+
+	// Repository
 	emailRepo := store.CreateEmailRepository(postgresClient)
+
+	// UseCase
 	emailUseCase := impl.CreateEmailUseCase(emailRepo, service.settings.MailUsername)
+
+	// Handler
 	emailHandler := handler.CreateEmailServer(emailUseCase, logger, mailDealer, channel, queue.Name, service.settings.ConsumerName)
+
+	// Prometheus server
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		logger.Error(http.ListenAndServe(service.settings.ServiceMetricsPort, nil))
+	}()
+
 	emailHandler.Run()
 }

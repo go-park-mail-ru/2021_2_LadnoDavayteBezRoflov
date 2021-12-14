@@ -11,6 +11,8 @@ type Settings struct {
 	ServiceProtocol string `mapstructure:"service_protocol"`
 	ServicePort     string `mapstructure:"service_port"`
 
+	ServiceMetricsPort string `mapstructure:"service_metrics_port"`
+
 	LogFilePath string
 
 	RedisProtocol string `mapstructure:"redis_protocol"`
@@ -37,6 +39,8 @@ func InitSettings() (settings Settings) {
 	settings = Settings{
 		ServiceProtocol: viper.GetString("service_protocol"),
 		ServicePort:     viper.GetString("service_port"),
+
+		ServiceMetricsPort: viper.GetString("service_metrics_port"),
 
 		LogFilePath: env.SESSION_LOG_LOCATION,
 
