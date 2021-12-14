@@ -3,8 +3,11 @@ package handlers
 import (
 	customErrors "backendServer/pkg/errors"
 	"backendServer/pkg/logger"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/penglongli/gin-metrics/ginmetrics"
 
 	"github.com/google/uuid"
 
@@ -37,6 +40,10 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 		c.Next()
 
 		if len(c.Errors) > 0 {
+			for _, err := range c.Errors {
+				_ = ginmetrics.GetMonitor().GetMetric("api_errors").Inc([]string{strconv.Itoa(customErrors.ResolveErrorToCode(err)), err.Error()})
+			}
+
 			err := customErrors.FindError(c.Errors.Last())
 			c.JSON(customErrors.ResolveErrorToCode(err), gin.H{"error": err.Error()})
 		}

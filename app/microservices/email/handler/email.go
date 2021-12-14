@@ -4,6 +4,7 @@ import (
 	"backendServer/app/api/models"
 	"backendServer/app/microservices/email/usecase"
 	"backendServer/pkg/logger"
+	"backendServer/pkg/metrics"
 	"encoding/json"
 	"time"
 
@@ -57,6 +58,7 @@ func (emailServer *EmailServer) SendFirstLetter(channel *amqp.Channel) {
 		nil,                      // args
 	)
 	if err != nil {
+		metrics.EmailHits.WithLabelValues("500", "send first letter; can't consume").Inc()
 		emailServer.logger.Error(err)
 		return
 	}
@@ -68,21 +70,26 @@ func (emailServer *EmailServer) SendFirstLetter(channel *amqp.Channel) {
 			userInfo := new(models.PublicUserInfo)
 			err := json.Unmarshal(data.Body, userInfo)
 			if err != nil {
+				metrics.EmailHits.WithLabelValues("500", "send first letter; can't unmarshal").Inc()
 				emailServer.logger.Error(err)
 				return
 			}
 
 			emailLetter := emailServer.EmailUseCase.SendFirstLetter(userInfo)
 			if err = emailServer.mailDealer.DialAndSend(emailLetter); err != nil {
+				metrics.EmailHits.WithLabelValues("500", "send first letter; can't send").Inc()
 				emailServer.logger.Error(err)
 				return
 			}
 
 			err = data.Ack(false)
 			if err != nil {
+				metrics.EmailHits.WithLabelValues("500", "send first letter; can't ack").Inc()
 				emailServer.logger.Error(err)
 				return
 			}
+
+			metrics.EmailHits.WithLabelValues("200", "send first letter").Inc()
 		}
 	}()
 
@@ -94,14 +101,18 @@ func (emailServer *EmailServer) SendNotifications() {
 		go func() {
 			emailLetters, err := emailServer.EmailUseCase.SendNotifications()
 			if err != nil {
+				metrics.EmailHits.WithLabelValues("500", "send notifications; can't get letters").Inc()
 				emailServer.logger.Error(err)
 			}
 
 			for _, emailLetter := range *emailLetters {
 				if err = emailServer.mailDealer.DialAndSend(&emailLetter); err != nil {
+					metrics.EmailHits.WithLabelValues("500", "send notifications; can't send").Inc()
 					emailServer.logger.Error(err)
 					break
 				}
+
+				metrics.EmailHits.WithLabelValues("200", "send notifications").Inc()
 
 				duration := time.Duration(30) * time.Minute
 				time.Sleep(duration)

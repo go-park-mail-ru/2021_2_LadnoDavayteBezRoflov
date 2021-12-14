@@ -92,7 +92,7 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	if err != nil {
 		return
 	}
-	publicData.Email = "ant-chum@mail.ru"
+
 	body, err := json.Marshal(publicData)
 	if err != nil {
 		return

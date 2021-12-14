@@ -15,6 +15,8 @@ type Settings struct {
 
 	LogFilePath string
 
+	ServiceMetricsPort string
+
 	RabbitMQPath string
 	QueueName    string
 	ConsumerName string
@@ -50,6 +52,8 @@ func InitSettings() (settings Settings) {
 		MailPassword: viper.GetString("mail.password"),
 
 		LogFilePath: env.EMAIL_LOG_LOCATION,
+
+		ServiceMetricsPort: viper.GetString("service_metrics_port"),
 
 		RabbitMQPath: viper.GetString("rabbitmq_path"),
 		QueueName:    viper.GetString("queue_name"),

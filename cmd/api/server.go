@@ -8,6 +8,7 @@ import (
 	"backendServer/app/microservices/session/handler"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
+	"backendServer/pkg/metrics"
 	"backendServer/pkg/sessionCookieController"
 
 	"github.com/penglongli/gin-metrics/ginmetrics"
@@ -140,6 +141,7 @@ func (server *Server) Run() {
 
 	// get global Monitor object
 	monitor := ginmetrics.GetMonitor()
+	_ = ginmetrics.GetMonitor().AddMetric(metrics.APIErrors)
 	monitor.SetMetricPath("/metrics")
 	monitor.SetSlowTime(10)
 	monitor.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})

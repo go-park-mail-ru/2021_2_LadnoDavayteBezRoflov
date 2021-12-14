@@ -29,6 +29,9 @@ refis.conf/
 # rabbitmq
 rabbitmq/
 
+# grafana
+grafana/
+
 # microservices
 /api
 /session
