@@ -79,6 +79,5 @@ jobs:
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
               cd /home/ubuntu/02-backend/
-              screen -r backend
-              exit
+              screen -XS backend quit
               screen -dmS backend sudo docker-compose up
