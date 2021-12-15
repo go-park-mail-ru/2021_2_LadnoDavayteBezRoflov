@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/mailru/easyjson"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -42,7 +44,7 @@ func (cardHandler *CardHandler) CreateCard(c *gin.Context) {
 	}
 
 	card := new(models.Card)
-	if err := c.ShouldBindJSON(card); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, card); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -75,7 +77,13 @@ func (cardHandler *CardHandler) GetCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, card)
+	cardJSON, err := card.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", cardJSON)
 }
 
 func (cardHandler *CardHandler) UpdateCard(c *gin.Context) {
@@ -93,7 +101,7 @@ func (cardHandler *CardHandler) UpdateCard(c *gin.Context) {
 	}
 
 	card := new(models.Card)
-	if err := c.ShouldBindJSON(card); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, card); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -105,7 +113,13 @@ func (cardHandler *CardHandler) UpdateCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, card)
+	cardJSON, err := card.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", cardJSON)
 }
 
 func (cardHandler *CardHandler) DeleteCard(c *gin.Context) {
@@ -158,5 +172,11 @@ func (cardHandler *CardHandler) ToggleUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, card)
+	cardJSON, err := card.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", cardJSON)
 }

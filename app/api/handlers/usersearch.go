@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backendServer/app/api/models"
 	"backendServer/app/api/usecases"
 	customErrors "backendServer/pkg/errors"
 	"net/http"
@@ -51,7 +52,16 @@ func (userSearchHandler *UserSearchHandler) FindForCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	usersInfo := new(models.UsersSearchInfo)
+	*usersInfo = *users
+
+	usersInfoJSON, err := usersInfo.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", usersInfoJSON)
 }
 
 func (userSearchHandler *UserSearchHandler) FindForTeam(c *gin.Context) {
@@ -74,7 +84,16 @@ func (userSearchHandler *UserSearchHandler) FindForTeam(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	usersInfo := new(models.UsersSearchInfo)
+	*usersInfo = *users
+
+	usersInfoJSON, err := usersInfo.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", usersInfoJSON)
 }
 
 func (userSearchHandler *UserSearchHandler) FindForBoard(c *gin.Context) {
@@ -97,5 +116,14 @@ func (userSearchHandler *UserSearchHandler) FindForBoard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	usersInfo := new(models.UsersSearchInfo)
+	*usersInfo = *users
+
+	usersInfoJSON, err := usersInfo.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", usersInfoJSON)
 }

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/mailru/easyjson"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -49,10 +51,17 @@ func (commentHandler *CommentHandler) GetComment(c *gin.Context) {
 
 	comment, err := commentHandler.CommentUseCase.GetComment(uid.(uint), uint(cmid))
 	if err != nil {
+		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, comment)
+	commentJSON, err := comment.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", commentJSON)
 }
 
 func (commentHandler *CommentHandler) CreateComment(c *gin.Context) {
@@ -63,7 +72,7 @@ func (commentHandler *CommentHandler) CreateComment(c *gin.Context) {
 	}
 
 	comment := new(models.Comment)
-	if err := c.ShouldBindJSON(comment); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, comment); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -75,7 +84,13 @@ func (commentHandler *CommentHandler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, comment)
+	commentJSON, err := comment.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", commentJSON)
 }
 
 func (commentHandler *CommentHandler) UpdateComment(c *gin.Context) {
@@ -93,7 +108,7 @@ func (commentHandler *CommentHandler) UpdateComment(c *gin.Context) {
 	}
 
 	comment := new(models.Comment)
-	if err := c.ShouldBindJSON(comment); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, comment); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -105,7 +120,13 @@ func (commentHandler *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, comment)
+	commentJSON, err := comment.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", commentJSON)
 }
 
 func (commentHandler *CommentHandler) DeleteComment(c *gin.Context) {
