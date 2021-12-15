@@ -23,6 +23,13 @@ jobs:
       - name: Checkout code 
         uses: actions/checkout@v2
 
+      - name: Create env file
+        run: |
+          touch .env
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+          echo EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} >> .env
+
       - name: Set up linter
         run: sudo apt-get update;
           sudo apt-get install libwebp-dev;
@@ -72,5 +79,6 @@ jobs:
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
               cd /home/ubuntu/02-backend/
-              sudo docker-compose -f docker-compose.yml down
-              sudo docker-compose -f docker-compose.yml up
+              screen -r backend
+              exit
+              screen -dmS backend sudo docker-compose up
