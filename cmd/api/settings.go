@@ -88,7 +88,7 @@ func InitSettings() (settings Settings) {
 		Origins: []string{
 			"http://localhost:8000",
 			"http://prometheus:9090",
-			fmt.Sprintf("http://%s", env.FRONTEND_ADDRESS),
+			fmt.Sprintf("https://%s", env.FRONTEND_ADDRESS),
 		},
 
 		AllowedMethods: viper.GetStringSlice("allowed_methods"),

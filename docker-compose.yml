@@ -116,7 +116,7 @@ services:
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=backend_ldbr_db
             - DATABASE_HOST=db
-            - FRONTEND_ADDRESS=95.163.213.142
+            - FRONTEND_ADDRESS=brrrello.ru
             - GIN_MODE=debug
             - TZ=Europe/Moscow
             - PUBLIC_DIR=/assets
