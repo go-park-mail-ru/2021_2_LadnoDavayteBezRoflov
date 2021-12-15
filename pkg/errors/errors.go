@@ -28,6 +28,8 @@ var (
 
 	ErrCheckListItemNotFound = errors.New("check list item not found")
 
+	ErrAttachmentNotFound = errors.New("attachment not found")
+
 	ErrNoAccess = errors.New("no access")
 
 	ErrNotImplemented = errors.New("not implemented")
@@ -56,6 +58,8 @@ var errorToCodeMap = map[error]int{
 	ErrCheckListNotFound: http.StatusNotFound,
 
 	ErrCheckListItemNotFound: http.StatusNotFound,
+
+	ErrAttachmentNotFound: http.StatusNotFound,
 
 	ErrNoAccess: http.StatusForbidden,
 

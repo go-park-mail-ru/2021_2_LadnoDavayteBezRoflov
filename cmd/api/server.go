@@ -60,6 +60,7 @@ func (server *Server) Run() {
 		&models.Comment{},
 		&models.CheckList{},
 		&models.CheckListItem{},
+		&models.Attachment{},
 	)
 	if err != nil {
 		logger.Error(err)
@@ -117,6 +118,7 @@ func (server *Server) Run() {
 	commentRepo := stores.CreateCommentRepository(postgresClient)
 	checkListRepo := stores.CreateCheckListRepository(postgresClient)
 	checkListItemRepo := stores.CreateCheckListItemRepository(postgresClient)
+	attachmentRepo := stores.CreateAttachmentRepository(postgresClient, server.settings.AttachmentPath)
 
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
@@ -129,6 +131,7 @@ func (server *Server) Run() {
 	checkListUseCase := impl.CreateCheckListUseCase(checkListRepo, userRepo)
 	checkListItemUseCase := impl.CreateCheckListItemUseCase(checkListItemRepo, userRepo)
 	userSearchUseCase := impl.CreateUserSearchUseCase(userRepo, cardRepo, teamRepo, boardRepo)
+	attachmentUseCase := impl.CreateAttachmentUseCase(attachmentRepo)
 
 	// Middlewares
 	commonMiddleware := handlers.CreateCommonMiddleware(logger)
@@ -159,6 +162,7 @@ func (server *Server) Run() {
 	handlers.CreateCheckListHandler(rootGroup, server.settings.CheckListsURL, checkListUseCase, sessionMiddleware)
 	handlers.CreateCheckListItemHandler(rootGroup, server.settings.CheckListItemsURL, checkListItemUseCase, sessionMiddleware)
 	handlers.CreateUserSearchHandler(rootGroup, server.settings.UserSearchURL, userSearchUseCase, sessionMiddleware)
+	handlers.CreateCommentHandler(rootGroup, server.settings.AttachmentURL, attachmentUseCase, sessionMiddleware)
 
 	err = router.Run(server.settings.ServerAddress)
 	if err != nil {
