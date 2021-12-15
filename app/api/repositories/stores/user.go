@@ -65,6 +65,9 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	if err != nil {
 		return err
 	}
+	defer func(out *os.File) {
+		_ = out.Close()
+	}(out)
 
 	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
 
@@ -158,6 +161,9 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 		if err != nil {
 			return err
 		}
+		defer func(in multipart.File) {
+			_ = in.Close()
+		}(in)
 
 		img, _, err := image.Decode(in)
 		if err != nil {
@@ -168,6 +174,9 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 		if err != nil {
 			return err
 		}
+		defer func(out *os.File) {
+			_ = out.Close()
+		}(out)
 
 		options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
 		if err != nil {

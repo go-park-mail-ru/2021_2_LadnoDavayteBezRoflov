@@ -183,7 +183,7 @@ func TestGetTeam(t *testing.T) {
 	req.AddCookie(csrfToken)
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestToggleUserTeam(t *testing.T) {

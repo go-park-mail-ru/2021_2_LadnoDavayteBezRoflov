@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/mailru/easyjson"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,13 +46,22 @@ func (boardHandler *BoardHandler) GetAllUserBoards(c *gin.Context) {
 		return
 	}
 
-	boards, err := boardHandler.BoardUseCase.GetUserBoards(uid.(uint))
+	boardsSlice, err := boardHandler.BoardUseCase.GetUserBoards(uid.(uint))
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, boards)
+	boards := new(models.Teams)
+	*boards = *boardsSlice
+
+	boardsJSON, err := boards.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", boardsJSON)
 }
 
 func (boardHandler *BoardHandler) GetBoard(c *gin.Context) {
@@ -73,7 +84,13 @@ func (boardHandler *BoardHandler) GetBoard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, board)
+	boardJSON, err := board.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", boardJSON)
 }
 
 func (boardHandler *BoardHandler) CreateBoard(c *gin.Context) {
@@ -84,7 +101,7 @@ func (boardHandler *BoardHandler) CreateBoard(c *gin.Context) {
 	}
 
 	board := new(models.Board)
-	if err := c.ShouldBindJSON(board); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, board); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -113,7 +130,7 @@ func (boardHandler *BoardHandler) UpdateBoard(c *gin.Context) {
 	}
 
 	board := new(models.Board)
-	if err := c.ShouldBindJSON(board); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, board); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -125,7 +142,13 @@ func (boardHandler *BoardHandler) UpdateBoard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, board)
+	boardJSON, err := board.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", boardJSON)
 }
 
 func (boardHandler *BoardHandler) DeleteBoard(c *gin.Context) {
@@ -178,7 +201,13 @@ func (boardHandler *BoardHandler) ToggleUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, board)
+	boardJSON, err := board.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", boardJSON)
 }
 
 func (boardHandler *BoardHandler) UpdateAccessLink(c *gin.Context) {
@@ -219,5 +248,11 @@ func (boardHandler *BoardHandler) AddUserViaLink(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, board)
+	boardJSON, err := board.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", boardJSON)
 }
