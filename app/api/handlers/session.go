@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/mailru/easyjson"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,7 +37,7 @@ func CreateSessionHandler(router *gin.RouterGroup,
 
 func (sessionHandler *SessionHandler) Create(c *gin.Context) {
 	user := new(models.User)
-	if err := c.ShouldBindJSON(user); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, user); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}

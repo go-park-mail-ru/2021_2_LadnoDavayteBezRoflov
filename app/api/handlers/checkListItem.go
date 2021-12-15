@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/mailru/easyjson"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -49,10 +51,17 @@ func (checkListItemHandler *CheckListItemHandler) GetCheckListItem(c *gin.Contex
 
 	checkListItem, err := checkListItemHandler.CheckListItemUseCase.GetCheckListItem(uid.(uint), uint(chliid))
 	if err != nil {
+		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, checkListItem)
+	checkListItemJSON, err := checkListItem.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", checkListItemJSON)
 }
 
 func (checkListItemHandler *CheckListItemHandler) CreateCheckListItem(c *gin.Context) {
@@ -63,7 +72,7 @@ func (checkListItemHandler *CheckListItemHandler) CreateCheckListItem(c *gin.Con
 	}
 
 	checkListItem := new(models.CheckListItem)
-	if err := c.ShouldBindJSON(checkListItem); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, checkListItem); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -92,7 +101,7 @@ func (checkListItemHandler *CheckListItemHandler) UpdateCheckListItem(c *gin.Con
 	}
 
 	checkListItem := new(models.CheckListItem)
-	if err := c.ShouldBindJSON(checkListItem); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, checkListItem); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -104,7 +113,13 @@ func (checkListItemHandler *CheckListItemHandler) UpdateCheckListItem(c *gin.Con
 		return
 	}
 
-	c.JSON(http.StatusOK, checkListItem)
+	checkListItemJSON, err := checkListItem.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", checkListItemJSON)
 }
 
 func (checkListItemHandler *CheckListItemHandler) DeleteCheckListItem(c *gin.Context) {

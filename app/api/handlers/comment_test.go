@@ -161,6 +161,19 @@ func TestGetComment(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// fail
+	sessionMock.EXPECT().GetUID(cookie.Value).Return(testUID, nil)
+	testComment.CMID = uint(2)
+	useCaseMock.EXPECT().GetComment(testUID, testComment.CMID).Return(nil, customErrors.ErrNoAccess)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/api/comments/2", nil)
+	req.AddCookie(cookie)
+	req.AddCookie(csrfToken)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestDeleteComment(t *testing.T) {

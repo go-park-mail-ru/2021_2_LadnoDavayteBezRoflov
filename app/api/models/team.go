@@ -6,6 +6,10 @@ const (
 	PrivateSpaceTeam
 )
 
+//easyjson:json
+type Teams []Team
+
+//easyjson:json
 type Team struct {
 	TID    uint    `json:"tid" gorm:"primaryKey"`
 	Title  string  `json:"team_name" faker:"word" gorm:"not null;unique;index"`

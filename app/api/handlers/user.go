@@ -7,6 +7,8 @@ import (
 	"backendServer/pkg/sessionCookieController"
 	"net/http"
 
+	"github.com/mailru/easyjson"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +34,7 @@ func CreateUserHandler(router *gin.RouterGroup, userURL string, userUseCase usec
 
 func (userHandler *UserHandler) CreateUser(c *gin.Context) {
 	user := new(models.User)
-	if err := c.ShouldBindJSON(user); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, user); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -62,7 +64,13 @@ func (userHandler *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	userJSON, err := user.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", userJSON)
 }
 
 func (userHandler *UserHandler) UpdateUser(c *gin.Context) {
@@ -73,7 +81,7 @@ func (userHandler *UserHandler) UpdateUser(c *gin.Context) {
 	}
 
 	user := new(models.User)
-	if err := c.ShouldBindJSON(user); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, user); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -85,7 +93,13 @@ func (userHandler *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	userJSON, err := user.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", userJSON)
 }
 
 func (userHandler *UserHandler) UpdateUserAvatar(c *gin.Context) {
@@ -112,5 +126,11 @@ func (userHandler *UserHandler) UpdateUserAvatar(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	userJSON, err := user.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", userJSON)
 }

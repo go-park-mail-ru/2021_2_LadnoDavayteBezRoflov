@@ -1,5 +1,9 @@
 package models
 
+//easyjson:json
+type UsersSearchInfo []UserSearchInfo
+
+//easyjson:json
 type UserSearchInfo struct {
 	UID    uint   `json:"uid"`
 	Login  string `json:"userName"`
