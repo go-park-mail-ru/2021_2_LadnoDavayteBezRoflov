@@ -63,7 +63,14 @@ jobs:
             key: ${{ secrets.PRIVATE_KEY }}
             source: "./*"
             target: "/home/ubuntu/02-backend/"
+
+        - name: executing remote ssh commands using password
+          uses: appleboy/ssh-action@master
+          with:
+            host: 95.163.213.142
+            username: ubuntu
+            key: ${{ secrets.PRIVATE_KEY }}
             script: |
+              cd /home/ubuntu/02-backend/
               sudo docker-compose -f docker-compose.yml down
               sudo docker-compose -f docker-compose.yml up
-              
