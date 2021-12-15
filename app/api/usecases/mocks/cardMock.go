@@ -78,6 +78,21 @@ func (mr *MockCardUseCaseMockRecorder) GetCard(uid, cid interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCard", reflect.TypeOf((*MockCardUseCase)(nil).GetCard), uid, cid)
 }
 
+// ToggleTag mocks base method.
+func (m *MockCardUseCase) ToggleTag(uid, cid, toggledTagID uint) (*models.Card, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ToggleTag", uid, cid, toggledTagID)
+	ret0, _ := ret[0].(*models.Card)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ToggleTag indicates an expected call of ToggleTag.
+func (mr *MockCardUseCaseMockRecorder) ToggleTag(uid, cid, toggledTagID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToggleTag", reflect.TypeOf((*MockCardUseCase)(nil).ToggleTag), uid, cid, toggledTagID)
+}
+
 // ToggleUser mocks base method.
 func (m *MockCardUseCase) ToggleUser(uid, cid, toggledUserID uint) (*models.Card, error) {
 	m.ctrl.T.Helper()

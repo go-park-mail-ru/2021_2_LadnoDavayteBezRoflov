@@ -122,6 +122,21 @@ func (mr *MockCardRepositoryMockRecorder) GetCardComments(cid interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCardComments", reflect.TypeOf((*MockCardRepository)(nil).GetCardComments), cid)
 }
 
+// GetCardTags mocks base method.
+func (m *MockCardRepository) GetCardTags(cid uint) (*[]models.Tag, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCardTags", cid)
+	ret0, _ := ret[0].(*[]models.Tag)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCardTags indicates an expected call of GetCardTags.
+func (mr *MockCardRepositoryMockRecorder) GetCardTags(cid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCardTags", reflect.TypeOf((*MockCardRepository)(nil).GetCardTags), cid)
+}
+
 // Move mocks base method.
 func (m *MockCardRepository) Move(fromPos, toPos, fromCardListID, toCardListID uint) error {
 	m.ctrl.T.Helper()

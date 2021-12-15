@@ -13,6 +13,7 @@ url: {
   boards_url:           '/boards',
   card_lists_url:       '/cardLists',
   cards_url:            '/cards',
+  tags_url:            '/tags',
   comments_url:         '/comments',
   check_lists_url:      '/checkLists',
   check_list_items_url: '/checkListItems',

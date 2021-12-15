@@ -96,6 +96,12 @@ func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Commen
 	return
 }
 
+func (cardStore *CardStore) GetCardTags(cid uint) (tags *[]models.Tag, err error) {
+	tags = new([]models.Tag)
+	err = cardStore.db.Model(&models.Card{CID: cid}).Association("Tags").Find(tags)
+	return
+}
+
 func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models.CheckList, err error) {
 	checkLists = new([]models.CheckList)
 	err = cardStore.db.Where("c_id = ?", cid).Order("chl_id").Find(checkLists).Error

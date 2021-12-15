@@ -10,10 +10,15 @@ import (
 type CardUseCaseImpl struct {
 	cardRepository repositories.CardRepository
 	userRepository repositories.UserRepository
+	tagRepository  repositories.TagRepository
 }
 
-func CreateCardUseCase(cardRepository repositories.CardRepository, userRepository repositories.UserRepository) usecases.CardUseCase {
-	return &CardUseCaseImpl{cardRepository: cardRepository, userRepository: userRepository}
+func CreateCardUseCase(
+	cardRepository repositories.CardRepository,
+	userRepository repositories.UserRepository,
+	tagRepository repositories.TagRepository,
+) usecases.CardUseCase {
+	return &CardUseCaseImpl{cardRepository: cardRepository, userRepository: userRepository, tagRepository: tagRepository}
 }
 
 func (cardUseCase *CardUseCaseImpl) CreateCard(card *models.Card) (cid uint, err error) {
@@ -38,6 +43,15 @@ func (cardUseCase *CardUseCaseImpl) GetCard(uid, cid uint) (card *models.Card, e
 	if err != nil {
 		return
 	}
+
+	tags, err := cardUseCase.cardRepository.GetCardTags(cid)
+	if err != nil {
+		return
+	}
+	for i, tag := range *tags {
+		(*tags)[i].Color = models.AvailableColors[tag.ColorID-1]
+	}
+	card.Tags = *tags
 
 	comments, err := cardUseCase.cardRepository.GetCardComments(cid)
 	if err != nil {
@@ -99,6 +113,24 @@ func (cardUseCase *CardUseCaseImpl) ToggleUser(uid, cid, toggledUserID uint) (ca
 	}
 
 	err = cardUseCase.userRepository.AddUserToCard(toggledUserID, cid)
+	if err != nil {
+		return
+	}
+
+	return cardUseCase.GetCard(uid, cid)
+}
+
+func (cardUseCase *CardUseCaseImpl) ToggleTag(uid, cid, toggledTagID uint) (card *models.Card, err error) {
+	isAccessed, err := cardUseCase.userRepository.IsCardAccessed(uid, cid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
+
+	err = cardUseCase.tagRepository.AddTagToCard(toggledTagID, cid)
 	if err != nil {
 		return
 	}

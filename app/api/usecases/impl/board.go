@@ -99,6 +99,8 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 		return
 	}
 
+	board.AvailableColors = models.AvailableColors
+
 	members, err := boardUseCase.boardRepository.GetBoardMembers(board)
 	if err != nil {
 		return
@@ -109,6 +111,12 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 	if err != nil {
 		return nil, err
 	}
+
+	tags, err := boardUseCase.boardRepository.GetBoardTags(bid)
+	if err != nil {
+		return
+	}
+	board.Tags = *tags
 
 	for i, list := range *lists {
 		var cards *[]models.Card
@@ -127,6 +135,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 			if err != nil {
 				return
 			}
+
 			for index, comment := range *comments {
 				var user *models.PublicUserInfo
 				user, err = boardUseCase.userRepository.GetPublicData(comment.UID)
@@ -136,8 +145,21 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 				(*comments)[index].User = *user
 				(*comments)[index].DateParsed = comment.Date.Round(time.Second).String()
 			}
+
 			(*cards)[j].Assignees = *users
 			(*cards)[j].Comments = *comments
+
+			var tags *[]models.Tag
+			tags, err = boardUseCase.cardRepository.GetCardTags(card.CID)
+			if err != nil {
+				return
+			}
+
+			for index, tag := range *tags {
+				(*tags)[index].Color = models.AvailableColors[tag.ColorID-1]
+			}
+
+			(*cards)[j].Tags = *tags
 
 			var checkLists *[]models.CheckList
 			checkLists, err = boardUseCase.cardRepository.GetCardCheckLists(card.CID)

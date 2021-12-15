@@ -92,6 +92,52 @@ func easyjson202377feDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Boar
 				}
 				in.Delim(']')
 			}
+		case "tags":
+			if in.IsNull() {
+				in.Skip()
+				out.Tags = nil
+			} else {
+				in.Delim('[')
+				if out.Tags == nil {
+					if !in.IsDelim(']') {
+						out.Tags = make([]Tag, 0, 0)
+					} else {
+						out.Tags = []Tag{}
+					}
+				} else {
+					out.Tags = (out.Tags)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v3 Tag
+					(v3).UnmarshalEasyJSON(in)
+					out.Tags = append(out.Tags, v3)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "colors":
+			if in.IsNull() {
+				in.Skip()
+				out.AvailableColors = nil
+			} else {
+				in.Delim('[')
+				if out.AvailableColors == nil {
+					if !in.IsDelim(']') {
+						out.AvailableColors = make([]Color, 0, 2)
+					} else {
+						out.AvailableColors = []Color{}
+					}
+				} else {
+					out.AvailableColors = (out.AvailableColors)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v4 Color
+					(v4).UnmarshalEasyJSON(in)
+					out.AvailableColors = append(out.AvailableColors, v4)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -138,11 +184,11 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v3, v4 := range in.Members {
-				if v3 > 0 {
+			for v5, v6 := range in.Members {
+				if v5 > 0 {
 					out.RawByte(',')
 				}
-				(v4).MarshalEasyJSON(out)
+				(v6).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -154,11 +200,43 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range in.CardLists {
-				if v5 > 0 {
+			for v7, v8 := range in.CardLists {
+				if v7 > 0 {
 					out.RawByte(',')
 				}
-				(v6).MarshalEasyJSON(out)
+				(v8).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"tags\":"
+		out.RawString(prefix)
+		if in.Tags == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v9, v10 := range in.Tags {
+				if v9 > 0 {
+					out.RawByte(',')
+				}
+				(v10).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"colors\":"
+		out.RawString(prefix)
+		if in.AvailableColors == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v11, v12 := range in.AvailableColors {
+				if v11 > 0 {
+					out.RawByte(',')
+				}
+				(v12).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
