@@ -36,7 +36,7 @@ func (tagUseCase *TagUseCaseImpl) GetTag(uid, tgid uint) (tag *models.Tag, err e
 		return
 	}
 
-	isAccessed, err := tagUseCase.userRepository.IsBoardAccessed(uid, tgid)
+	isAccessed, err := tagUseCase.userRepository.IsBoardAccessed(uid, tag.BID)
 	if err != nil {
 		return
 	}
