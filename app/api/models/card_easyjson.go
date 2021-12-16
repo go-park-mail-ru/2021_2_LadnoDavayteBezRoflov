@@ -146,6 +146,29 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 				}
 				in.Delim(']')
 			}
+		case "attachments":
+			if in.IsNull() {
+				in.Skip()
+				out.Attachments = nil
+			} else {
+				in.Delim('[')
+				if out.Attachments == nil {
+					if !in.IsDelim(']') {
+						out.Attachments = make([]Attachment, 0, 1)
+					} else {
+						out.Attachments = []Attachment{}
+					}
+				} else {
+					out.Attachments = (out.Attachments)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v5 Attachment
+					(v5).UnmarshalEasyJSON(in)
+					out.Attachments = append(out.Attachments, v5)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -212,11 +235,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range in.Comments {
-				if v5 > 0 {
+			for v6, v7 := range in.Comments {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				(v6).MarshalEasyJSON(out)
+				(v7).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -228,11 +251,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v7, v8 := range in.CheckLists {
-				if v7 > 0 {
+			for v8, v9 := range in.CheckLists {
+				if v8 > 0 {
 					out.RawByte(',')
 				}
-				(v8).MarshalEasyJSON(out)
+				(v9).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -244,11 +267,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v9, v10 := range in.Tags {
-				if v9 > 0 {
+			for v10, v11 := range in.Tags {
+				if v10 > 0 {
 					out.RawByte(',')
 				}
-				(v10).MarshalEasyJSON(out)
+				(v11).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -260,11 +283,27 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.Assignees {
-				if v11 > 0 {
+			for v12, v13 := range in.Assignees {
+				if v12 > 0 {
 					out.RawByte(',')
 				}
-				(v12).MarshalEasyJSON(out)
+				(v13).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"attachments\":"
+		out.RawString(prefix)
+		if in.Attachments == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v14, v15 := range in.Attachments {
+				if v14 > 0 {
+					out.RawByte(',')
+				}
+				(v15).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}

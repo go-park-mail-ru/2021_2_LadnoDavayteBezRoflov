@@ -110,6 +110,12 @@ func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models.Ch
 	return
 }
 
+func (cardStore *CardStore) GetCardAttachments(cid uint) (attachments *[]models.Attachment, err error) {
+	attachments = new([]models.Attachment)
+	err = cardStore.db.Where("c_id = ?", cid).Order("at_id").Find(attachments).Error
+	return
+}
+
 func (cardStore *CardStore) move(from, to, clid uint, isToLeftMove bool) (err error) {
 	subQuery := cardStore.db.Model(&models.Card{}).Where(
 		"cl_id = ? AND position_on_card_list BETWEEN ? AND ?",

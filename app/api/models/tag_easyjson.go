@@ -43,7 +43,7 @@ func easyjson13673cd6DecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Tag)
 		case "tag_name":
 			out.Title = string(in.String())
 		case "color":
-			easyjson13673cd6DecodeBackendServerAppApiModels1(in, &out.Color)
+			(out.Color).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -76,7 +76,7 @@ func easyjson13673cd6EncodeBackendServerAppApiModels(out *jwriter.Writer, in Tag
 	{
 		const prefix string = ",\"color\":"
 		out.RawString(prefix)
-		easyjson13673cd6EncodeBackendServerAppApiModels1(out, in.Color)
+		(in.Color).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -103,53 +103,4 @@ func (v *Tag) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Tag) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson13673cd6DecodeBackendServerAppApiModels(l, v)
-}
-func easyjson13673cd6DecodeBackendServerAppApiModels1(in *jlexer.Lexer, out *Color) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "clrid":
-			out.CLRID = uint(in.Uint())
-		case "color_name":
-			out.Name = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson13673cd6EncodeBackendServerAppApiModels1(out *jwriter.Writer, in Color) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"clrid\":"
-		out.RawString(prefix[1:])
-		out.Uint(uint(in.CLRID))
-	}
-	{
-		const prefix string = ",\"color_name\":"
-		out.RawString(prefix)
-		out.String(string(in.Name))
-	}
-	out.RawByte('}')
 }

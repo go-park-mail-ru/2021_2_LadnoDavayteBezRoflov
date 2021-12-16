@@ -107,6 +107,21 @@ func (mr *MockCardRepositoryMockRecorder) GetByID(cid interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockCardRepository)(nil).GetByID), cid)
 }
 
+// GetCardAttachments mocks base method.
+func (m *MockCardRepository) GetCardAttachments(cid uint) (*[]models.Attachment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCardAttachments", cid)
+	ret0, _ := ret[0].(*[]models.Attachment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCardAttachments indicates an expected call of GetCardAttachments.
+func (mr *MockCardRepositoryMockRecorder) GetCardAttachments(cid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCardAttachments", reflect.TypeOf((*MockCardRepository)(nil).GetCardAttachments), cid)
+}
+
 // GetCardCheckLists mocks base method.
 func (m *MockCardRepository) GetCardCheckLists(cid uint) (*[]models.CheckList, error) {
 	m.ctrl.T.Helper()

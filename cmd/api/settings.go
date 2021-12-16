@@ -23,6 +23,7 @@ type Settings struct {
 	CheckListsURL     string `mapstructure:"check_lists_url"`
 	CheckListItemsURL string `mapstructure:"check_list_items_url"`
 	UserSearchURL     string `mapstructure:"user_search_url"`
+	AttachmentsURL    string `mapstructure:"attachments_url"`
 
 	ServerAddress         string `mapstructure:"server_address"`
 	SessionServiceAddress string `mapstructure:"session_service_address"`
@@ -39,6 +40,7 @@ type Settings struct {
 
 	LogFilePath       string
 	AvatarsPath       string
+	AttachmentsPath   string
 	DefaultAvatarName string `mapstructure:"default_avatar_name"`
 
 	PostgresDsn string
@@ -80,6 +82,7 @@ func InitSettings() (settings Settings) {
 		CheckListsURL:     viper.GetString("url.check_lists_url"),
 		CheckListItemsURL: viper.GetString("url.check_list_items_url"),
 		UserSearchURL:     viper.GetString("url.user_search_url"),
+		AttachmentsURL:    viper.GetString("url.attachments_url"),
 
 		ServerAddress:         viper.GetString("server_address"),
 		SessionServiceAddress: viper.GetString("session_service_address"),
@@ -101,6 +104,7 @@ func InitSettings() (settings Settings) {
 
 		LogFilePath:       env.LOG_LOCATION,
 		AvatarsPath:       env.FRONTEND_PATH,
+		AttachmentsPath:   env.FRONTEND_PATH,
 		DefaultAvatarName: viper.GetString("default_avatar_name"),
 
 		PostgresDsn: fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DATABASE_HOST, env.POSTGRES_USER, env.POSTGRES_PASSWORD, env.POSTGRES_DB, env.DB_PORT),

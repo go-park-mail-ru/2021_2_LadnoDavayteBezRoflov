@@ -45,7 +45,7 @@ func (teamStore *TeamStore) Update(team *models.Team) (err error) {
 }
 
 func (teamStore *TeamStore) Delete(tid uint) (err error) {
-	return teamStore.db.Delete(tid).Error
+	return teamStore.db.Delete(&models.Team{}, tid).Error
 }
 
 func (teamStore *TeamStore) GetByID(tid uint) (*models.Team, error) {

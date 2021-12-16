@@ -15,4 +15,5 @@ type Card struct {
 	Tags               []Tag            `json:"tags" faker:"-" gorm:"many2many:tags_cards;"`
 	Users              []User           `json:"-" gorm:"many2many:users_cards;constraint:OnDelete:CASCADE;"`
 	Assignees          []PublicUserInfo `json:"assignees" gorm:"-"`
+	Attachments        []Attachment     `json:"attachments" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`
 }

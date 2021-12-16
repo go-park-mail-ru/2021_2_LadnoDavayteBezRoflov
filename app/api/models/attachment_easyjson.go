@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonE9abebc9DecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Comment) {
+func easyjson76362c5bDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Attachment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -36,18 +36,14 @@ func easyjsonE9abebc9DecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Comm
 			continue
 		}
 		switch key {
-		case "cmid":
-			out.CMID = uint(in.Uint())
+		case "atid":
+			out.ATID = uint(in.Uint())
 		case "cid":
 			out.CID = uint(in.Uint())
-		case "uid":
-			out.UID = uint(in.Uint())
-		case "text":
-			out.Text = string(in.String())
-		case "date":
-			out.DateParsed = string(in.String())
-		case "user":
-			(out.User).UnmarshalEasyJSON(in)
+		case "file_tech_name":
+			out.AttachmentTechName = string(in.String())
+		case "file_pub_name":
+			out.AttachmentPubName = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -58,14 +54,14 @@ func easyjsonE9abebc9DecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Comm
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeBackendServerAppApiModels(out *jwriter.Writer, in Comment) {
+func easyjson76362c5bEncodeBackendServerAppApiModels(out *jwriter.Writer, in Attachment) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"cmid\":"
+		const prefix string = ",\"atid\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.CMID))
+		out.Uint(uint(in.ATID))
 	}
 	{
 		const prefix string = ",\"cid\":"
@@ -73,48 +69,38 @@ func easyjsonE9abebc9EncodeBackendServerAppApiModels(out *jwriter.Writer, in Com
 		out.Uint(uint(in.CID))
 	}
 	{
-		const prefix string = ",\"uid\":"
+		const prefix string = ",\"file_tech_name\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.UID))
+		out.String(string(in.AttachmentTechName))
 	}
 	{
-		const prefix string = ",\"text\":"
+		const prefix string = ",\"file_pub_name\":"
 		out.RawString(prefix)
-		out.String(string(in.Text))
-	}
-	{
-		const prefix string = ",\"date\":"
-		out.RawString(prefix)
-		out.String(string(in.DateParsed))
-	}
-	{
-		const prefix string = ",\"user\":"
-		out.RawString(prefix)
-		(in.User).MarshalEasyJSON(out)
+		out.String(string(in.AttachmentPubName))
 	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v Comment) MarshalJSON() ([]byte, error) {
+func (v Attachment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeBackendServerAppApiModels(&w, v)
+	easyjson76362c5bEncodeBackendServerAppApiModels(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Comment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeBackendServerAppApiModels(w, v)
+func (v Attachment) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson76362c5bEncodeBackendServerAppApiModels(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *Comment) UnmarshalJSON(data []byte) error {
+func (v *Attachment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeBackendServerAppApiModels(&r, v)
+	easyjson76362c5bDecodeBackendServerAppApiModels(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Comment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeBackendServerAppApiModels(l, v)
+func (v *Attachment) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson76362c5bDecodeBackendServerAppApiModels(l, v)
 }

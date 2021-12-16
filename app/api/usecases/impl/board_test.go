@@ -147,6 +147,9 @@ func TestGetBoard(t *testing.T) {
 	testComment := new(models.Comment)
 	err = faker.FakeData(testComment)
 	assert.NoError(t, err)
+	testAttachment := new(models.Attachment)
+	err = faker.FakeData(testAttachment)
+	assert.NoError(t, err)
 	testCheckList := new(models.CheckList)
 	err = faker.FakeData(testCheckList)
 	assert.NoError(t, err)
@@ -156,6 +159,7 @@ func TestGetBoard(t *testing.T) {
 	testCheckList.CheckListItems = append(testCheckList.CheckListItems, *testCheckListItem)
 	testCard.CheckLists = append(testCard.CheckLists, *testCheckList)
 	testCard.Comments = append(testCard.Comments, *testComment)
+	testCard.Attachments = append(testCard.Attachments, *testAttachment)
 	testCard.Tags = append(testCard.Tags, *testTag)
 	testCardList.Cards = append(testCardList.Cards, *testCard)
 	testBoard.CardLists = append(testBoard.CardLists, *testCardList)
@@ -179,6 +183,7 @@ func TestGetBoard(t *testing.T) {
 		cardListRepoMock.EXPECT().GetCardListCards(cardList.CLID).Return(&cardList.Cards, nil)
 		for _, card := range cardList.Cards {
 			cardRepoMock.EXPECT().GetCardComments(card.CID).Return(&card.Comments, nil)
+			cardRepoMock.EXPECT().GetCardAttachments(card.CID).Return(&card.Attachments, nil)
 			cardRepoMock.EXPECT().GetAssignedUsers(card.CID).Return(&card.Assignees, nil)
 			for _, comment := range card.Comments {
 				userRepoMock.EXPECT().GetPublicData(comment.UID).Return(&comment.User, nil)
@@ -267,6 +272,19 @@ func TestGetBoard(t *testing.T) {
 	_, err = boardUseCase.GetBoard(uid, bid)
 	assert.Equal(t, customErrors.ErrInternal, err)
 
+	// can't get attachments
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
+	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
+	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
+	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
+	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
+	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
+	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(nil, customErrors.ErrInternal)
+	_, err = boardUseCase.GetBoard(uid, bid)
+	assert.Equal(t, customErrors.ErrInternal, err)
+
 	// can't get assigned users
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
@@ -276,6 +294,7 @@ func TestGetBoard(t *testing.T) {
 	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
+	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
 	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(nil, customErrors.ErrInternal)
 	_, err = boardUseCase.GetBoard(uid, bid)
 	assert.Equal(t, customErrors.ErrInternal, err)
@@ -289,6 +308,7 @@ func TestGetBoard(t *testing.T) {
 	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
+	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
 	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Assignees, nil)
 	userRepoMock.EXPECT().GetPublicData(testBoard.CardLists[0].Cards[0].Comments[0].UID).Return(nil, customErrors.ErrInternal)
 	_, err = boardUseCase.GetBoard(uid, bid)
@@ -303,6 +323,7 @@ func TestGetBoard(t *testing.T) {
 	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
+	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
 	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Assignees, nil)
 	userRepoMock.EXPECT().GetPublicData(testBoard.CardLists[0].Cards[0].Comments[0].UID).Return(&testBoard.CardLists[0].Cards[0].Comments[0].User, nil)
 	cardRepoMock.EXPECT().GetCardTags(testBoard.CardLists[0].Cards[0].CID).Return(nil, customErrors.ErrInternal)
@@ -318,6 +339,7 @@ func TestGetBoard(t *testing.T) {
 	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
+	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
 	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Assignees, nil)
 	userRepoMock.EXPECT().GetPublicData(testBoard.CardLists[0].Cards[0].Comments[0].UID).Return(&testBoard.CardLists[0].Cards[0].Comments[0].User, nil)
 	cardRepoMock.EXPECT().GetCardTags(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Tags, nil)
@@ -334,6 +356,7 @@ func TestGetBoard(t *testing.T) {
 	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
+	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
 	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Assignees, nil)
 	userRepoMock.EXPECT().GetPublicData(testBoard.CardLists[0].Cards[0].Comments[0].UID).Return(&testBoard.CardLists[0].Cards[0].Comments[0].User, nil)
 	cardRepoMock.EXPECT().GetCardTags(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Tags, nil)
@@ -439,6 +462,7 @@ func TestToggleBoard(t *testing.T) {
 		cardListRepoMock.EXPECT().GetCardListCards(cardList.CLID).Return(&cardList.Cards, nil)
 		for _, card := range cardList.Cards {
 			cardRepoMock.EXPECT().GetCardComments(card.CID).Return(&card.Comments, nil)
+			cardRepoMock.EXPECT().GetAssignedUsers(card.CID).Return(&card.Attachments, nil)
 			cardRepoMock.EXPECT().GetAssignedUsers(card.CID).Return(&card.Assignees, nil)
 			for _, comment := range card.Comments {
 				userRepoMock.EXPECT().GetPublicData(comment.UID).Return(&comment.User, nil)

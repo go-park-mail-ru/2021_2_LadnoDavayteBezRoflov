@@ -59,7 +59,7 @@ func easyjson6d88e0beDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Chec
 				}
 				for !in.IsDelim(']') {
 					var v1 CheckListItem
-					easyjson6d88e0beDecodeBackendServerAppApiModels1(in, &v1)
+					(v1).UnmarshalEasyJSON(in)
 					out.CheckListItems = append(out.CheckListItems, v1)
 					in.WantComma()
 				}
@@ -105,7 +105,7 @@ func easyjson6d88e0beEncodeBackendServerAppApiModels(out *jwriter.Writer, in Che
 				if v2 > 0 {
 					out.RawByte(',')
 				}
-				easyjson6d88e0beEncodeBackendServerAppApiModels1(out, v3)
+				(v3).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -135,67 +135,4 @@ func (v *CheckList) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *CheckList) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson6d88e0beDecodeBackendServerAppApiModels(l, v)
-}
-func easyjson6d88e0beDecodeBackendServerAppApiModels1(in *jlexer.Lexer, out *CheckListItem) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "chliid":
-			out.CHLIID = uint(in.Uint())
-		case "chlid":
-			out.CHLID = uint(in.Uint())
-		case "text":
-			out.Text = string(in.String())
-		case "status":
-			out.Status = bool(in.Bool())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson6d88e0beEncodeBackendServerAppApiModels1(out *jwriter.Writer, in CheckListItem) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"chliid\":"
-		out.RawString(prefix[1:])
-		out.Uint(uint(in.CHLIID))
-	}
-	{
-		const prefix string = ",\"chlid\":"
-		out.RawString(prefix)
-		out.Uint(uint(in.CHLID))
-	}
-	{
-		const prefix string = ",\"text\":"
-		out.RawString(prefix)
-		out.String(string(in.Text))
-	}
-	{
-		const prefix string = ",\"status\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.Status))
-	}
-	out.RawByte('}')
 }

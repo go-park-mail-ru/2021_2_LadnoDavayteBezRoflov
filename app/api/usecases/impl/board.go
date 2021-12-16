@@ -140,6 +140,11 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 			if err != nil {
 				return
 			}
+			var attachments *[]models.Attachment
+			attachments, err = boardUseCase.cardRepository.GetCardAttachments(card.CID)
+			if err != nil {
+				return
+			}
 			var users *[]models.PublicUserInfo
 			users, err = boardUseCase.cardRepository.GetAssignedUsers(card.CID)
 			if err != nil {
@@ -158,6 +163,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 
 			(*cards)[j].Assignees = *users
 			(*cards)[j].Comments = *comments
+			(*cards)[j].Attachments = *attachments
 
 			var tags *[]models.Tag
 			tags, err = boardUseCase.cardRepository.GetCardTags(card.CID)
