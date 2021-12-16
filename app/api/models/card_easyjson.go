@@ -48,6 +48,8 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 			out.Title = string(in.String())
 		case "description":
 			out.Description = string(in.String())
+		case "access_path":
+			out.AccessPath = string(in.String())
 		case "deadline_check":
 			out.DeadlineChecked = bool(in.Bool())
 		case "deadline":
@@ -98,6 +100,29 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 				}
 				in.Delim(']')
 			}
+		case "tags":
+			if in.IsNull() {
+				in.Skip()
+				out.Tags = nil
+			} else {
+				in.Delim('[')
+				if out.Tags == nil {
+					if !in.IsDelim(']') {
+						out.Tags = make([]Tag, 0, 0)
+					} else {
+						out.Tags = []Tag{}
+					}
+				} else {
+					out.Tags = (out.Tags)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v3 Tag
+					(v3).UnmarshalEasyJSON(in)
+					out.Tags = append(out.Tags, v3)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		case "assignees":
 			if in.IsNull() {
 				in.Skip()
@@ -114,9 +139,9 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 					out.Assignees = (out.Assignees)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v3 PublicUserInfo
-					(v3).UnmarshalEasyJSON(in)
-					out.Assignees = append(out.Assignees, v3)
+					var v4 PublicUserInfo
+					(v4).UnmarshalEasyJSON(in)
+					out.Assignees = append(out.Assignees, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -137,9 +162,9 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 					out.Attachments = (out.Attachments)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v4 Attachment
-					(v4).UnmarshalEasyJSON(in)
-					out.Attachments = append(out.Attachments, v4)
+					var v5 Attachment
+					(v5).UnmarshalEasyJSON(in)
+					out.Attachments = append(out.Attachments, v5)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -189,6 +214,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 		out.String(string(in.Description))
 	}
 	{
+		const prefix string = ",\"access_path\":"
+		out.RawString(prefix)
+		out.String(string(in.AccessPath))
+	}
+	{
 		const prefix string = ",\"deadline_check\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.DeadlineChecked))
@@ -205,11 +235,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range in.Comments {
-				if v5 > 0 {
+			for v6, v7 := range in.Comments {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				(v6).MarshalEasyJSON(out)
+				(v7).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -221,11 +251,27 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v7, v8 := range in.CheckLists {
-				if v7 > 0 {
+			for v8, v9 := range in.CheckLists {
+				if v8 > 0 {
 					out.RawByte(',')
 				}
-				(v8).MarshalEasyJSON(out)
+				(v9).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"tags\":"
+		out.RawString(prefix)
+		if in.Tags == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v10, v11 := range in.Tags {
+				if v10 > 0 {
+					out.RawByte(',')
+				}
+				(v11).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -237,11 +283,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v9, v10 := range in.Assignees {
-				if v9 > 0 {
+			for v12, v13 := range in.Assignees {
+				if v12 > 0 {
 					out.RawByte(',')
 				}
-				(v10).MarshalEasyJSON(out)
+				(v13).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -253,11 +299,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.Attachments {
-				if v11 > 0 {
+			for v14, v15 := range in.Attachments {
+				if v14 > 0 {
 					out.RawByte(',')
 				}
-				(v12).MarshalEasyJSON(out)
+				(v15).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}

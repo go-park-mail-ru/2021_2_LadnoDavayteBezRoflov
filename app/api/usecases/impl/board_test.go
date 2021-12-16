@@ -140,6 +140,10 @@ func TestGetBoard(t *testing.T) {
 	testCard := new(models.Card)
 	err = faker.FakeData(testCard)
 	assert.NoError(t, err)
+	testTag := new(models.Tag)
+	err = faker.FakeData(testTag)
+	assert.NoError(t, err)
+	testTag.ColorID = uint(2)
 	testComment := new(models.Comment)
 	err = faker.FakeData(testComment)
 	assert.NoError(t, err)
@@ -156,6 +160,7 @@ func TestGetBoard(t *testing.T) {
 	testCard.CheckLists = append(testCard.CheckLists, *testCheckList)
 	testCard.Comments = append(testCard.Comments, *testComment)
 	testCard.Attachments = append(testCard.Attachments, *testAttachment)
+	testCard.Tags = append(testCard.Tags, *testTag)
 	testCardList.Cards = append(testCardList.Cards, *testCard)
 	testBoard.CardLists = append(testBoard.CardLists, *testCardList)
 
@@ -171,7 +176,9 @@ func TestGetBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	for _, cardList := range testBoard.CardLists {
 		cardListRepoMock.EXPECT().GetCardListCards(cardList.CLID).Return(&cardList.Cards, nil)
 		for _, card := range cardList.Cards {
@@ -181,6 +188,7 @@ func TestGetBoard(t *testing.T) {
 			for _, comment := range card.Comments {
 				userRepoMock.EXPECT().GetPublicData(comment.UID).Return(&comment.User, nil)
 			}
+			cardRepoMock.EXPECT().GetCardTags(card.CID).Return(&card.Tags, nil)
 			cardRepoMock.EXPECT().GetCardCheckLists(card.CID).Return(&card.CheckLists, nil)
 			for _, checkList := range card.CheckLists {
 				checkListRepoMock.EXPECT().GetCheckListItems(checkList.CHLID).Return(&checkList.CheckListItems, nil)
@@ -214,11 +222,30 @@ func TestGetBoard(t *testing.T) {
 	_, err = boardUseCase.GetBoard(uid, bid)
 	assert.Equal(t, customErrors.ErrInternal, err)
 
+	// can't get board invited members
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
+	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
+	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(nil, customErrors.ErrInternal)
+	_, err = boardUseCase.GetBoard(uid, bid)
+	assert.Equal(t, customErrors.ErrInternal, err)
+
 	// can't get board card lists
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(nil, customErrors.ErrInternal)
+	_, err = boardUseCase.GetBoard(uid, bid)
+	assert.Equal(t, customErrors.ErrInternal, err)
+
+	// can't get board tags
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
+	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
+	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
+	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(nil, customErrors.ErrInternal)
 	_, err = boardUseCase.GetBoard(uid, bid)
 	assert.Equal(t, customErrors.ErrInternal, err)
 
@@ -226,7 +253,9 @@ func TestGetBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(nil, customErrors.ErrInternal)
 	_, err = boardUseCase.GetBoard(uid, bid)
 	assert.Equal(t, customErrors.ErrInternal, err)
@@ -235,7 +264,9 @@ func TestGetBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(nil, customErrors.ErrInternal)
 	_, err = boardUseCase.GetBoard(uid, bid)
@@ -245,7 +276,9 @@ func TestGetBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
 	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(nil, customErrors.ErrInternal)
@@ -256,7 +289,9 @@ func TestGetBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
 	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
@@ -268,7 +303,9 @@ func TestGetBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
 	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
@@ -277,16 +314,35 @@ func TestGetBoard(t *testing.T) {
 	_, err = boardUseCase.GetBoard(uid, bid)
 	assert.Equal(t, customErrors.ErrInternal, err)
 
-	// can't get check lists
+	// can't get card's tags
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
 	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
 	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Assignees, nil)
 	userRepoMock.EXPECT().GetPublicData(testBoard.CardLists[0].Cards[0].Comments[0].UID).Return(&testBoard.CardLists[0].Cards[0].Comments[0].User, nil)
+	cardRepoMock.EXPECT().GetCardTags(testBoard.CardLists[0].Cards[0].CID).Return(nil, customErrors.ErrInternal)
+	_, err = boardUseCase.GetBoard(uid, bid)
+	assert.Equal(t, customErrors.ErrInternal, err)
+
+	// can't get check lists
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
+	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
+	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
+	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
+	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
+	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
+	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
+	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Assignees, nil)
+	userRepoMock.EXPECT().GetPublicData(testBoard.CardLists[0].Cards[0].Comments[0].UID).Return(&testBoard.CardLists[0].Cards[0].Comments[0].User, nil)
+	cardRepoMock.EXPECT().GetCardTags(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Tags, nil)
 	cardRepoMock.EXPECT().GetCardCheckLists(testBoard.CardLists[0].Cards[0].CID).Return(nil, customErrors.ErrInternal)
 	_, err = boardUseCase.GetBoard(uid, bid)
 	assert.Equal(t, customErrors.ErrInternal, err)
@@ -295,12 +351,15 @@ func TestGetBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	cardListRepoMock.EXPECT().GetCardListCards(testBoard.CardLists[0].CLID).Return(&testBoard.CardLists[0].Cards, nil)
 	cardRepoMock.EXPECT().GetCardComments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Comments, nil)
 	cardRepoMock.EXPECT().GetCardAttachments(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Attachments, nil)
 	cardRepoMock.EXPECT().GetAssignedUsers(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Assignees, nil)
 	userRepoMock.EXPECT().GetPublicData(testBoard.CardLists[0].Cards[0].Comments[0].UID).Return(&testBoard.CardLists[0].Cards[0].Comments[0].User, nil)
+	cardRepoMock.EXPECT().GetCardTags(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].Tags, nil)
 	cardRepoMock.EXPECT().GetCardCheckLists(testBoard.CardLists[0].Cards[0].CID).Return(&testBoard.CardLists[0].Cards[0].CheckLists, nil)
 	checkListRepoMock.EXPECT().GetCheckListItems(testBoard.CardLists[0].Cards[0].CheckLists[0].CHLID).Return(nil, customErrors.ErrInternal)
 	_, err = boardUseCase.GetBoard(uid, bid)
@@ -396,7 +455,9 @@ func TestToggleBoard(t *testing.T) {
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
 	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
 	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	boardRepoMock.EXPECT().GetBoardCardLists(bid).Return(&testBoard.CardLists, nil)
+	boardRepoMock.EXPECT().GetBoardTags(bid).Return(&testBoard.Tags, nil)
 	for _, cardList := range testBoard.CardLists {
 		cardListRepoMock.EXPECT().GetCardListCards(cardList.CLID).Return(&cardList.Cards, nil)
 		for _, card := range cardList.Cards {
@@ -406,6 +467,7 @@ func TestToggleBoard(t *testing.T) {
 			for _, comment := range card.Comments {
 				userRepoMock.EXPECT().GetPublicData(comment.UID).Return(&comment.User, nil)
 			}
+			cardRepoMock.EXPECT().GetCardTags(card.CID).Return(&card.Tags, nil)
 			cardRepoMock.EXPECT().GetCardCheckLists(card.CID).Return(&card.CheckLists, nil)
 			for _, checkList := range card.CheckLists {
 				checkListRepoMock.EXPECT().GetCheckListItems(checkList.CHLID).Return(&checkList.CheckListItems, nil)

@@ -34,6 +34,21 @@ func (m *MockCardUseCase) EXPECT() *MockCardUseCaseMockRecorder {
 	return m.recorder
 }
 
+// AddUserViaLink mocks base method.
+func (m *MockCardUseCase) AddUserViaLink(uid uint, accessPath string) (*models.Card, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddUserViaLink", uid, accessPath)
+	ret0, _ := ret[0].(*models.Card)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddUserViaLink indicates an expected call of AddUserViaLink.
+func (mr *MockCardUseCaseMockRecorder) AddUserViaLink(uid, accessPath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserViaLink", reflect.TypeOf((*MockCardUseCase)(nil).AddUserViaLink), uid, accessPath)
+}
+
 // CreateCard mocks base method.
 func (m *MockCardUseCase) CreateCard(card *models.Card) (uint, error) {
 	m.ctrl.T.Helper()
@@ -78,6 +93,21 @@ func (mr *MockCardUseCaseMockRecorder) GetCard(uid, cid interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCard", reflect.TypeOf((*MockCardUseCase)(nil).GetCard), uid, cid)
 }
 
+// ToggleTag mocks base method.
+func (m *MockCardUseCase) ToggleTag(uid, cid, toggledTagID uint) (*models.Card, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ToggleTag", uid, cid, toggledTagID)
+	ret0, _ := ret[0].(*models.Card)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ToggleTag indicates an expected call of ToggleTag.
+func (mr *MockCardUseCaseMockRecorder) ToggleTag(uid, cid, toggledTagID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToggleTag", reflect.TypeOf((*MockCardUseCase)(nil).ToggleTag), uid, cid, toggledTagID)
+}
+
 // ToggleUser mocks base method.
 func (m *MockCardUseCase) ToggleUser(uid, cid, toggledUserID uint) (*models.Card, error) {
 	m.ctrl.T.Helper()
@@ -91,6 +121,21 @@ func (m *MockCardUseCase) ToggleUser(uid, cid, toggledUserID uint) (*models.Card
 func (mr *MockCardUseCaseMockRecorder) ToggleUser(uid, cid, toggledUserID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToggleUser", reflect.TypeOf((*MockCardUseCase)(nil).ToggleUser), uid, cid, toggledUserID)
+}
+
+// UpdateAccessPath mocks base method.
+func (m *MockCardUseCase) UpdateAccessPath(uid, cid uint) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccessPath", uid, cid)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAccessPath indicates an expected call of UpdateAccessPath.
+func (mr *MockCardUseCaseMockRecorder) UpdateAccessPath(uid, cid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccessPath", reflect.TypeOf((*MockCardUseCase)(nil).UpdateAccessPath), uid, cid)
 }
 
 // UpdateCard mocks base method.

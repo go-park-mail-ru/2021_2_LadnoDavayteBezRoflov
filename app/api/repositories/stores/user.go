@@ -254,6 +254,19 @@ func (userStore *UserStore) FindBoardMembersByLogin(bid uint, text string, amoun
 	return
 }
 
+func (userStore *UserStore) FindBoardInvitedMembersByLogin(bid uint, text string, amount int) (users *[]models.PublicUserInfo, err error) {
+	users = new([]models.PublicUserInfo)
+	text = strings.Join([]string{"%", text, "%"}, "")
+
+	err = userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+		Where("boards.b_id = ? AND LOWER(users.login) LIKE ?", bid, strings.ToLower(text)).
+		Select("users.uid, users.login, users.avatar").Limit(amount).Find(users).Error
+
+	return
+}
+
 func (userStore *UserStore) GetUserTeams(uid uint) (teams *[]models.Team, err error) {
 	teams = new([]models.Team)
 	err = userStore.db.Model(&models.User{UID: uid}).Association("Teams").Find(teams)

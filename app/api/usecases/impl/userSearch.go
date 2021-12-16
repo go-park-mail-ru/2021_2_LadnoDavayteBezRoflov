@@ -125,16 +125,12 @@ func (userSearchUseCase *UserSearchUseCaseImpl) FindForBoard(uid, bid uint, text
 		return
 	}
 
-	matchedUsers, err := userSearchUseCase.userRepository.FindAllByLogin(text, 15)
+	matchedUsers, err := userSearchUseCase.userRepository.FindBoardInvitedMembersByLogin(bid, text, 15)
 	if err != nil {
 		return
 	}
 
-	board, err := userSearchUseCase.boardRepository.GetByID(bid)
-	if err != nil {
-		return
-	}
-	members, err := userSearchUseCase.boardRepository.GetBoardMembers(board)
+	members, err := userSearchUseCase.boardRepository.GetBoardInvitedMembers(bid)
 	if err != nil {
 		return
 	}

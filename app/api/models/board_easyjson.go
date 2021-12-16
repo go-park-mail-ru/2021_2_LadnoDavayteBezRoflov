@@ -69,6 +69,29 @@ func easyjson202377feDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Boar
 				}
 				in.Delim(']')
 			}
+		case "invited_members":
+			if in.IsNull() {
+				in.Skip()
+				out.InvitedMembers = nil
+			} else {
+				in.Delim('[')
+				if out.InvitedMembers == nil {
+					if !in.IsDelim(']') {
+						out.InvitedMembers = make([]PublicUserInfo, 0, 1)
+					} else {
+						out.InvitedMembers = []PublicUserInfo{}
+					}
+				} else {
+					out.InvitedMembers = (out.InvitedMembers)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v2 PublicUserInfo
+					(v2).UnmarshalEasyJSON(in)
+					out.InvitedMembers = append(out.InvitedMembers, v2)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		case "card_lists":
 			if in.IsNull() {
 				in.Skip()
@@ -85,9 +108,55 @@ func easyjson202377feDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Boar
 					out.CardLists = (out.CardLists)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v2 CardList
-					(v2).UnmarshalEasyJSON(in)
-					out.CardLists = append(out.CardLists, v2)
+					var v3 CardList
+					(v3).UnmarshalEasyJSON(in)
+					out.CardLists = append(out.CardLists, v3)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "tags":
+			if in.IsNull() {
+				in.Skip()
+				out.Tags = nil
+			} else {
+				in.Delim('[')
+				if out.Tags == nil {
+					if !in.IsDelim(']') {
+						out.Tags = make([]Tag, 0, 0)
+					} else {
+						out.Tags = []Tag{}
+					}
+				} else {
+					out.Tags = (out.Tags)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v4 Tag
+					(v4).UnmarshalEasyJSON(in)
+					out.Tags = append(out.Tags, v4)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "colors":
+			if in.IsNull() {
+				in.Skip()
+				out.AvailableColors = nil
+			} else {
+				in.Delim('[')
+				if out.AvailableColors == nil {
+					if !in.IsDelim(']') {
+						out.AvailableColors = make([]Color, 0, 2)
+					} else {
+						out.AvailableColors = []Color{}
+					}
+				} else {
+					out.AvailableColors = (out.AvailableColors)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v5 Color
+					(v5).UnmarshalEasyJSON(in)
+					out.AvailableColors = append(out.AvailableColors, v5)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -138,11 +207,27 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v3, v4 := range in.Members {
-				if v3 > 0 {
+			for v6, v7 := range in.Members {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				(v4).MarshalEasyJSON(out)
+				(v7).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"invited_members\":"
+		out.RawString(prefix)
+		if in.InvitedMembers == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v8, v9 := range in.InvitedMembers {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				(v9).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -154,11 +239,43 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range in.CardLists {
-				if v5 > 0 {
+			for v10, v11 := range in.CardLists {
+				if v10 > 0 {
 					out.RawByte(',')
 				}
-				(v6).MarshalEasyJSON(out)
+				(v11).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"tags\":"
+		out.RawString(prefix)
+		if in.Tags == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v12, v13 := range in.Tags {
+				if v12 > 0 {
+					out.RawByte(',')
+				}
+				(v13).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"colors\":"
+		out.RawString(prefix)
+		if in.AvailableColors == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v14, v15 := range in.AvailableColors {
+				if v14 > 0 {
+					out.RawByte(',')
+				}
+				(v15).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}

@@ -33,6 +33,9 @@ func CreateCardHandler(router *gin.RouterGroup,
 		cards.PUT("/:cid", mw.CheckAuth(), mw.CSRF(), handler.UpdateCard)
 		cards.DELETE("/:cid", mw.CheckAuth(), mw.CSRF(), handler.DeleteCard)
 		cards.PUT("/:cid/toggleuser/:uid", mw.CheckAuth(), mw.CSRF(), handler.ToggleUser)
+		cards.PUT("/:cid/toggletag/:tgid", mw.CheckAuth(), mw.CSRF(), handler.ToggleTag)
+		cards.PUT("/access/:сid", mw.CheckAuth(), mw.CSRF(), handler.UpdateAccessLink)
+		cards.PUT("/access/tocard/:accessPath", mw.CheckAuth(), mw.CSRF(), handler.AddUserViaLink)
 	}
 }
 
@@ -55,7 +58,7 @@ func (cardHandler *CardHandler) CreateCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"cid": cid})
+	c.JSON(http.StatusOK, gin.H{"cid": cid, "access_path": card.AccessPath})
 }
 
 func (cardHandler *CardHandler) GetCard(c *gin.Context) {
@@ -145,6 +148,42 @@ func (cardHandler *CardHandler) DeleteCard(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "card was successfully deleted"})
 }
 
+func (cardHandler *CardHandler) ToggleTag(c *gin.Context) {
+	uid, exists := c.Get("uid")
+	if !exists {
+		_ = c.Error(customErrors.ErrNotAuthorized)
+		return
+	}
+
+	cid64 := c.Param("cid")
+	cid, err := strconv.ParseUint(cid64, 10, 32)
+	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
+		return
+	}
+
+	tgid64 := c.Param("tgid")
+	tgid, err := strconv.ParseUint(tgid64, 10, 32)
+	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
+		return
+	}
+
+	card, err := cardHandler.CardUseCase.ToggleTag(uid.(uint), uint(cid), uint(tgid))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	cardJSON, err := card.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", cardJSON)
+}
+
 func (cardHandler *CardHandler) ToggleUser(c *gin.Context) {
 	uid, exists := c.Get("uid")
 	if !exists {
@@ -167,6 +206,53 @@ func (cardHandler *CardHandler) ToggleUser(c *gin.Context) {
 	}
 
 	card, err := cardHandler.CardUseCase.ToggleUser(uid.(uint), uint(cid), uint(toggledUserID))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	cardJSON, err := card.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", cardJSON)
+}
+
+func (cardHandler *CardHandler) UpdateAccessLink(c *gin.Context) {
+	uid, exists := c.Get("uid")
+	if !exists {
+		_ = c.Error(customErrors.ErrNotAuthorized)
+		return
+	}
+
+	cid64 := c.Param("cid")
+	cid, err := strconv.ParseUint(cid64, 10, 32)
+	if err != nil {
+		_ = c.Error(customErrors.ErrBadRequest)
+		return
+	}
+
+	newAccessPath, err := cardHandler.CardUseCase.UpdateAccessPath(uid.(uint), uint(cid))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"access_path": newAccessPath})
+}
+
+func (cardHandler *CardHandler) AddUserViaLink(c *gin.Context) {
+	uid, exists := c.Get("uid")
+	if !exists {
+		_ = c.Error(customErrors.ErrNotAuthorized)
+		return
+	}
+
+	accessPath := c.Param("accessPath")
+
+	card, err := cardHandler.CardUseCase.AddUserViaLink(uid.(uint), accessPath)
 	if err != nil {
 		_ = c.Error(err)
 		return

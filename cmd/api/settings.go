@@ -18,6 +18,7 @@ type Settings struct {
 	BoardsURL         string `mapstructure:"boards_url"`
 	CardListsURL      string `mapstructure:"card_lists_url"`
 	CardsURL          string `mapstructure:"cards_url"`
+	TagsURL           string `mapstructure:"tags_url"`
 	CommentsURL       string `mapstructure:"comments_url"`
 	CheckListsURL     string `mapstructure:"check_lists_url"`
 	CheckListItemsURL string `mapstructure:"check_list_items_url"`
@@ -76,6 +77,7 @@ func InitSettings() (settings Settings) {
 		BoardsURL:         viper.GetString("url.boards_url"),
 		CardListsURL:      viper.GetString("url.card_lists_url"),
 		CardsURL:          viper.GetString("url.cards_url"),
+		TagsURL:           viper.GetString("url.tags_url"),
 		CommentsURL:       viper.GetString("url.comments_url"),
 		CheckListsURL:     viper.GetString("url.check_lists_url"),
 		CheckListItemsURL: viper.GetString("url.check_list_items_url"),
