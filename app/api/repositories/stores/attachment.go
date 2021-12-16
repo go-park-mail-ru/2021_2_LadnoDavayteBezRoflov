@@ -6,6 +6,7 @@ import (
 	customErrors "backendServer/pkg/errors"
 
 	"github.com/google/uuid"
+	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -23,8 +24,8 @@ func CreateAttachmentRepository(db *gorm.DB, attachmentsPath string) repositorie
 	return &AttachmentStore{db: db, attachmentsPath: attachmentsPath}
 }
 
-func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, cid uint) (attachment *models.AttachedFile, err error) {
-	attachment := new(models.AttachedFile)
+func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, cid uint) (attachment *models.Attachment, err error) {
+	attachment := new(models.Attachment)
 	attachment.AttachmentPubName = filepath.Base(file.Filename)
 	attachment.CID = cid
 
@@ -53,19 +54,19 @@ func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, cid u
 }
 
 func (attachmentStore *AttachmentStore) Delete(atid uint) (err error) {
-	attachment := new(models.AttachedFile)
+	attachment := new(models.Attachment)
 	fileToDelete := attachment.AttachmentTechName
 
-	err = os.remove(fileToDelete)
+	err = os.Remove(fileToDelete)
 	if err != nil {
 		return err
 	}
 
-	return attachmentStore.db.Delete(&models.AttachedFile{}, atid).Error
+	return attachmentStore.db.Delete(&models.Attachment{}, atid).Error
 }
 
-func (attachmentStore *AttachmentStore) Get(atid uint) (*models.AttachedFile, error) {
-	attachment := new(models.AttachedFile)
+func (attachmentStore *AttachmentStore) Get(atid uint) (*models.Attachment, error) {
+	attachment := new(models.Attachment)
 	if res := attachmentStore.db.Find(attachment, atid); res.RowsAffected == 0 {
 		return nil, customErrors.ErrAttachmentNotFound
 	} else if res.Error != nil {

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"backendServer/app/api/models"
 	"backendServer/app/api/usecases"
 	customErrors "backendServer/pkg/errors"
 	"net/http"
@@ -46,9 +45,9 @@ func (attachmentHandler *AttachmentHandler) GetAttachment(c *gin.Context) {
 		return
 	}
 
-	attachment, err := attachmentHandler.AttachmentUseCase.GetAttachment(uint(atid), uint(cid), uid.(uint))
+	attachment, err := attachmentHandler.AttachmentUseCase.GetAttachment(uint(atid), uid.(uint))
 	if err != nil {
-		_ = c.Errors(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -75,7 +74,7 @@ func (attachmentHandler *AttachmentHandler) CreateAttachment(c *gin.Context) {
 		return
 	}
 
-	attachment, err = attachmentHandler.AttachmentUseCase.CreateAttachment(file, uint(cid), uid.(uint))
+	attachment, err := attachmentHandler.AttachmentUseCase.CreateAttachment(file, uint(cid), uid.(uint))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -98,7 +97,7 @@ func (attachmentHandler *AttachmentHandler) DeleteAttachment(c *gin.Context) {
 		return
 	}
 
-	err = attachmentHandler.AttachmentUseCase.DeleteAttachment(uint(atid), uint(cid), uid.(uint))
+	err = attachmentHandler.AttachmentUseCase.DeleteAttachment(uint(atid), uid.(uint))
 	if err != nil {
 		_ = c.Error(err)
 		return

@@ -7,6 +7,6 @@ import (
 
 type AttachmentUseCase interface {
 	CreateAttachment(file *multipart.FileHeader, cid, uid uint) (attachment *models.Attachment, err error)
-	GetAttachment(atid, cid, uid uint) (attachment *models.Attachment, err error)
-	DeleteAttachment(atid, cid, uid uint) (err error)
+	GetAttachment(atid, uid uint) (attachment *models.Attachment, err error)
+	DeleteAttachment(atid, uid uint) (err error)
 }

@@ -34,7 +34,7 @@ func (attachmentUseCase *AttachmentUseCaseImpl) CreateAttachment(file *multipart
 		return
 	}
 
-	attachment, err = attachmentUseCase.attachmentRepository.Create(file, attachment)
+	attachment, err = attachmentUseCase.attachmentRepository.Create(file, cid)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,13 @@ func (attachmentUseCase *AttachmentUseCaseImpl) CreateAttachment(file *multipart
 	return attachment, nil
 }
 
-func (attachmentUseCase *AttachmentUseCaseImpl) GetAttachment(atid, cid, uid uint) (attachment *models.Attachment, err error) {
-	isAccessed, err := attachmentUseCase.userRepository.IsCardAccessed(uid, cid)
+func (attachmentUseCase *AttachmentUseCaseImpl) GetAttachment(atid, uid uint) (attachment *models.Attachment, err error) {
+	attachment, err = attachmentUseCase.attachmentRepository.Get(atid)
+	if err != nil {
+		return nil, err
+	}
+
+	isAccessed, err := attachmentUseCase.userRepository.IsCardAccessed(uid, attachment.CID)
 	if err != nil {
 		return
 	}
@@ -52,16 +57,16 @@ func (attachmentUseCase *AttachmentUseCaseImpl) GetAttachment(atid, cid, uid uin
 		return
 	}
 
-	attachment, err = attachmentUseCase.attachmentRepository.Get(atid)
-	if err != nil {
-		return nil, err
-	}
-
 	return attachment, nil
 }
 
-func (attachmentUseCase *AttachmentUseCaseImpl) DeleteAttachment(atid, cid, uid uint) (err error) {
-	isAccessed, err := attachmentUseCase.userRepository.IsCardAccessed(uid, cid)
+func (attachmentUseCase *AttachmentUseCaseImpl) DeleteAttachment(atid, uid uint) (err error) {
+	attachment, err = attachmentUseCase.attachmentRepository.Get(atid)
+	if err != nil {
+		return err
+	}
+
+	isAccessed, err := attachmentUseCase.userRepository.IsCardAccessed(uid, attachment.CID)
 	if err != nil {
 		return
 	}
