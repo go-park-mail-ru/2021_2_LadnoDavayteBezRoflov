@@ -61,7 +61,7 @@ func (attachmentUseCase *AttachmentUseCaseImpl) GetAttachment(atid, uid uint) (a
 }
 
 func (attachmentUseCase *AttachmentUseCaseImpl) DeleteAttachment(atid, uid uint) (err error) {
-	attachment, err = attachmentUseCase.attachmentRepository.Get(atid)
+	attachment, err := attachmentUseCase.attachmentRepository.Get(atid)
 	if err != nil {
 		return err
 	}

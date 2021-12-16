@@ -25,7 +25,7 @@ func CreateAttachmentRepository(db *gorm.DB, attachmentsPath string) repositorie
 }
 
 func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, cid uint) (attachment *models.Attachment, err error) {
-	attachment := new(models.Attachment)
+	attachment = new(models.Attachment)
 	attachment.AttachmentPubName = filepath.Base(file.Filename)
 	attachment.CID = cid
 
@@ -33,7 +33,7 @@ func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, cid u
 	fileName := strings.Join([]string{attachmentStore.attachmentsPath, "/", fileNameID}, "")
 	attachment.AttachmentTechName = fileName
 
-	src, err := attachment.Open()
+	src, err := file.Open()
 	if err != nil {
 		return nil, err
 	}
