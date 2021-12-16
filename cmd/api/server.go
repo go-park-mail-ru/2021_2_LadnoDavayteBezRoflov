@@ -132,7 +132,7 @@ func (server *Server) Run() {
 	checkListUseCase := impl.CreateCheckListUseCase(checkListRepo, userRepo)
 	checkListItemUseCase := impl.CreateCheckListItemUseCase(checkListItemRepo, userRepo)
 	userSearchUseCase := impl.CreateUserSearchUseCase(userRepo, cardRepo, teamRepo, boardRepo)
-	attachmentUseCase := impl.CreateAttachmentUseCase(attachmentRepo)
+	attachmentUseCase := impl.CreateAttachmentUseCase(attachmentRepo, userRepo)
 
 	// Middlewares
 	commonMiddleware := handlers.CreateCommonMiddleware(logger)
