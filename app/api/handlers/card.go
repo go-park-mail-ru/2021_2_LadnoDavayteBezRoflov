@@ -34,7 +34,7 @@ func CreateCardHandler(router *gin.RouterGroup,
 		cards.DELETE("/:cid", mw.CheckAuth(), mw.CSRF(), handler.DeleteCard)
 		cards.PUT("/:cid/toggleuser/:uid", mw.CheckAuth(), mw.CSRF(), handler.ToggleUser)
 		cards.PUT("/:cid/toggletag/:tgid", mw.CheckAuth(), mw.CSRF(), handler.ToggleTag)
-		cards.PUT("/access/:сid", mw.CheckAuth(), mw.CSRF(), handler.UpdateAccessLink)
+		cards.PUT("/access/:cid", mw.CheckAuth(), mw.CSRF(), handler.UpdateAccessLink)
 		cards.PUT("/access/tocard/:accessPath", mw.CheckAuth(), mw.CSRF(), handler.AddUserViaLink)
 	}
 }

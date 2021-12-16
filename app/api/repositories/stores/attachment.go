@@ -4,13 +4,13 @@ import (
 	"backendServer/app/api/models"
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
-
-	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/google/uuid"
 
 	"gorm.io/gorm"
 )
@@ -54,7 +54,11 @@ func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, cid u
 }
 
 func (attachmentStore *AttachmentStore) Delete(atid uint) (err error) {
-	attachment := new(models.Attachment)
+	attachment, err := attachmentStore.Get(atid)
+	if err != nil {
+		return err
+	}
+
 	fileToDelete := attachment.AttachmentTechName
 
 	err = os.Remove(fileToDelete)
