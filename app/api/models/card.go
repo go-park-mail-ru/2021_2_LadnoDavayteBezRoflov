@@ -13,5 +13,5 @@ type Card struct {
 	CheckLists         []CheckList      `json:"check_lists" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`
 	Users              []User           `json:"-" faker:"-" gorm:"many2many:users_cards;constraint:OnDelete:CASCADE;"`
 	Assignees          []PublicUserInfo `json:"assignees" faker:"-" gorm:"-"`
-	Attachments        []AttachedFile   `json:"attachments" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`
+	Attachments        []Attachment     `json:"attachments" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`
 }

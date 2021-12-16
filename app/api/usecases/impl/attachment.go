@@ -15,11 +15,11 @@ type AttachmentUseCaseImpl struct {
 
 func CreateAttachmentUseCase(
 	attachmentRepository repositories.AttachmentRepository,
-	userRepository repositories.UserRepository,	
+	userRepository repositories.UserRepository,
 ) usecases.AttachmentUseCase {
 	return &AttachmentUseCaseImpl{
 		attachmentRepository: attachmentRepository,
-		userRepository:    userRepository,
+		userRepository:       userRepository,
 	}
 }
 
@@ -68,6 +68,6 @@ func (attachmentUseCase *AttachmentUseCaseImpl) DeleteAttachment(atid, cid, uid 
 		err = customErrors.ErrNoAccess
 		return
 	}
-	
+
 	return attachmentUseCase.attachmentRepository.Delete(atid)
 }

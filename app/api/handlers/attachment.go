@@ -75,7 +75,7 @@ func (cardHandler *CardHandler) CreateAttachment(c *gin.Context) {
 		return
 	}
 
-	attachment, err = attachmentHandler.AttachmentUseCase.CreateAttachment(file, uint(cid), uid.(uint)))
+	attachment, err = attachmentHandler.AttachmentUseCase.CreateAttachment(file, uint(cid), uid.(uint))
 	if err != nil {
 		_ = c.Error(err)
 		return

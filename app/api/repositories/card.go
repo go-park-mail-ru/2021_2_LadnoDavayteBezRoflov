@@ -12,5 +12,6 @@ type CardRepository interface {
 	GetAssignedUsers(cid uint) (users *[]models.PublicUserInfo, err error)
 	GetCardComments(cid uint) (comments *[]models.Comment, err error)
 	GetCardCheckLists(cid uint) (checkLists *[]models.CheckList, err error)
+	GetCardAttachments(cid uint) (attachments *[]models.Attachment, err error)
 	Move(fromPos, toPos, fromCardListID, toCardListID uint) (err error)
 }
