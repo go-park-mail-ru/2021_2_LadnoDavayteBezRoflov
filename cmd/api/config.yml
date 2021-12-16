@@ -17,7 +17,7 @@ url: {
   check_lists_url:      '/checkLists',
   check_list_items_url: '/checkListItems',
   user_search_url:      '/usersearch',
-  attachment_url:       '/attachments'
+  attachments_url:       '/attachments'
 }
 
 allowed_methods:

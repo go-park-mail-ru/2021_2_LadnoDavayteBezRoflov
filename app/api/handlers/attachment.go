@@ -27,7 +27,7 @@ func CreateAttachmentHandler(router *gin.RouterGroup,
 	attachments := router.Group(handler.AttachmentURL)
 	{
 		attachments.GET("/:atid", mw.CheckAuth(), mw.CSRF(), handler.GetAttachment)
-		attachments.POST("", mw.CheckAuth(), mw.CSRF(), handler.CreateAttachment)
+		attachments.POST("/:cid", mw.CheckAuth(), mw.CSRF(), handler.CreateAttachment)
 		attachments.DELETE("/:atid", mw.CheckAuth(), mw.CSRF(), handler.DeleteAttachment)
 	}
 }
@@ -46,8 +46,9 @@ func (commentHandler *CommentHandler) GetAttachment(c *gin.Context) {
 		return
 	}
 
-	attachment, err := attachmentHandler.AttachmentUseCase.GetAttachment(uint(atid))
+	attachment, err := attachmentHandler.AttachmentUseCase.GetAttachment(uint(atid), uint(cid), uid.(uint))
 	if err != nil {
+		_ = c.Errors(err)
 		return
 	}
 
@@ -74,12 +75,7 @@ func (cardHandler *CardHandler) CreateAttachment(c *gin.Context) {
 		return
 	}
 
-	attachment := new(models.AttachedFile)
-	attachment.AttachmentPub = file.Filename
-	attachment.CID = cid
-	// attachment.AttachmentTech = fileTechName
-
-	attachment, err = attachmentHandler.AttachmentUseCase.CreateAttachment(file, attachment)
+	attachment, err = attachmentHandler.AttachmentUseCase.CreateAttachment(file, uint(cid), uid.(uint)))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -102,7 +98,7 @@ func (cardHandler *CardHandler) DeleteAttachment(c *gin.Context) {
 		return
 	}
 
-	err = attachmentHandler.AttachmentUseCase.DeleteAttachment(uint(atid))
+	err = attachmentHandler.AttachmentUseCase.DeleteAttachment(uint(atid), uint(cid), uid.(uint))
 	if err != nil {
 		_ = c.Error(err)
 		return

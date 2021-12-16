@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"os"
 	"strings"
+	"path/filepath"
 
 	"gorm.io/gorm"
 )
@@ -18,16 +19,19 @@ type AttachmentStore struct {
 	attachmentsPath string
 }
 
-func CreateAttachmentRepository(db *gorm.DB, attachmentPath) repositories.AttachmentRepository {
-	return &AttachmentStore{db: db, attachmentPath: attachmentPath}
+func CreateAttachmentRepository(db *gorm.DB, attachmentsPath) repositories.AttachmentRepository {
+	return &AttachmentStore{db: db, attachmentsPath: attachmentsPath}
 }
 
-func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, attachment *models.AttachedFile) (err error) {
+func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, cid uint) (attachment *models.AttachedFile, err error) {
+	attachment := new(models.AttachedFile)
+	attachment.AttachmentPubName = filepath.Base(file.Filename)
+	attachment.CID = cid
+
 	fileNameID := uuid.NewString()
 	fileName := strings.Join([]string{attachmentStore.attachmentsPath, "/", fileNameID}, "")
-	attachment.AttachmentTech = fileName
+	attachment.AttachmentTechName = fileName
 
-	// save file
 	src, err := attachment.Open()
 	if err != nil {
 		return nil, err
@@ -45,14 +49,22 @@ func (attachmentStore *AttachmentStore) Create(file *multipart.FileHeader, attac
 		return nil, err
 	}
 
-	return attachmentStore.db.Create(attachment).Error
+	return attachment, attachmentStore.db.Create(attachment).Error
 }
 
 func (attachmentStore *AttachmentStore) Delete(atid uint) (err error) {
+	attachment := new(models.AttachedFile)
+	fileToDelete := attachment.AttachmentTechName
+
+	err = os.remove(fileToDelete)
+	if err != nil {
+		return err
+	}
+
 	return attachmentStore.db.Delete(&models.AttachedFile{}, atid).Error
 }
 
-func (attachmentStore *AttachmentStore) GetAttachment(atid uint) (*models.AttachedFile, error) {
+func (attachmentStore *AttachmentStore) Get(atid uint) (*models.AttachedFile, error) {
 	attachment := new(models.AttachedFile)
 	if res := attachmentStore.db.Find(attachment, atid); res.RowsAffected == 0 {
 		return nil, customErrors.ErrAttachmentNotFound
