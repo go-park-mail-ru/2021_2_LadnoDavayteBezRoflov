@@ -116,6 +116,9 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 	if err != nil {
 		return
 	}
+	for i, tag := range *tags {
+		(*tags)[i].Color = models.AvailableColors[tag.ColorID-1]
+	}
 	board.Tags = *tags
 
 	for i, list := range *lists {
