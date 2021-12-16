@@ -122,7 +122,7 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 			if err != nil {
 				return
 			}
-			var attachments *[]models.Attachments
+			var attachments *[]models.Attachment
 			attachments, err = boardUseCase.cardRepository.GetCardAttachments(card.CID)
 			if err != nil {
 				return

@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"mime/multipart"
 	"os"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -19,7 +19,7 @@ type AttachmentStore struct {
 	attachmentsPath string
 }
 
-func CreateAttachmentRepository(db *gorm.DB, attachmentsPath) repositories.AttachmentRepository {
+func CreateAttachmentRepository(db *gorm.DB, attachmentsPath string) repositories.AttachmentRepository {
 	return &AttachmentStore{db: db, attachmentsPath: attachmentsPath}
 }
 

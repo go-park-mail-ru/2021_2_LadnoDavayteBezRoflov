@@ -32,7 +32,7 @@ func CreateAttachmentHandler(router *gin.RouterGroup,
 	}
 }
 
-func (commentHandler *CommentHandler) GetAttachment(c *gin.Context) {
+func (attachmentHandler *AttachmentHandler) GetAttachment(c *gin.Context) {
 	uid, exists := c.Get("uid")
 	if !exists {
 		_ = c.Error(customErrors.ErrNotAuthorized)
@@ -55,7 +55,7 @@ func (commentHandler *CommentHandler) GetAttachment(c *gin.Context) {
 	c.JSON(http.StatusOK, attachment)
 }
 
-func (cardHandler *CardHandler) CreateAttachment(c *gin.Context) {
+func (attachmentHandler *AttachmentHandler) CreateAttachment(c *gin.Context) {
 	uid, exists := c.Get("uid")
 	if !exists {
 		_ = c.Error(customErrors.ErrNotAuthorized)
@@ -84,7 +84,7 @@ func (cardHandler *CardHandler) CreateAttachment(c *gin.Context) {
 	c.JSON(http.StatusOK, attachment)
 }
 
-func (cardHandler *CardHandler) DeleteAttachment(c *gin.Context) {
+func (attachmentHandler *AttachmentHandler) DeleteAttachment(c *gin.Context) {
 	uid, exists := c.Get("uid")
 	if !exists {
 		_ = c.Error(customErrors.ErrNotAuthorized)

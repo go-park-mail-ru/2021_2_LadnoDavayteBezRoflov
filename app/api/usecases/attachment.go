@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"backendServer/app/api/models"
+	"mime/multipart"
 )
 
 type AttachmentUseCase interface {

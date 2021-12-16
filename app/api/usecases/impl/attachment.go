@@ -5,7 +5,8 @@ import (
 	"backendServer/app/api/repositories"
 	"backendServer/app/api/usecases"
 	customErrors "backendServer/pkg/errors"
-	"time"
+
+	"mime/multipart"
 )
 
 type AttachmentUseCaseImpl struct {
