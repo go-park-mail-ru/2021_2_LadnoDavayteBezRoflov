@@ -69,7 +69,7 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 				}
 				for !in.IsDelim(']') {
 					var v1 Comment
-					easyjsonFfcccb8aDecodeBackendServerAppApiModels1(in, &v1)
+					(v1).UnmarshalEasyJSON(in)
 					out.Comments = append(out.Comments, v1)
 					in.WantComma()
 				}
@@ -92,7 +92,7 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 				}
 				for !in.IsDelim(']') {
 					var v2 CheckList
-					easyjsonFfcccb8aDecodeBackendServerAppApiModels2(in, &v2)
+					(v2).UnmarshalEasyJSON(in)
 					out.CheckLists = append(out.CheckLists, v2)
 					in.WantComma()
 				}
@@ -115,8 +115,31 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 				}
 				for !in.IsDelim(']') {
 					var v3 PublicUserInfo
-					easyjsonFfcccb8aDecodeBackendServerAppApiModels3(in, &v3)
+					(v3).UnmarshalEasyJSON(in)
 					out.Assignees = append(out.Assignees, v3)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "attachments":
+			if in.IsNull() {
+				in.Skip()
+				out.Attachments = nil
+			} else {
+				in.Delim('[')
+				if out.Attachments == nil {
+					if !in.IsDelim(']') {
+						out.Attachments = make([]Attachment, 0, 1)
+					} else {
+						out.Attachments = []Attachment{}
+					}
+				} else {
+					out.Attachments = (out.Attachments)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v4 Attachment
+					(v4).UnmarshalEasyJSON(in)
+					out.Attachments = append(out.Attachments, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -182,11 +205,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v4, v5 := range in.Comments {
-				if v4 > 0 {
+			for v5, v6 := range in.Comments {
+				if v5 > 0 {
 					out.RawByte(',')
 				}
-				easyjsonFfcccb8aEncodeBackendServerAppApiModels1(out, v5)
+				(v6).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -198,11 +221,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v6, v7 := range in.CheckLists {
-				if v6 > 0 {
+			for v7, v8 := range in.CheckLists {
+				if v7 > 0 {
 					out.RawByte(',')
 				}
-				easyjsonFfcccb8aEncodeBackendServerAppApiModels2(out, v7)
+				(v8).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -214,11 +237,27 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v8, v9 := range in.Assignees {
-				if v8 > 0 {
+			for v9, v10 := range in.Assignees {
+				if v9 > 0 {
 					out.RawByte(',')
 				}
-				easyjsonFfcccb8aEncodeBackendServerAppApiModels3(out, v9)
+				(v10).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"attachments\":"
+		out.RawString(prefix)
+		if in.Attachments == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v11, v12 := range in.Attachments {
+				if v11 > 0 {
+					out.RawByte(',')
+				}
+				(v12).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -248,302 +287,4 @@ func (v *Card) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Card) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonFfcccb8aDecodeBackendServerAppApiModels(l, v)
-}
-func easyjsonFfcccb8aDecodeBackendServerAppApiModels3(in *jlexer.Lexer, out *PublicUserInfo) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "uid":
-			out.UID = uint(in.Uint())
-		case "userName":
-			out.Login = string(in.String())
-		case "email":
-			out.Email = string(in.String())
-		case "avatar":
-			out.Avatar = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonFfcccb8aEncodeBackendServerAppApiModels3(out *jwriter.Writer, in PublicUserInfo) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"uid\":"
-		out.RawString(prefix[1:])
-		out.Uint(uint(in.UID))
-	}
-	{
-		const prefix string = ",\"userName\":"
-		out.RawString(prefix)
-		out.String(string(in.Login))
-	}
-	{
-		const prefix string = ",\"email\":"
-		out.RawString(prefix)
-		out.String(string(in.Email))
-	}
-	{
-		const prefix string = ",\"avatar\":"
-		out.RawString(prefix)
-		out.String(string(in.Avatar))
-	}
-	out.RawByte('}')
-}
-func easyjsonFfcccb8aDecodeBackendServerAppApiModels2(in *jlexer.Lexer, out *CheckList) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "chlid":
-			out.CHLID = uint(in.Uint())
-		case "cid":
-			out.CID = uint(in.Uint())
-		case "title":
-			out.Title = string(in.String())
-		case "check_list_items":
-			if in.IsNull() {
-				in.Skip()
-				out.CheckListItems = nil
-			} else {
-				in.Delim('[')
-				if out.CheckListItems == nil {
-					if !in.IsDelim(']') {
-						out.CheckListItems = make([]CheckListItem, 0, 1)
-					} else {
-						out.CheckListItems = []CheckListItem{}
-					}
-				} else {
-					out.CheckListItems = (out.CheckListItems)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v10 CheckListItem
-					easyjsonFfcccb8aDecodeBackendServerAppApiModels4(in, &v10)
-					out.CheckListItems = append(out.CheckListItems, v10)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonFfcccb8aEncodeBackendServerAppApiModels2(out *jwriter.Writer, in CheckList) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"chlid\":"
-		out.RawString(prefix[1:])
-		out.Uint(uint(in.CHLID))
-	}
-	{
-		const prefix string = ",\"cid\":"
-		out.RawString(prefix)
-		out.Uint(uint(in.CID))
-	}
-	{
-		const prefix string = ",\"title\":"
-		out.RawString(prefix)
-		out.String(string(in.Title))
-	}
-	{
-		const prefix string = ",\"check_list_items\":"
-		out.RawString(prefix)
-		if in.CheckListItems == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v11, v12 := range in.CheckListItems {
-				if v11 > 0 {
-					out.RawByte(',')
-				}
-				easyjsonFfcccb8aEncodeBackendServerAppApiModels4(out, v12)
-			}
-			out.RawByte(']')
-		}
-	}
-	out.RawByte('}')
-}
-func easyjsonFfcccb8aDecodeBackendServerAppApiModels4(in *jlexer.Lexer, out *CheckListItem) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "chliid":
-			out.CHLIID = uint(in.Uint())
-		case "chlid":
-			out.CHLID = uint(in.Uint())
-		case "text":
-			out.Text = string(in.String())
-		case "status":
-			out.Status = bool(in.Bool())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonFfcccb8aEncodeBackendServerAppApiModels4(out *jwriter.Writer, in CheckListItem) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"chliid\":"
-		out.RawString(prefix[1:])
-		out.Uint(uint(in.CHLIID))
-	}
-	{
-		const prefix string = ",\"chlid\":"
-		out.RawString(prefix)
-		out.Uint(uint(in.CHLID))
-	}
-	{
-		const prefix string = ",\"text\":"
-		out.RawString(prefix)
-		out.String(string(in.Text))
-	}
-	{
-		const prefix string = ",\"status\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.Status))
-	}
-	out.RawByte('}')
-}
-func easyjsonFfcccb8aDecodeBackendServerAppApiModels1(in *jlexer.Lexer, out *Comment) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "cmid":
-			out.CMID = uint(in.Uint())
-		case "cid":
-			out.CID = uint(in.Uint())
-		case "uid":
-			out.UID = uint(in.Uint())
-		case "text":
-			out.Text = string(in.String())
-		case "date":
-			out.DateParsed = string(in.String())
-		case "user":
-			easyjsonFfcccb8aDecodeBackendServerAppApiModels3(in, &out.User)
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonFfcccb8aEncodeBackendServerAppApiModels1(out *jwriter.Writer, in Comment) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"cmid\":"
-		out.RawString(prefix[1:])
-		out.Uint(uint(in.CMID))
-	}
-	{
-		const prefix string = ",\"cid\":"
-		out.RawString(prefix)
-		out.Uint(uint(in.CID))
-	}
-	{
-		const prefix string = ",\"uid\":"
-		out.RawString(prefix)
-		out.Uint(uint(in.UID))
-	}
-	{
-		const prefix string = ",\"text\":"
-		out.RawString(prefix)
-		out.String(string(in.Text))
-	}
-	{
-		const prefix string = ",\"date\":"
-		out.RawString(prefix)
-		out.String(string(in.DateParsed))
-	}
-	{
-		const prefix string = ",\"user\":"
-		out.RawString(prefix)
-		easyjsonFfcccb8aEncodeBackendServerAppApiModels3(out, in.User)
-	}
-	out.RawByte('}')
 }
