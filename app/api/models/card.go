@@ -7,6 +7,7 @@ type Card struct {
 	PositionOnCardList uint             `json:"pos" faker:"-"`
 	Title              string           `json:"card_name" faker:"word" gorm:"not null;index"`
 	Description        string           `json:"description" faker:"sentence"`
+	AccessPath         string           `json:"access_path"`
 	DeadlineChecked    bool             `json:"deadline_check" faker:"-"`
 	Deadline           string           `json:"deadline" faker:"timestamp"`
 	Comments           []Comment        `json:"comments" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`

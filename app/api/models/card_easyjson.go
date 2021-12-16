@@ -48,6 +48,8 @@ func easyjsonFfcccb8aDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Card
 			out.Title = string(in.String())
 		case "description":
 			out.Description = string(in.String())
+		case "access_path":
+			out.AccessPath = string(in.String())
 		case "deadline_check":
 			out.DeadlineChecked = bool(in.Bool())
 		case "deadline":
@@ -187,6 +189,11 @@ func easyjsonFfcccb8aEncodeBackendServerAppApiModels(out *jwriter.Writer, in Car
 		const prefix string = ",\"description\":"
 		out.RawString(prefix)
 		out.String(string(in.Description))
+	}
+	{
+		const prefix string = ",\"access_path\":"
+		out.RawString(prefix)
+		out.String(string(in.AccessPath))
 	}
 	{
 		const prefix string = ",\"deadline_check\":"

@@ -62,6 +62,21 @@ func (mr *MockCardRepositoryMockRecorder) Delete(cid interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCardRepository)(nil).Delete), cid)
 }
 
+// FindCardByPath mocks base method.
+func (m *MockCardRepository) FindCardByPath(accessPath string) (*models.Card, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindCardByPath", accessPath)
+	ret0, _ := ret[0].(*models.Card)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindCardByPath indicates an expected call of FindCardByPath.
+func (mr *MockCardRepositoryMockRecorder) FindCardByPath(accessPath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindCardByPath", reflect.TypeOf((*MockCardRepository)(nil).FindCardByPath), accessPath)
+}
+
 // GetAssignedUsers mocks base method.
 func (m *MockCardRepository) GetAssignedUsers(cid uint) (*[]models.PublicUserInfo, error) {
 	m.ctrl.T.Helper()
@@ -163,4 +178,19 @@ func (m *MockCardRepository) Update(card *models.Card) error {
 func (mr *MockCardRepositoryMockRecorder) Update(card interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCardRepository)(nil).Update), card)
+}
+
+// UpdateAccessPath mocks base method.
+func (m *MockCardRepository) UpdateAccessPath(cid uint) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccessPath", cid)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAccessPath indicates an expected call of UpdateAccessPath.
+func (mr *MockCardRepositoryMockRecorder) UpdateAccessPath(cid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccessPath", reflect.TypeOf((*MockCardRepository)(nil).UpdateAccessPath), cid)
 }

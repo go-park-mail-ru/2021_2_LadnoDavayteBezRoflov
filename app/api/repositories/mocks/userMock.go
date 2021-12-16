@@ -226,6 +226,21 @@ func (mr *MockUserRepositoryMockRecorder) IsCardAccessed(uid, cid interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsCardAccessed", reflect.TypeOf((*MockUserRepository)(nil).IsCardAccessed), uid, cid)
 }
 
+// IsCardAssigned mocks base method.
+func (m *MockUserRepository) IsCardAssigned(uid, cid uint) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsCardAssigned", uid, cid)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsCardAssigned indicates an expected call of IsCardAssigned.
+func (mr *MockUserRepositoryMockRecorder) IsCardAssigned(uid, cid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsCardAssigned", reflect.TypeOf((*MockUserRepository)(nil).IsCardAssigned), uid, cid)
+}
+
 // IsCardListAccessed mocks base method.
 func (m *MockUserRepository) IsCardListAccessed(uid, clid uint) (bool, error) {
 	m.ctrl.T.Helper()

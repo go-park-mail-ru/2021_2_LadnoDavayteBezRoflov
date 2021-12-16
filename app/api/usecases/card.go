@@ -11,4 +11,6 @@ type CardUseCase interface {
 	DeleteCard(uid, cid uint) (err error)
 	ToggleUser(uid, cid, toggledUserID uint) (card *models.Card, err error)
 	ToggleTag(uid, cid, toggledTagID uint) (card *models.Card, err error)
+	UpdateAccessPath(uid, cid uint) (newAccessLink string, err error)
+	AddUserViaLink(uid uint, accessPath string) (card *models.Card, err error)
 }

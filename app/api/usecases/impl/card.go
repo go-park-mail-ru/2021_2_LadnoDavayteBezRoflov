@@ -5,6 +5,8 @@ import (
 	"backendServer/app/api/repositories"
 	"backendServer/app/api/usecases"
 	customErrors "backendServer/pkg/errors"
+
+	"github.com/google/uuid"
 )
 
 type CardUseCaseImpl struct {
@@ -22,6 +24,7 @@ func CreateCardUseCase(
 }
 
 func (cardUseCase *CardUseCaseImpl) CreateCard(card *models.Card) (cid uint, err error) {
+	card.AccessPath = uuid.NewString()
 	err = cardUseCase.cardRepository.Create(card)
 	if err != nil {
 		return
@@ -136,4 +139,48 @@ func (cardUseCase *CardUseCaseImpl) ToggleTag(uid, cid, toggledTagID uint) (card
 	}
 
 	return cardUseCase.GetCard(uid, cid)
+}
+
+func (cardUseCase *CardUseCaseImpl) UpdateAccessPath(uid, cid uint) (newAccessPath string, err error) {
+	isAccessed, err := cardUseCase.userRepository.IsCardAccessed(uid, cid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
+
+	return cardUseCase.cardRepository.UpdateAccessPath(cid)
+}
+
+func (cardUseCase *CardUseCaseImpl) AddUserViaLink(uid uint, accessPath string) (card *models.Card, err error) {
+	card, err = cardUseCase.cardRepository.FindCardByPath(accessPath)
+	if err != nil {
+		return
+	}
+
+	isAccessed, err := cardUseCase.userRepository.IsBoardAccessed(uid, card.BID)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = cardUseCase.userRepository.AddUserToBoard(uid, card.BID)
+		if err != nil {
+			return
+		}
+	}
+
+	isAssigned, err := cardUseCase.userRepository.IsCardAssigned(uid, card.CID)
+	if err != nil {
+		return
+	}
+	if !isAssigned {
+		err = cardUseCase.userRepository.AddUserToCard(uid, card.CID)
+		if err != nil {
+			return
+		}
+	}
+
+	return
 }
