@@ -63,7 +63,7 @@ jobs:
         - name: Transfer build files to server
           uses: appleboy/scp-action@master
           with:
-            host: 95.163.213.142
+            host: ${{ secrets.HOST_IP }}
             username: ubuntu
             key: ${{ secrets.PRIVATE_KEY }}
             source: "./*"
@@ -72,7 +72,7 @@ jobs:
         - name: Reload docker-compose
           uses: appleboy/ssh-action@master
           with:
-            host: 95.163.213.142
+            host: ${{ secrets.HOST_IP }}
             username: ubuntu
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
