@@ -43,7 +43,7 @@ jobs:
         run: go test -race -coverpkg=./app/... -coverprofile=c.out ./app/...; go tool cover -func=c.out
       
       - name: Count test coverage (without generated files)
-        run: go test -race -coverpkg=./app/... -coverprofile cover.out.tmp ./app/...; cat cover.out.tmp | grep -v "_easyjson.go|.pb.go" > cover.out; go tool cover -func cover.out
+        run: go test -race -coverpkg=./app/... -coverprofile cover.out.tmp ./app/...; cat cover.out.tmp | grep -v ".*_easyjson\.go|.*\.pb\.go" > cover.out; go tool cover -func cover.out
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
