@@ -5,6 +5,8 @@ import (
 	"backendServer/app/api/repositories"
 	customErrors "backendServer/pkg/errors"
 
+	"github.com/google/uuid"
+
 	_ "gorm.io/driver/postgres" // Register postgres driver
 	"gorm.io/gorm"
 )
@@ -96,6 +98,12 @@ func (cardStore *CardStore) GetCardComments(cid uint) (comments *[]models.Commen
 	return
 }
 
+func (cardStore *CardStore) GetCardTags(cid uint) (tags *[]models.Tag, err error) {
+	tags = new([]models.Tag)
+	err = cardStore.db.Model(&models.Card{CID: cid}).Association("Tags").Find(tags)
+	return
+}
+
 func (cardStore *CardStore) GetCardCheckLists(cid uint) (checkLists *[]models.CheckList, err error) {
 	checkLists = new([]models.CheckList)
 	err = cardStore.db.Where("c_id = ?", cid).Order("chl_id").Find(checkLists).Error
@@ -133,5 +141,32 @@ func (cardStore *CardStore) Move(fromPos, toPos, fromCardListID, toCardListID ui
 		}
 		err = cardStore.move(toPos, (^uint(0)-1)/2 /*максимально возможное значение позиции*/, toCardListID, false)
 	}
+	return
+}
+
+func (cardStore *CardStore) UpdateAccessPath(cid uint) (newAccessPath string, err error) {
+	newAccessPath = uuid.NewString()
+
+	oldCard, err := cardStore.GetByID(cid)
+	if err != nil {
+		return
+	}
+	oldCard.AccessPath = newAccessPath
+
+	err = cardStore.db.Save(oldCard).Error
+	return
+}
+
+func (cardStore *CardStore) FindCardByPath(accessPath string) (card *models.Card, err error) {
+	card = new(models.Card)
+	err = cardStore.db.Where("access_path = ?", accessPath).Take(card).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return
+	}
+
+	if card.CID == 0 {
+		err = customErrors.ErrCardNotFound
+	}
+
 	return
 }

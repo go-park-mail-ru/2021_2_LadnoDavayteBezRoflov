@@ -96,7 +96,7 @@ func (middleware *SessionMiddlewareImpl) CSRF() gin.HandlerFunc {
 					Value:    token,
 					Path:     "/",
 					Expires:  time.Now().Add(15 * time.Minute),
-					Secure:   false,
+					Secure:   true,
 					HttpOnly: true,
 					SameSite: http.SameSiteLaxMode,
 				}

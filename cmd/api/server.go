@@ -61,6 +61,7 @@ func (server *Server) Run() {
 		&models.Comment{},
 		&models.CheckList{},
 		&models.CheckListItem{},
+		&models.Tag{},
 	)
 	if err != nil {
 		logger.Error(err)
@@ -115,6 +116,7 @@ func (server *Server) Run() {
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
 	cardRepo := stores.CreateCardRepository(postgresClient)
+	tagRepo := stores.CreateTagRepository(postgresClient)
 	commentRepo := stores.CreateCommentRepository(postgresClient)
 	checkListRepo := stores.CreateCheckListRepository(postgresClient)
 	checkListItemRepo := stores.CreateCheckListItemRepository(postgresClient)
@@ -125,8 +127,9 @@ func (server *Server) Run() {
 	teamUseCase := impl.CreateTeamUseCase(teamRepo, userRepo)
 	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo, checkListRepo)
 	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo)
-	cardUseCase := impl.CreateCardUseCase(cardRepo, userRepo)
+	cardUseCase := impl.CreateCardUseCase(cardRepo, userRepo, tagRepo)
 	commentUseCase := impl.CreateCommentUseCase(commentRepo, userRepo)
+	tagUseCase := impl.CreateTagUseCase(tagRepo, userRepo)
 	checkListUseCase := impl.CreateCheckListUseCase(checkListRepo, userRepo)
 	checkListItemUseCase := impl.CreateCheckListItemUseCase(checkListItemRepo, userRepo)
 	userSearchUseCase := impl.CreateUserSearchUseCase(userRepo, cardRepo, teamRepo, boardRepo)
@@ -158,6 +161,7 @@ func (server *Server) Run() {
 	handlers.CreateCardListHandler(rootGroup, server.settings.CardListsURL, cardListUseCase, sessionMiddleware)
 	handlers.CreateCardHandler(rootGroup, server.settings.CardsURL, cardUseCase, sessionMiddleware)
 	handlers.CreateCommentHandler(rootGroup, server.settings.CommentsURL, commentUseCase, sessionMiddleware)
+	handlers.CreateTagHandler(rootGroup, server.settings.TagsURL, tagUseCase, sessionMiddleware)
 	handlers.CreateCheckListHandler(rootGroup, server.settings.CheckListsURL, checkListUseCase, sessionMiddleware)
 	handlers.CreateCheckListItemHandler(rootGroup, server.settings.CheckListItemsURL, checkListItemUseCase, sessionMiddleware)
 	handlers.CreateUserSearchHandler(rootGroup, server.settings.UserSearchURL, userSearchUseCase, sessionMiddleware)

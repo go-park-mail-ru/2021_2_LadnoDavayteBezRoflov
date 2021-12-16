@@ -112,7 +112,7 @@ func (boardHandler *BoardHandler) CreateBoard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"bid": bid})
+	c.JSON(http.StatusOK, gin.H{"bid": bid, "access_path": board.AccessPath})
 }
 
 func (boardHandler *BoardHandler) UpdateBoard(c *gin.Context) {

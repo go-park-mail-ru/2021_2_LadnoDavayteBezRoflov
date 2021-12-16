@@ -196,7 +196,7 @@ func TestFindForBoard(t *testing.T) {
 	testBoard := new(models.Board)
 	err = faker.FakeData(testBoard)
 	assert.NoError(t, err)
-	testBoard.Members = append(testBoard.Members, testMatchedUsers[0])
+	testBoard.InvitedMembers = append(testBoard.InvitedMembers, testMatchedUsers[0])
 
 	expectedUsers := new([]models.UserSearchInfo)
 	for _, matchedUser := range testMatchedUsersSlice {
@@ -206,7 +206,7 @@ func TestFindForBoard(t *testing.T) {
 			Avatar: matchedUser.Avatar,
 		}
 
-		for _, member := range testBoard.Members {
+		for _, member := range testBoard.InvitedMembers {
 			if member.Login == matchedUser.Login {
 				user.Added = true
 				break
@@ -218,9 +218,8 @@ func TestFindForBoard(t *testing.T) {
 
 	// good
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
-	userRepoMock.EXPECT().FindAllByLogin(testText, 15).Return(&testMatchedUsersSlice, nil)
-	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
-	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(&testBoard.Members, nil)
+	userRepoMock.EXPECT().FindBoardInvitedMembersByLogin(bid, testText, 15).Return(&testMatchedUsersSlice, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(&testBoard.InvitedMembers, nil)
 	resUsers, err := userSearchUseCase.FindForBoard(uid, bid, testText)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedUsers, resUsers)
@@ -237,22 +236,14 @@ func TestFindForBoard(t *testing.T) {
 
 	// error while finding
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
-	userRepoMock.EXPECT().FindAllByLogin(testText, 15).Return(nil, customErrors.ErrInternal)
+	userRepoMock.EXPECT().FindBoardInvitedMembersByLogin(bid, testText, 15).Return(nil, customErrors.ErrInternal)
 	_, err = userSearchUseCase.FindForBoard(uid, bid, testText)
 	assert.Equal(t, customErrors.ErrInternal, err)
 
-	// can't get team members
+	// can't get board invited members
 	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
-	userRepoMock.EXPECT().FindAllByLogin(testText, 15).Return(&testMatchedUsersSlice, nil)
-	boardRepoMock.EXPECT().GetByID(bid).Return(nil, customErrors.ErrInternal)
-	_, err = userSearchUseCase.FindForBoard(uid, bid, testText)
-	assert.Equal(t, customErrors.ErrInternal, err)
-
-	// can't get team members
-	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
-	userRepoMock.EXPECT().FindAllByLogin(testText, 15).Return(&testMatchedUsersSlice, nil)
-	boardRepoMock.EXPECT().GetByID(bid).Return(testBoard, nil)
-	boardRepoMock.EXPECT().GetBoardMembers(testBoard).Return(nil, customErrors.ErrInternal)
+	userRepoMock.EXPECT().FindBoardInvitedMembersByLogin(bid, testText, 15).Return(&testMatchedUsersSlice, nil)
+	boardRepoMock.EXPECT().GetBoardInvitedMembers(bid).Return(nil, customErrors.ErrInternal)
 	_, err = userSearchUseCase.FindForBoard(uid, bid, testText)
 	assert.Equal(t, customErrors.ErrInternal, err)
 }

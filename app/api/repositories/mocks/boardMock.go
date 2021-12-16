@@ -137,6 +137,21 @@ func (mr *MockBoardRepositoryMockRecorder) GetBoardMembers(board interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBoardMembers", reflect.TypeOf((*MockBoardRepository)(nil).GetBoardMembers), board)
 }
 
+// GetBoardTags mocks base method.
+func (m *MockBoardRepository) GetBoardTags(bid uint) (*[]models.Tag, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBoardTags", bid)
+	ret0, _ := ret[0].(*[]models.Tag)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBoardTags indicates an expected call of GetBoardTags.
+func (mr *MockBoardRepositoryMockRecorder) GetBoardTags(bid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBoardTags", reflect.TypeOf((*MockBoardRepository)(nil).GetBoardTags), bid)
+}
+
 // GetByID mocks base method.
 func (m *MockBoardRepository) GetByID(bid uint) (*models.Board, error) {
 	m.ctrl.T.Helper()

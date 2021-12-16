@@ -82,6 +82,12 @@ func (boardStore *BoardStore) GetBoardCardLists(bid uint) (cardLists *[]models.C
 	return
 }
 
+func (boardStore *BoardStore) GetBoardTags(bid uint) (tags *[]models.Tag, err error) {
+	tags = new([]models.Tag)
+	err = boardStore.db.Where("b_id = ?", bid).Order("tg_id").Find(tags).Error
+	return
+}
+
 func (boardStore *BoardStore) GetBoardCards(bid uint) (cards *[]models.Card, err error) {
 	cards = new([]models.Card)
 	err = boardStore.db.Model(&models.Board{BID: bid}).Association("Cards").Find(cards)
