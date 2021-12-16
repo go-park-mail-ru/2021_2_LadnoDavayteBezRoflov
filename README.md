@@ -26,7 +26,7 @@ Trello backend repository for LadnoDavayteBezRoflov team, autumn of 2021.
 [Link to API](https://app.swaggerhub.com/apis/DPeshkoff/LadnoDavayteBezRoflov).
 
 ### Deploy
-[Link to deploy](http://95.163.213.142).
+[Link to deploy](https://brrrello.ru).
 
 ### Usage
 

@@ -38,8 +38,8 @@ services:
         container_name: db_postgres
         command: -p 5433 
         environment:
-            - POSTGRES_USER=backend_ldbr
-            - POSTGRES_PASSWORD=backend_LDBR_password
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=backend_ldbr_db
             - DATABASE_HOST=db
             - TZ=Europe/Moscow
@@ -64,8 +64,8 @@ services:
             - "8083"
         environment:
             - DB_PORT=5433
-            - POSTGRES_USER=backend_ldbr
-            - POSTGRES_PASSWORD=backend_LDBR_password
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=backend_ldbr_db
             - DATABASE_HOST=db
         volumes:
@@ -112,11 +112,11 @@ services:
     backend:
         environment:
             - DB_PORT=5433
-            - POSTGRES_USER=backend_ldbr
-            - POSTGRES_PASSWORD=backend_LDBR_password
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=backend_ldbr_db
             - DATABASE_HOST=db
-            - FRONTEND_ADDRESS=95.163.213.142
+            - FRONTEND_ADDRESS=brrrello.ru
             - GIN_MODE=debug
             - TZ=Europe/Moscow
             - PUBLIC_DIR=/assets
@@ -130,7 +130,7 @@ services:
             - "8000"
         volumes:
             - ./:/backend
-            - /home/ubuntu/01-frontend/2021_2_LadnoDavayteBezRoflov/public/assets:/assets
+            - /home/ubuntu/01-frontend/dist/assets:/assets
         restart: on-failure
         depends_on:
             - postgres

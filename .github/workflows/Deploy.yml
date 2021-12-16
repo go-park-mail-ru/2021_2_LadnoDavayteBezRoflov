@@ -1,7 +1,7 @@
-name: CI
+name: Deploy
 
 on:
-  pull_request:
+  push:
     branches: [ main ]
 
   workflow_dispatch:
@@ -41,12 +41,41 @@ jobs:
 
       - name: Count test coverage
         run: go test -race -coverpkg=./... -coverprofile=c.out ./...; go tool cover -func=c.out
-      
-      - name: Count test coverage (without generated files)
-        run: go test -race -coverpkg=./... -coverprofile cover.out.tmp ./...; cat cover.out.tmp | grep -v "_easyjson.go" > cover.out; go tool cover -func cover.out
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
           name: backend
           path: .
+
+  deploy:
+      runs-on: ubuntu-latest
+
+      needs: build
+
+      steps:
+        - name: Download build
+          uses: actions/download-artifact@v2
+          with:
+            name: backend
+            path: .
+
+        - name: Transfer build files to server
+          uses: appleboy/scp-action@master
+          with:
+            host: ${{ secrets.HOST_IP }}
+            username: ubuntu
+            key: ${{ secrets.PRIVATE_KEY }}
+            source: "./*"
+            target: "/home/ubuntu/02-backend/"
+
+        - name: Reload docker-compose
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST_IP }}
+            username: ubuntu
+            key: ${{ secrets.PRIVATE_KEY }}
+            script: |
+              cd /home/ubuntu/02-backend/
+              screen -XS backend quit
+              screen -dmS backend sudo docker-compose up
