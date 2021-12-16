@@ -106,6 +106,21 @@ func (mr *MockUserRepositoryMockRecorder) FindAllByLogin(text, amount interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllByLogin", reflect.TypeOf((*MockUserRepository)(nil).FindAllByLogin), text, amount)
 }
 
+// FindBoardInvitedMembersByLogin mocks base method.
+func (m *MockUserRepository) FindBoardInvitedMembersByLogin(bid uint, text string, amount int) (*[]models.PublicUserInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindBoardInvitedMembersByLogin", bid, text, amount)
+	ret0, _ := ret[0].(*[]models.PublicUserInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindBoardInvitedMembersByLogin indicates an expected call of FindBoardInvitedMembersByLogin.
+func (mr *MockUserRepositoryMockRecorder) FindBoardInvitedMembersByLogin(bid, text, amount interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindBoardInvitedMembersByLogin", reflect.TypeOf((*MockUserRepository)(nil).FindBoardInvitedMembersByLogin), bid, text, amount)
+}
+
 // FindBoardMembersByLogin mocks base method.
 func (m *MockUserRepository) FindBoardMembersByLogin(bid uint, text string, amount int) (*[]models.PublicUserInfo, error) {
 	m.ctrl.T.Helper()

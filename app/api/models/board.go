@@ -8,6 +8,7 @@ type Board struct {
 	AccessPath      string           `json:"access_path"`
 	Users           []User           `json:"-" gorm:"many2many:users_boards;"`
 	Members         []PublicUserInfo `json:"members" gorm:"-"`
+	InvitedMembers  []PublicUserInfo `json:"invited_members" gorm:"-"`
 	CardLists       []CardList       `json:"card_lists" gorm:"foreignKey:BID;constraint:OnDelete:CASCADE;"`
 	Cards           []Card           `json:"-" gorm:"foreignKey:BID;constraint:OnDelete:CASCADE;"`
 	Tags            []Tag            `json:"tags" gorm:"foreignKey:BID;constraint:OnDelete:CASCADE;"`

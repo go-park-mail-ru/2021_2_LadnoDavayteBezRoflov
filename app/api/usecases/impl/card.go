@@ -5,6 +5,7 @@ import (
 	"backendServer/app/api/repositories"
 	"backendServer/app/api/usecases"
 	customErrors "backendServer/pkg/errors"
+	"errors"
 
 	"github.com/google/uuid"
 )
@@ -161,7 +162,7 @@ func (cardUseCase *CardUseCaseImpl) AddUserViaLink(uid uint, accessPath string) 
 	}
 
 	isAccessed, err := cardUseCase.userRepository.IsBoardAccessed(uid, card.BID)
-	if err != nil {
+	if err != nil && !errors.Is(err, customErrors.ErrNoAccess) {
 		return
 	}
 	if !isAccessed {
@@ -172,7 +173,7 @@ func (cardUseCase *CardUseCaseImpl) AddUserViaLink(uid uint, accessPath string) 
 	}
 
 	isAssigned, err := cardUseCase.userRepository.IsCardAssigned(uid, card.CID)
-	if err != nil {
+	if err != nil && !errors.Is(err, customErrors.ErrNoAccess) {
 		return
 	}
 	if !isAssigned {

@@ -69,6 +69,29 @@ func easyjson202377feDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Boar
 				}
 				in.Delim(']')
 			}
+		case "invited_members":
+			if in.IsNull() {
+				in.Skip()
+				out.InvitedMembers = nil
+			} else {
+				in.Delim('[')
+				if out.InvitedMembers == nil {
+					if !in.IsDelim(']') {
+						out.InvitedMembers = make([]PublicUserInfo, 0, 1)
+					} else {
+						out.InvitedMembers = []PublicUserInfo{}
+					}
+				} else {
+					out.InvitedMembers = (out.InvitedMembers)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v2 PublicUserInfo
+					(v2).UnmarshalEasyJSON(in)
+					out.InvitedMembers = append(out.InvitedMembers, v2)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		case "card_lists":
 			if in.IsNull() {
 				in.Skip()
@@ -85,9 +108,9 @@ func easyjson202377feDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Boar
 					out.CardLists = (out.CardLists)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v2 CardList
-					(v2).UnmarshalEasyJSON(in)
-					out.CardLists = append(out.CardLists, v2)
+					var v3 CardList
+					(v3).UnmarshalEasyJSON(in)
+					out.CardLists = append(out.CardLists, v3)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -108,9 +131,9 @@ func easyjson202377feDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Boar
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v3 Tag
-					(v3).UnmarshalEasyJSON(in)
-					out.Tags = append(out.Tags, v3)
+					var v4 Tag
+					(v4).UnmarshalEasyJSON(in)
+					out.Tags = append(out.Tags, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -131,9 +154,9 @@ func easyjson202377feDecodeBackendServerAppApiModels(in *jlexer.Lexer, out *Boar
 					out.AvailableColors = (out.AvailableColors)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v4 Color
-					(v4).UnmarshalEasyJSON(in)
-					out.AvailableColors = append(out.AvailableColors, v4)
+					var v5 Color
+					(v5).UnmarshalEasyJSON(in)
+					out.AvailableColors = append(out.AvailableColors, v5)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -184,11 +207,27 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range in.Members {
-				if v5 > 0 {
+			for v6, v7 := range in.Members {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				(v6).MarshalEasyJSON(out)
+				(v7).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"invited_members\":"
+		out.RawString(prefix)
+		if in.InvitedMembers == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v8, v9 := range in.InvitedMembers {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				(v9).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -200,11 +239,11 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v7, v8 := range in.CardLists {
-				if v7 > 0 {
+			for v10, v11 := range in.CardLists {
+				if v10 > 0 {
 					out.RawByte(',')
 				}
-				(v8).MarshalEasyJSON(out)
+				(v11).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -216,11 +255,11 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v9, v10 := range in.Tags {
-				if v9 > 0 {
+			for v12, v13 := range in.Tags {
+				if v12 > 0 {
 					out.RawByte(',')
 				}
-				(v10).MarshalEasyJSON(out)
+				(v13).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -232,11 +271,11 @@ func easyjson202377feEncodeBackendServerAppApiModels(out *jwriter.Writer, in Boa
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.AvailableColors {
-				if v11 > 0 {
+			for v14, v15 := range in.AvailableColors {
+				if v14 > 0 {
 					out.RawByte(',')
 				}
-				(v12).MarshalEasyJSON(out)
+				(v15).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}

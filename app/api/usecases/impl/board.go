@@ -5,6 +5,7 @@ import (
 	"backendServer/app/api/repositories"
 	"backendServer/app/api/usecases"
 	customErrors "backendServer/pkg/errors"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -106,6 +107,12 @@ func (boardUseCase *BoardUseCaseImpl) GetBoard(uid, bid uint) (board *models.Boa
 		return
 	}
 	board.Members = *members
+
+	invitedMembers, err := boardUseCase.boardRepository.GetBoardInvitedMembers(bid)
+	if err != nil {
+		return
+	}
+	board.InvitedMembers = *invitedMembers
 
 	lists, err := boardUseCase.boardRepository.GetBoardCardLists(bid)
 	if err != nil {
@@ -249,7 +256,7 @@ func (boardUseCase *BoardUseCaseImpl) AddUserViaLink(uid uint, accessPath string
 	}
 
 	isAccessed, err := boardUseCase.userRepository.IsBoardAccessed(uid, bid)
-	if err != nil {
+	if err != nil && !errors.Is(err, customErrors.ErrNoAccess) {
 		return
 	}
 	if !isAccessed {

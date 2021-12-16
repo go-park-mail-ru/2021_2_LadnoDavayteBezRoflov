@@ -5,6 +5,7 @@ import (
 	"backendServer/pkg/logger"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/penglongli/gin-metrics/ginmetrics"
@@ -19,7 +20,8 @@ type CommonMiddleware interface {
 }
 
 type CommonMiddlewareImpl struct {
-	logger logger.Logger
+	logger       logger.Logger
+	metricsMutex sync.Mutex
 }
 
 func CreateCommonMiddleware(logger logger.Logger) CommonMiddleware {
@@ -41,7 +43,9 @@ func (middleware *CommonMiddlewareImpl) Logger() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, err := range c.Errors {
+				middleware.metricsMutex.Lock()
 				_ = ginmetrics.GetMonitor().GetMetric("api_errors").Inc([]string{strconv.Itoa(customErrors.ResolveErrorToCode(err)), err.Error()})
+				middleware.metricsMutex.Unlock()
 			}
 
 			err := customErrors.FindError(c.Errors.Last())

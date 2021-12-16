@@ -58,7 +58,7 @@ func (cardHandler *CardHandler) CreateCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"cid": cid})
+	c.JSON(http.StatusOK, gin.H{"cid": cid, "access_path": card.AccessPath})
 }
 
 func (cardHandler *CardHandler) GetCard(c *gin.Context) {

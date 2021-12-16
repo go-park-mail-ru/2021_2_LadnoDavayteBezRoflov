@@ -13,6 +13,7 @@ type UserRepository interface {
 	GetByID(uid uint) (user *models.User, err error)
 	FindAllByLogin(text string, amount int) (users *[]models.PublicUserInfo, err error)
 	FindBoardMembersByLogin(bid uint, text string, amount int) (users *[]models.PublicUserInfo, err error)
+	FindBoardInvitedMembersByLogin(bid uint, text string, amount int) (users *[]models.PublicUserInfo, err error)
 	GetUserTeams(uid uint) (teams *[]models.Team, err error)
 	GetUserToggledBoards(uid uint) (boards *[]models.Board, err error)
 	AddUserToTeam(uid, tid uint) (err error)
