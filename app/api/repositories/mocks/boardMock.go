@@ -62,6 +62,21 @@ func (mr *MockBoardRepositoryMockRecorder) Delete(bid interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBoardRepository)(nil).Delete), bid)
 }
 
+// FindBoardIDByPath mocks base method.
+func (m *MockBoardRepository) FindBoardIDByPath(accessPath string) (uint, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindBoardIDByPath", accessPath)
+	ret0, _ := ret[0].(uint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindBoardIDByPath indicates an expected call of FindBoardIDByPath.
+func (mr *MockBoardRepositoryMockRecorder) FindBoardIDByPath(accessPath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindBoardIDByPath", reflect.TypeOf((*MockBoardRepository)(nil).FindBoardIDByPath), accessPath)
+}
+
 // GetBoardCardLists mocks base method.
 func (m *MockBoardRepository) GetBoardCardLists(bid uint) (*[]models.CardList, error) {
 	m.ctrl.T.Helper()
@@ -149,4 +164,19 @@ func (m *MockBoardRepository) Update(board *models.Board) error {
 func (mr *MockBoardRepositoryMockRecorder) Update(board interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockBoardRepository)(nil).Update), board)
+}
+
+// UpdateAccessPath mocks base method.
+func (m *MockBoardRepository) UpdateAccessPath(bid uint) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccessPath", bid)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAccessPath indicates an expected call of UpdateAccessPath.
+func (mr *MockBoardRepositoryMockRecorder) UpdateAccessPath(bid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccessPath", reflect.TypeOf((*MockBoardRepository)(nil).UpdateAccessPath), bid)
 }

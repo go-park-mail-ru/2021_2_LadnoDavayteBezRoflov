@@ -6,6 +6,8 @@ import (
 	"backendServer/app/api/usecases"
 	customErrors "backendServer/pkg/errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type BoardUseCaseImpl struct {
@@ -45,7 +47,7 @@ func (boardUseCase *BoardUseCaseImpl) GetUserBoards(uid uint) (teams *[]models.T
 		boards, boardsErr := boardUseCase.teamRepository.GetTeamBoards(team.TID)
 		if boardsErr != nil {
 			err = boardsErr
-			return
+			return nil, err
 		}
 		members, err := boardUseCase.teamRepository.GetTeamMembers(team.TID)
 		if err != nil {
@@ -74,6 +76,7 @@ func (boardUseCase *BoardUseCaseImpl) GetUserBoards(uid uint) (teams *[]models.T
 }
 
 func (boardUseCase *BoardUseCaseImpl) CreateBoard(board *models.Board) (bid uint, err error) {
+	board.AccessPath = uuid.NewString()
 	err = boardUseCase.boardRepository.Create(board)
 	if err != nil {
 		return 0, err
@@ -202,6 +205,39 @@ func (boardUseCase *BoardUseCaseImpl) ToggleUser(uid, bid, toggledUserID uint) (
 	err = boardUseCase.userRepository.AddUserToBoard(toggledUserID, bid)
 	if err != nil {
 		return
+	}
+
+	return boardUseCase.GetBoard(uid, bid)
+}
+
+func (boardUseCase *BoardUseCaseImpl) UpdateAccessPath(uid, bid uint) (newAccessPath string, err error) {
+	isAccessed, err := boardUseCase.userRepository.IsBoardAccessed(uid, bid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = customErrors.ErrNoAccess
+		return
+	}
+
+	return boardUseCase.boardRepository.UpdateAccessPath(bid)
+}
+
+func (boardUseCase *BoardUseCaseImpl) AddUserViaLink(uid uint, accessPath string) (board *models.Board, err error) {
+	bid, err := boardUseCase.boardRepository.FindBoardIDByPath(accessPath)
+	if err != nil {
+		return
+	}
+
+	isAccessed, err := boardUseCase.userRepository.IsBoardAccessed(uid, bid)
+	if err != nil {
+		return
+	}
+	if !isAccessed {
+		err = boardUseCase.userRepository.AddUserToBoard(uid, bid)
+		if err != nil {
+			return
+		}
 	}
 
 	return boardUseCase.GetBoard(uid, bid)

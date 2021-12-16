@@ -11,4 +11,6 @@ type BoardUseCase interface {
 	UpdateBoard(uid uint, board *models.Board) (err error)
 	DeleteBoard(uid, bid uint) (err error)
 	ToggleUser(uid, bid, toggledUserID uint) (board *models.Board, err error)
+	UpdateAccessPath(uid, bid uint) (newAccessLink string, err error)
+	AddUserViaLink(uid uint, accessPath string) (board *models.Board, err error)
 }

@@ -2,7 +2,7 @@ package models
 
 type PublicUserInfo struct {
 	UID    uint   `json:"uid"`
-	Login  string `json:"userName" faker:"username,unique"`
-	Email  string `json:"email" faker:"email,unique"`
+	Login  string `json:"userName" faker:"username"`
+	Email  string `json:"email" faker:"email"`
 	Avatar string `json:"avatar"`
 }

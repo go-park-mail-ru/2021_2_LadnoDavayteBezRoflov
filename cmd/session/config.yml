@@ -2,4 +2,6 @@ service_protocol: 'tcp'
 
 service_port: '0.0.0.0:8081'
 
+service_metrics_port: '0.0.0.0:8082'
+
 redis_protocol: 'tcp'

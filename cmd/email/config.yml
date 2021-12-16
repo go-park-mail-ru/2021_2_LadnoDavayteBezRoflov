@@ -5,6 +5,8 @@ mail: {
   password: 'B1GmLskQvzhubYNKxKq0',
 }
 
+service_metrics_port: '0.0.0.0:8083'
+
 rabbitmq_path: 'amqp://guest:guest@rabbitmq:5672/'
 queue_name:    'queue'
-consumer_name: 'consumer'
+consumer_name: ''

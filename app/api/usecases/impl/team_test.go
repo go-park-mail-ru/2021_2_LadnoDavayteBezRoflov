@@ -223,6 +223,13 @@ func TestToggleTeam(t *testing.T) {
 	_, err = teamUseCase.ToggleUser(uid, tid, toggledUserId)
 	assert.Equal(t, customErrors.ErrInternal, err)
 
+	// user was successfully deleted from team
+	userRepoMock.EXPECT().IsUserInTeam(uid, tid).Return(true, nil)
+	userRepoMock.EXPECT().AddUserToTeam(toggledUserId, tid).Return(nil)
+	userRepoMock.EXPECT().IsUserInTeam(uid, tid).Return(false, customErrors.ErrNoAccess)
+	_, err = teamUseCase.ToggleUser(uid, tid, toggledUserId)
+	assert.Equal(t, nil, err)
+
 	// get team error
 	userRepoMock.EXPECT().IsUserInTeam(uid, tid).Return(true, nil)
 	userRepoMock.EXPECT().AddUserToTeam(toggledUserId, tid).Return(nil)

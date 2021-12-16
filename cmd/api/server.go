@@ -8,6 +8,7 @@ import (
 	"backendServer/app/microservices/session/handler"
 	"backendServer/pkg/closer"
 	zapLogger "backendServer/pkg/logger"
+	"backendServer/pkg/metrics"
 	"backendServer/pkg/sessionCookieController"
 
 	"github.com/penglongli/gin-metrics/ginmetrics"
@@ -82,7 +83,7 @@ func (server *Server) Run() {
 	}
 	defer everythingCloser.Close(channel.Close)
 
-	queue, err := channel.QueueDeclare(
+	_, err = channel.QueueDeclare(
 		server.settings.QueueName, // name
 		false,                     // durable
 		false,                     // delete when unused
@@ -110,7 +111,7 @@ func (server *Server) Run() {
 
 	// Repositories
 	sessionRepo := stores.CreateSessionRepository(sessionManager)
-	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName, channel, queue)
+	userRepo := stores.CreateUserRepository(postgresClient, server.settings.AvatarsPath, server.settings.DefaultAvatarName, channel, server.settings.QueueName)
 	teamRepo := stores.CreateTeamRepository(postgresClient)
 	boardRepo := stores.CreateBoardRepository(postgresClient)
 	cardListRepo := stores.CreateCardListRepository(postgresClient)
@@ -143,6 +144,7 @@ func (server *Server) Run() {
 
 	// get global Monitor object
 	monitor := ginmetrics.GetMonitor()
+	_ = ginmetrics.GetMonitor().AddMetric(metrics.APIErrors)
 	monitor.SetMetricPath("/metrics")
 	monitor.SetSlowTime(10)
 	monitor.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})

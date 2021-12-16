@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/mailru/easyjson"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -42,7 +44,7 @@ func (teamHandler *TeamHandler) CreateTeam(c *gin.Context) {
 	}
 
 	team := new(models.Team)
-	if err := c.ShouldBindJSON(team); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, team); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -72,10 +74,17 @@ func (teamHandler *TeamHandler) GetTeam(c *gin.Context) {
 
 	team, err := teamHandler.TeamUseCase.GetTeam(uid.(uint), uint(tid))
 	if err != nil {
+		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, team)
+	teamJSON, err := team.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", teamJSON)
 }
 
 func (teamHandler *TeamHandler) UpdateTeam(c *gin.Context) {
@@ -85,7 +94,7 @@ func (teamHandler *TeamHandler) UpdateTeam(c *gin.Context) {
 		return
 	}
 
-	tid64 := c.Param("cid")
+	tid64 := c.Param("tid")
 	tid, err := strconv.ParseUint(tid64, 10, 32)
 	if err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
@@ -93,7 +102,7 @@ func (teamHandler *TeamHandler) UpdateTeam(c *gin.Context) {
 	}
 
 	team := new(models.Team)
-	if err := c.ShouldBindJSON(team); err != nil {
+	if err := easyjson.UnmarshalFromReader(c.Request.Body, team); err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
 		return
 	}
@@ -105,7 +114,13 @@ func (teamHandler *TeamHandler) UpdateTeam(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, team)
+	teamJSON, err := team.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", teamJSON)
 }
 
 func (teamHandler *TeamHandler) DeleteTeam(c *gin.Context) {
@@ -115,7 +130,7 @@ func (teamHandler *TeamHandler) DeleteTeam(c *gin.Context) {
 		return
 	}
 
-	tid64 := c.Param("cid")
+	tid64 := c.Param("tid")
 	tid, err := strconv.ParseUint(tid64, 10, 32)
 	if err != nil {
 		_ = c.Error(customErrors.ErrBadRequest)
@@ -158,5 +173,11 @@ func (teamHandler *TeamHandler) ToggleUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, team)
+	teamJSON, err := team.MarshalJSON()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", teamJSON)
 }

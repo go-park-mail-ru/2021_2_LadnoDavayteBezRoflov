@@ -33,11 +33,11 @@ type UserStore struct {
 	avatarPath        string
 	defaultAvatarName string
 	channel           *amqp.Channel
-	queue             amqp.Queue
+	queueName         string
 }
 
-func CreateUserRepository(db *gorm.DB, avatarPath, defaultAvatarName string, channel *amqp.Channel, queue amqp.Queue) repositories.UserRepository {
-	return &UserStore{db: db, avatarPath: avatarPath, defaultAvatarName: defaultAvatarName, channel: channel, queue: queue}
+func CreateUserRepository(db *gorm.DB, avatarPath, defaultAvatarName string, channel *amqp.Channel, queueName string) repositories.UserRepository {
+	return &UserStore{db: db, avatarPath: avatarPath, defaultAvatarName: defaultAvatarName, channel: channel, queueName: queueName}
 }
 
 func (userStore *UserStore) Create(user *models.User) (err error) {
@@ -65,6 +65,9 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	if err != nil {
 		return err
 	}
+	defer func(out *os.File) {
+		_ = out.Close()
+	}(out)
 
 	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
 
@@ -92,13 +95,14 @@ func (userStore *UserStore) Create(user *models.User) (err error) {
 	if err != nil {
 		return
 	}
+
 	body, err := json.Marshal(publicData)
 	if err != nil {
 		return
 	}
 
-	err = userStore.channel.Publish("", userStore.queue.Name, false, false, amqp.Publishing{
-		DeliveryMode: amqp.Persistent,
+	err = userStore.channel.Publish("", userStore.queueName, false, false, amqp.Publishing{
+		DeliveryMode: amqp.Transient,
 		ContentType:  "text/plain",
 		Body:         body,
 	})
@@ -157,6 +161,9 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 		if err != nil {
 			return err
 		}
+		defer func(in multipart.File) {
+			_ = in.Close()
+		}(in)
 
 		img, _, err := image.Decode(in)
 		if err != nil {
@@ -167,6 +174,9 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 		if err != nil {
 			return err
 		}
+		defer func(out *os.File) {
+			_ = out.Close()
+		}(out)
 
 		options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
 		if err != nil {
@@ -181,7 +191,6 @@ func (userStore *UserStore) UpdateAvatar(user *models.User, avatar *multipart.Fi
 		defaultAvatar := strings.Join([]string{userStore.avatarPath, "/", userStore.defaultAvatarName}, "")
 		defaultAvatar = strings.Replace(defaultAvatar, "/backend", "", -1)
 		if oldUser.Avatar != "" && oldUser.Avatar != defaultAvatar {
-			oldUser.Avatar = strings.Join([]string{"/backend", oldUser.Avatar}, "")
 			err = os.Remove(oldUser.Avatar)
 			if err != nil {
 				oldUser.Avatar = strings.Replace(oldUser.Avatar, "/backend", "", -1)

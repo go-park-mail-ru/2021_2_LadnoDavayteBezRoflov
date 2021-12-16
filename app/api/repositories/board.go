@@ -13,4 +13,6 @@ type BoardRepository interface {
 	GetBoardInvitedMembers(bid uint) (members *[]models.PublicUserInfo, err error)
 	GetBoardCardLists(bid uint) (cardLists *[]models.CardList, err error)
 	GetBoardCards(bid uint) (cards *[]models.Card, err error)
+	UpdateAccessPath(bid uint) (newAccessPath string, err error)
+	FindBoardIDByPath(accessPath string) (bid uint, err error)
 }

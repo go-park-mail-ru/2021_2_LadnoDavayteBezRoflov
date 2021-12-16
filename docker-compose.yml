@@ -1,4 +1,5 @@
 version: "3"
+
 services:
     rabbitmq:
         image: rabbitmq:3-management-alpine
@@ -7,8 +8,8 @@ services:
             - "5672:5672"
             - "15672:15672"
         volumes:
-            - $PWD/rabbitmq/data/:/var/lib/rabbitmq/
-            - $PWD/rabbitmq/log/:/var/log/rabbitmq
+            - $PWD/rabbitmq/data/:$HOME/.log/var/lib/rabbitmq/
+            - $PWD/rabbitmq/log/:$HOME/.log/var/log/rabbitmq
         healthcheck:
             test: rabbitmq-diagnostics -q ping
             interval: 30s
@@ -58,16 +59,24 @@ services:
             dockerfile: ./Dockerfile-email
         container_name: "2021_2_LadnoDavayteBezRoflov_Email"
         ports:
-            - "8082:8082"
+            - "8083:8083"
         expose:
-            - "8082"
+            - "8083"
+        environment:
+            - DB_PORT=5433
+            - POSTGRES_USER=backend_ldbr
+            - POSTGRES_PASSWORD=backend_LDBR_password
+            - POSTGRES_DB=backend_ldbr_db
+            - DATABASE_HOST=db
         volumes:
             - ./:/email
         restart: on-failure
         depends_on:
             - rabbitmq
+            - postgres
         links:
             - "rabbitmq:rabbitmq"
+            - "postgres:db"
         healthcheck:
             test: [ "CMD", "curl", "-f", "http://localhost:8082" ]
             interval: 30s
@@ -83,8 +92,10 @@ services:
         container_name: "2021_2_LadnoDavayteBezRoflov_Session"
         ports:
             - "8081:8081"
+            - "8082:8082"
         expose:
             - "8081"
+            - "8082"
         volumes:
             - ./:/session
         restart: on-failure
@@ -128,6 +139,39 @@ services:
             - "postgres:db"
             - "session:session"
             - "rabbitmq:rabbitmq"
+
+    node-exporter:
+        image: prom/node-exporter
+        volumes:
+            - /proc:/host/proc:ro
+            - /sys:/host/sys:ro
+            - /:/rootfs:ro
+        command:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --collector.filesystem.ignored-mount-points
+            - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
+        ports:
+            - "9100:9100"
+        restart: always
+        deploy:
+            mode: global
+
+    prometheus:
+        image: "prom/prometheus"
+        ports:
+            - "9090:9090"
+        command:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+        volumes:
+            - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+
+    grafana:
+        image: "grafana/grafana"
+        ports:
+            - "3000:3000"
+        volumes:
+            - "./grafana:/var/lib/grafana:cached"
 
 volumes:
     .:

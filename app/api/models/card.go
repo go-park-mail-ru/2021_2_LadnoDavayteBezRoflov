@@ -11,7 +11,7 @@ type Card struct {
 	Deadline           string           `json:"deadline" faker:"timestamp"`
 	Comments           []Comment        `json:"comments" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`
 	CheckLists         []CheckList      `json:"check_lists" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`
-	Users              []User           `json:"-" faker:"-" gorm:"many2many:users_cards;constraint:OnDelete:CASCADE;"`
-	Assignees          []PublicUserInfo `json:"assignees" faker:"-" gorm:"-"`
+	Users              []User           `json:"-" gorm:"many2many:users_cards;constraint:OnDelete:CASCADE;"`
+	Assignees          []PublicUserInfo `json:"assignees" gorm:"-"`
 	Attachments        []Attachment     `json:"attachments" gorm:"foreignKey:CID;constraint:OnDelete:CASCADE;"`
 }
