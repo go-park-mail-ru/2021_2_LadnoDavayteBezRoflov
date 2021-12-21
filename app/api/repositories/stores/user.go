@@ -338,9 +338,6 @@ func (userStore *UserStore) AddUserToBoard(uid, bid uint) (err error) {
 		}
 
 		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Delete(user)
-		if err != nil {
-			return
-		}
 	} else {
 		err = userStore.db.Model(&models.Board{BID: bid}).Association("Users").Append(user)
 	}
