@@ -42,6 +42,26 @@ func (tagStore *TagStore) Update(tag *models.Tag) (err error) {
 }
 
 func (tagStore *TagStore) Delete(tgid uint) (err error) {
+	tag, err := tagStore.GetByID(tgid)
+	if err != nil {
+		return err
+	}
+
+	cards := new([]models.Card)
+	err = tagStore.db.Model(&models.Board{BID: tag.BID}).Association("Cards").Find(cards)
+	if err != nil {
+		return
+	}
+
+	for _, card := range *cards {
+		if isAssigned, _ := tagStore.IsCardAssigned(tgid, card.CID); isAssigned {
+			err = tagStore.AddTagToCard(tgid, card.CID)
+			if err != nil {
+				return
+			}
+		}
+	}
+
 	return tagStore.db.Delete(&models.Tag{}, tgid).Error
 }
 
