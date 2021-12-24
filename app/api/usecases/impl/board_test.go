@@ -502,3 +502,38 @@ func TestToggleBoard(t *testing.T) {
 	_, err = boardUseCase.ToggleUser(uid, bid, toggledUserId)
 	assert.Equal(t, customErrors.ErrInternal, err)
 }
+
+func TestUpdateAccessPathBoard(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	boardRepoMock, userRepoMock, teamRepoMock, cardListRepoMock, cardRepoMock, checkListRepoMock := createBoardRepoMocks(ctrl)
+	boardUseCase := CreateBoardUseCase(boardRepoMock, userRepoMock, teamRepoMock, cardListRepoMock, cardRepoMock, checkListRepoMock)
+
+	uid := uint(1)
+	bid := uint(1)
+	newAccessPath := "new path"
+
+	// good
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
+	boardRepoMock.EXPECT().UpdateAccessPath(bid).Return(newAccessPath, nil)
+	resAccessPath, err := boardUseCase.UpdateAccessPath(uid, bid)
+	assert.NoError(t, err)
+	assert.Equal(t, newAccessPath, resAccessPath)
+
+	// error while checking access
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(false, customErrors.ErrInternal)
+	_, err = boardUseCase.UpdateAccessPath(uid, bid)
+	assert.Equal(t, customErrors.ErrInternal, err)
+
+	// no access
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(false, nil)
+	_, err = boardUseCase.UpdateAccessPath(uid, bid)
+	assert.Equal(t, customErrors.ErrNoAccess, err)
+
+	// can't update
+	userRepoMock.EXPECT().IsBoardAccessed(uid, bid).Return(true, nil)
+	boardRepoMock.EXPECT().UpdateAccessPath(bid).Return("", customErrors.ErrInternal)
+	_, err = boardUseCase.UpdateAccessPath(uid, bid)
+	assert.Equal(t, customErrors.ErrInternal, err)
+}
