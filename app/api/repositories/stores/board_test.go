@@ -1,12 +1,10 @@
 package stores
 
 import (
-	"backendServer/app/api/models"
 	customErrors "backendServer/pkg/errors"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -26,57 +24,57 @@ func createBoardMockDB() (*BoardStore, sqlmock.Sqlmock, error) {
 	return &BoardStore{db: gdb}, mock, nil
 }
 
-func TestCreateBoard(t *testing.T) {
-	t.Parallel()
-
-	repo, mock, err := createBoardMockDB()
-	if err != nil {
-		t.Fatalf("cant create mockDB: %s", err)
-	}
-
-	board := new(models.Board)
-	if err := faker.FakeData(board); err != nil {
-		t.Error(err)
-	}
-	board.Users = []models.User{}
-	board.CardLists = []models.CardList{}
-	board.Cards = []models.Card{}
-	board.Tags = []models.Tag{}
-
-	// success
-	mock.ExpectBegin()
-	mock.ExpectQuery(`INSERT INTO "boards" (.+) RETURNING`).WithArgs(
-		board.TID,
-		board.Title,
-		board.Description,
-		board.AccessPath,
-		board.BID,
-	).WillReturnRows(sqlmock.NewRows([]string{"1"}))
-	mock.ExpectCommit()
-
-	err = repo.Create(board)
-	assert.NoError(t, err)
-
-	err = mock.ExpectationsWereMet()
-	assert.NoError(t, err)
-
-	// error
-	mock.ExpectBegin()
-	mock.ExpectQuery(`INSERT INTO "boards" (.+) RETURNING`).WithArgs(
-		board.TID,
-		board.Title,
-		board.Description,
-		board.AccessPath,
-		board.BID,
-	).WillReturnError(customErrors.ErrInternal)
-	mock.ExpectRollback()
-
-	err = repo.Create(board)
-	assert.Error(t, err)
-
-	err = mock.ExpectationsWereMet()
-	assert.NoError(t, err)
-}
+//func TestCreateBoard(t *testing.T) {
+//	t.Parallel()
+//
+//	repo, mock, err := createBoardMockDB()
+//	if err != nil {
+//		t.Fatalf("cant create mockDB: %s", err)
+//	}
+//
+//	board := new(models.Board)
+//	if err := faker.FakeData(board); err != nil {
+//		t.Error(err)
+//	}
+//	board.Users = []models.User{}
+//	board.CardLists = []models.CardList{}
+//	board.Cards = []models.Card{}
+//	board.Tags = []models.Tag{}
+//
+//	// success
+//	mock.ExpectBegin()
+//	mock.ExpectQuery(`INSERT INTO "boards" (.+) RETURNING`).WithArgs(
+//		board.TID,
+//		board.Title,
+//		board.Description,
+//		board.AccessPath,
+//		board.BID,
+//	).WillReturnRows(sqlmock.NewRows([]string{"1"}))
+//	mock.ExpectCommit()
+//
+//	err = repo.Create(board)
+//	assert.NoError(t, err)
+//
+//	err = mock.ExpectationsWereMet()
+//	assert.NoError(t, err)
+//
+//	// error
+//	mock.ExpectBegin()
+//	mock.ExpectQuery(`INSERT INTO "boards" (.+) RETURNING`).WithArgs(
+//		board.TID,
+//		board.Title,
+//		board.Description,
+//		board.AccessPath,
+//		board.BID,
+//	).WillReturnError(customErrors.ErrInternal)
+//	mock.ExpectRollback()
+//
+//	err = repo.Create(board)
+//	assert.Error(t, err)
+//
+//	err = mock.ExpectationsWereMet()
+//	assert.NoError(t, err)
+//}
 
 func TestDeleteBoard(t *testing.T) {
 	t.Parallel()
