@@ -40,10 +40,10 @@ jobs:
         run: sudo apt-get install libwebp-dev; go clean -testcache; go test -race -cover ./...
 
       - name: Count test coverage
-        run: go test -race -coverpkg=./app/api/... -coverprofile=c.out ./app/api/...; go tool cover -func=c.out
+        run: go test -race -coverpkg=./... -coverprofile=c.out ./...; go tool cover -func=c.out
 
       - name: Count test coverage (without generated files)
-        run: go test -race -coverpkg=./app/api/... -coverprofile cover.out.tmp ./app/api/...; cat cover.out.tmp | grep -v "_easyjson.go" > cover1.out.tmp; cat cover1.out.tmp | grep -v ".pb.go" > cover.out ; go tool cover -func cover.out
+        run: go test -race -coverpkg=./... -coverprofile cover.out.tmp ./...; cat cover.out.tmp | grep -v "_easyjson.go" > cover1.out.tmp; cat cover1.out.tmp | grep -v ".pb.go" > cover.out ; go tool cover -func cover.out
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v2

@@ -2,7 +2,7 @@ mail: {
   host:     'smtp.mail.ru',
   port:     587,
   username: 'brrrello-notify@mail.ru',
-  password: '${EMAIL_PASSWORD}',
+  password: ${EMAIL_PASSWORD},
 }
 
 service_metrics_port: '0.0.0.0:8083'
