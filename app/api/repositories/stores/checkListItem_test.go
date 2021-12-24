@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func createBoardMockDB() (*BoardStore, sqlmock.Sqlmock, error) {
+func createCheckListItemMockDB() (*CheckListItemStore, sqlmock.Sqlmock, error) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, nil, err
@@ -23,38 +23,33 @@ func createBoardMockDB() (*BoardStore, sqlmock.Sqlmock, error) {
 		return nil, nil, err
 	}
 
-	return &BoardStore{db: gdb}, mock, nil
+	return &CheckListItemStore{db: gdb}, mock, nil
 }
 
-func TestCreateBoard(t *testing.T) {
+func TestCreateCheckListItem(t *testing.T) {
 	t.Parallel()
 
-	repo, mock, err := createBoardMockDB()
+	repo, mock, err := createCheckListItemMockDB()
 	if err != nil {
 		t.Fatalf("cant create mockDB: %s", err)
 	}
 
-	board := new(models.Board)
-	if err := faker.FakeData(board); err != nil {
+	checkListItem := new(models.CheckListItem)
+	if err := faker.FakeData(checkListItem); err != nil {
 		t.Error(err)
 	}
-	board.Users = []models.User{}
-	board.CardLists = []models.CardList{}
-	board.Cards = []models.Card{}
-	board.Tags = []models.Tag{}
 
 	// success
 	mock.ExpectBegin()
-	mock.ExpectQuery(`INSERT INTO "boards" (.+) RETURNING`).WithArgs(
-		board.TID,
-		board.Title,
-		board.Description,
-		board.AccessPath,
-		board.BID,
+	mock.ExpectQuery(`INSERT INTO "check_list_items" (.+) RETURNING`).WithArgs(
+		checkListItem.CHLID,
+		checkListItem.Text,
+		checkListItem.Status,
+		checkListItem.CHLIID,
 	).WillReturnRows(sqlmock.NewRows([]string{"1"}))
 	mock.ExpectCommit()
 
-	err = repo.Create(board)
+	err = repo.Create(checkListItem)
 	assert.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -62,40 +57,39 @@ func TestCreateBoard(t *testing.T) {
 
 	// error
 	mock.ExpectBegin()
-	mock.ExpectQuery(`INSERT INTO "boards" (.+) RETURNING`).WithArgs(
-		board.TID,
-		board.Title,
-		board.Description,
-		board.AccessPath,
-		board.BID,
+	mock.ExpectQuery(`INSERT INTO "check_list_items" (.+) RETURNING`).WithArgs(
+		checkListItem.CHLID,
+		checkListItem.Text,
+		checkListItem.Status,
+		checkListItem.CHLIID,
 	).WillReturnError(customErrors.ErrInternal)
 	mock.ExpectRollback()
 
-	err = repo.Create(board)
+	err = repo.Create(checkListItem)
 	assert.Error(t, err)
 
 	err = mock.ExpectationsWereMet()
 	assert.NoError(t, err)
 }
 
-func TestDeleteBoard(t *testing.T) {
+func TestDeleteCheckListItem(t *testing.T) {
 	t.Parallel()
 
-	repo, mock, err := createBoardMockDB()
+	repo, mock, err := createCheckListItemMockDB()
 	if err != nil {
 		t.Fatalf("cant create mockDB: %s", err)
 	}
 
-	testBID := uint(1)
+	testCHLIID := uint(1)
 
 	// success
 	mock.ExpectBegin()
-	mock.ExpectExec(`DELETE FROM "boards" WHERE "boards"."b_id"`).WithArgs(
-		testBID,
+	mock.ExpectExec(`DELETE FROM "check_list_items" WHERE "check_list_items"."chli_id"`).WithArgs(
+		testCHLIID,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
-	err = repo.Delete(testBID)
+	err = repo.Delete(testCHLIID)
 	assert.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -103,12 +97,12 @@ func TestDeleteBoard(t *testing.T) {
 
 	// error
 	mock.ExpectBegin()
-	mock.ExpectExec(`DELETE FROM "boards" WHERE "boards"."b_id"`).WithArgs(
-		testBID,
+	mock.ExpectExec(`DELETE FROM "check_list_items" WHERE "check_list_items"."chli_id"`).WithArgs(
+		testCHLIID,
 	).WillReturnError(customErrors.ErrInternal)
 	mock.ExpectRollback()
 
-	err = repo.Delete(testBID)
+	err = repo.Delete(testCHLIID)
 	assert.Error(t, err)
 
 	err = mock.ExpectationsWereMet()
