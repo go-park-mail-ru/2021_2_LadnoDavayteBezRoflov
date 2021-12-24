@@ -10,6 +10,7 @@ import (
 	zapLogger "backendServer/pkg/logger"
 	"backendServer/pkg/metrics"
 	"backendServer/pkg/sessionCookieController"
+	"backendServer/pkg/webSockets"
 
 	"github.com/penglongli/gin-metrics/ginmetrics"
 
@@ -156,6 +157,7 @@ func (server *Server) Run() {
 	// Handlers
 	router.NoRoute(handlers.NoRouteHandler)
 	router.GET("/debug/vars", expvar.Handler())
+	router.GET("/ws", sessionMiddleware.CheckAuth(), sessionMiddleware.CSRF(), webSockets.WebSocketsHandler)
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
 	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware)
