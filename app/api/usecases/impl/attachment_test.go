@@ -4,6 +4,7 @@ import (
 	"backendServer/app/api/models"
 	"backendServer/app/api/repositories/mocks"
 	customErrors "backendServer/pkg/errors"
+	"mime/multipart"
 	"testing"
 
 	"github.com/bxcodec/faker/v3"
@@ -17,6 +18,44 @@ func createAttachmentRepoMocks(controller *gomock.Controller) (*mocks.MockAttach
 	attachmentRepoMock := mocks.NewMockAttachmentRepository(controller)
 	userRepoMock := mocks.NewMockUserRepository(controller)
 	return attachmentRepoMock, userRepoMock
+}
+
+func TestCreateAttachment(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	attachmentRepoMock, userRepoMock := createAttachmentRepoMocks(ctrl)
+	attachmentUseCase := CreateAttachmentUseCase(attachmentRepoMock, userRepoMock)
+
+	uid := uint(1)
+	testAttachment := new(models.Attachment)
+	err := faker.FakeData(testAttachment)
+	assert.NoError(t, err)
+
+	file := new(multipart.FileHeader)
+
+	// good
+	userRepoMock.EXPECT().IsCardAccessed(uid, testAttachment.CID).Return(true, nil)
+	attachmentRepoMock.EXPECT().Create(file, testAttachment.CID).Return(testAttachment, nil)
+	resAttachment, err := attachmentUseCase.CreateAttachment(file, testAttachment.CID, uid)
+	assert.NoError(t, err)
+	assert.Equal(t, testAttachment, resAttachment)
+
+	// error while checking access
+	userRepoMock.EXPECT().IsCardAccessed(uid, testAttachment.CID).Return(false, customErrors.ErrInternal)
+	_, err = attachmentUseCase.CreateAttachment(file, testAttachment.CID, uid)
+	assert.Equal(t, customErrors.ErrInternal, err)
+
+	// no access
+	userRepoMock.EXPECT().IsCardAccessed(uid, testAttachment.CID).Return(false, nil)
+	_, err = attachmentUseCase.CreateAttachment(file, testAttachment.CID, uid)
+	assert.Equal(t, customErrors.ErrNoAccess, err)
+
+	// can't create
+	userRepoMock.EXPECT().IsCardAccessed(uid, testAttachment.CID).Return(true, nil)
+	attachmentRepoMock.EXPECT().Create(file, testAttachment.CID).Return(nil, customErrors.ErrInternal)
+	_, err = attachmentUseCase.CreateAttachment(file, testAttachment.CID, uid)
+	assert.Equal(t, customErrors.ErrInternal, err)
 }
 
 func TestGetAttachment(t *testing.T) {
