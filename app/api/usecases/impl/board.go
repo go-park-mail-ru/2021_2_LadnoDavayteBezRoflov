@@ -221,6 +221,21 @@ func (boardUseCase *BoardUseCaseImpl) DeleteBoard(uid, bid uint) (err error) {
 	if !isAccessed {
 		return customErrors.ErrNoAccess
 	}
+
+	users, err := boardUseCase.boardRepository.GetBoardInvitedMembers(bid)
+	if err != nil {
+		return
+	}
+
+	for _, user := range *users {
+		if isAssigned, _ := boardUseCase.userRepository.IsBoardAccessed(user.UID, bid); isAssigned {
+			err = boardUseCase.userRepository.AddUserToBoard(user.UID, bid)
+			if err != nil {
+				return
+			}
+		}
+	}
+
 	return boardUseCase.boardRepository.Delete(bid)
 }
 

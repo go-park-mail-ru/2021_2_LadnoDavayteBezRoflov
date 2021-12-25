@@ -119,7 +119,7 @@ func (emailServer *EmailServer) SendNotifications() {
 			}
 		}()
 
-		duration := time.Duration(12) * time.Hour
+		duration := time.Duration(24) * time.Hour
 		time.Sleep(duration)
 	}
 }

@@ -8,12 +8,13 @@ import (
 )
 
 type TeamUseCaseImpl struct {
-	teamRepository repositories.TeamRepository
-	userRepository repositories.UserRepository
+	teamRepository  repositories.TeamRepository
+	userRepository  repositories.UserRepository
+	boardRepository repositories.BoardRepository
 }
 
-func CreateTeamUseCase(teamRepository repositories.TeamRepository, userRepository repositories.UserRepository) usecases.TeamUseCase {
-	return &TeamUseCaseImpl{teamRepository: teamRepository, userRepository: userRepository}
+func CreateTeamUseCase(teamRepository repositories.TeamRepository, userRepository repositories.UserRepository, boardRepository repositories.BoardRepository) usecases.TeamUseCase {
+	return &TeamUseCaseImpl{teamRepository: teamRepository, userRepository: userRepository, boardRepository: boardRepository}
 }
 
 func (teamUseCase *TeamUseCaseImpl) CreateTeam(uid uint, team *models.Team) (tid uint, err error) {
@@ -81,6 +82,42 @@ func (teamUseCase *TeamUseCaseImpl) DeleteTeam(uid, tid uint) (err error) {
 	if !isMember {
 		err = customErrors.ErrNoAccess
 		return
+	}
+
+	boards, err := teamUseCase.teamRepository.GetTeamBoards(tid)
+	if err != nil {
+		return
+	}
+
+	for _, board := range *boards {
+		var users *[]models.PublicUserInfo
+		users, err = teamUseCase.boardRepository.GetBoardInvitedMembers(board.BID)
+		if err != nil {
+			return
+		}
+		for _, user := range *users {
+			if isAssigned, _ := teamUseCase.userRepository.IsBoardAccessed(user.UID, board.BID); isAssigned {
+				err = teamUseCase.userRepository.AddUserToBoard(user.UID, board.BID)
+				if err != nil {
+					return
+				}
+			}
+		}
+	}
+
+	var users *[]models.User
+	users, err = teamUseCase.teamRepository.GetTeamMembers(tid)
+	if err != nil {
+		return
+	}
+
+	for _, user := range *users {
+		if isAssigned, _ := teamUseCase.userRepository.IsUserInTeam(user.UID, tid); isAssigned {
+			err = teamUseCase.userRepository.AddUserToTeam(user.UID, tid)
+			if err != nil {
+				return
+			}
+		}
 	}
 
 	return teamUseCase.teamRepository.Delete(tid)

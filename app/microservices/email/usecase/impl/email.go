@@ -107,7 +107,7 @@ func (emailUseCase *EmailUseCaseImpl) SendNotifications() (emailLetters *[]gomai
 				if parsedDeadline.Before(tomorrow) && parsedDeadline.After(timeNow) {
 					cardInfo = strings.Join([]string{"карточка \"", card.Title, "\"", " истекает в течение дня;"}, "")
 				} else {
-					cardInfo = strings.Join([]string{"карточка \"", card.Title, "\"", "истекла менее 3-х дней назад;"}, "")
+					cardInfo = strings.Join([]string{"карточка \"", card.Title, "\"", " истекла менее 3-х дней назад;"}, "")
 				}
 
 				cardsInfo = strings.Join([]string{cardsInfo, cardInfo}, "\n\t- ")

@@ -10,6 +10,7 @@ import (
 	zapLogger "backendServer/pkg/logger"
 	"backendServer/pkg/metrics"
 	"backendServer/pkg/sessionCookieController"
+	"backendServer/pkg/webSockets"
 
 	"github.com/penglongli/gin-metrics/ginmetrics"
 
@@ -126,7 +127,7 @@ func (server *Server) Run() {
 	// UseCases
 	sessionUseCase := impl.CreateSessionUseCase(sessionRepo, userRepo)
 	userUseCase := impl.CreateUserUseCase(sessionRepo, userRepo, teamRepo)
-	teamUseCase := impl.CreateTeamUseCase(teamRepo, userRepo)
+	teamUseCase := impl.CreateTeamUseCase(teamRepo, userRepo, boardRepo)
 	boardUseCase := impl.CreateBoardUseCase(boardRepo, userRepo, teamRepo, cardListRepo, cardRepo, checkListRepo)
 	cardListUseCase := impl.CreateCardListUseCase(cardListRepo, userRepo)
 	cardUseCase := impl.CreateCardUseCase(cardRepo, userRepo, tagRepo)
@@ -153,9 +154,12 @@ func (server *Server) Run() {
 	monitor.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})
 	monitor.Use(router)
 
+	webSockets.SetupWebSocketHandler()
+
 	// Handlers
 	router.NoRoute(handlers.NoRouteHandler)
 	router.GET("/debug/vars", expvar.Handler())
+	router.GET("/ws", sessionMiddleware.CheckAuth(), sessionMiddleware.CSRF(), webSockets.WebSocketsHandler)
 	rootGroup := router.Group(server.settings.RootURL)
 	handlers.CreateSessionHandler(rootGroup, server.settings.SessionURL, sessionUseCase, sessionMiddleware)
 	handlers.CreateUserHandler(rootGroup, server.settings.ProfileURL, userUseCase, sessionMiddleware)
