@@ -66,12 +66,10 @@ func WebSocketsHandler(c *gin.Context) {
 			}
 		}()
 
-		for {
-			err := conn.ReadJSON(&inputData)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
+		err = conn.ReadJSON(&inputData)
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 
 		for userID, userConnections := range connections {
