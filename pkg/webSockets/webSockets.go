@@ -72,6 +72,8 @@ func WebSocketsHandler(c *gin.Context) {
 			}
 
 			for userID, userConnections := range connections {
+				mux.Lock()
+				mux.Unlock()
 				for _, connection := range userConnections {
 					if userID == uid {
 						continue
