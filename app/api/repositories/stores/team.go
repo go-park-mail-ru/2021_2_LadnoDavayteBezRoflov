@@ -34,7 +34,9 @@ func (teamStore *TeamStore) Update(team *models.Team) (err error) {
 
 	if team.Title != "" && team.Title != oldTeam.Title {
 		var isNewTitleExist bool
-		isNewTitleExist, err = teamStore.IsTeamExist(team)
+		emptyTeam := new(models.Team)
+		emptyTeam.Title = team.Title
+		isNewTitleExist, err = teamStore.IsTeamExist(emptyTeam)
 		if isNewTitleExist {
 			return
 		}
