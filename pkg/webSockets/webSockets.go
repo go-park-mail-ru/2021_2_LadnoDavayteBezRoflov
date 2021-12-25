@@ -1,28 +1,59 @@
 package webSockets
 
 import (
+	"sync"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
 var (
 	upgrader    websocket.Upgrader
-	connections map[uint]*websocket.Conn
+	connections map[uint][]*websocket.Conn
+	mux         *sync.Mutex
 )
+
+func SetupWebSocketHandler() {
+	connections = make(map[uint][]*websocket.Conn)
+	mux = &sync.Mutex{}
+}
 
 func WebSocketsHandler(c *gin.Context) {
 	var inputData struct {
 		BID uint `json:"message"`
 	}
 
-	uid, exists := c.Get("uid")
+	_uid, exists := c.Get("uid")
+	uid := _uid.(uint)
 	if exists {
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
 			return
 		}
+		defer conn.Close()
 
-		connections[uid.(uint)] = conn
+		{
+			mux.Lock()
+			defer mux.Unlock()
+			for _, elem := range connections[uid] {
+				if elem == conn {
+					return
+				}
+			}
+			connections[uid] = append(connections[uid], conn)
+		}
+
+		defer func() {
+			mux.Lock()
+			defer mux.Unlock()
+			for idx, elem := range connections[uid] {
+				if elem == conn {
+					connections[uid][idx] = connections[uid][len(connections[uid])-1]
+					connections[uid] = connections[uid][:len(connections[uid])-1]
+					return
+				}
+			}
+		}()
 
 		for {
 			err := conn.ReadJSON(&inputData)
@@ -30,10 +61,16 @@ func WebSocketsHandler(c *gin.Context) {
 				break
 			}
 
-			for _, connection := range connections {
-				err = connection.WriteJSON(&inputData)
-				if err != nil {
-					break
+			for userID, userConnections := range connections {
+				for _, connection := range userConnections {
+					if userID == uid {
+						continue
+					}
+
+					err = connection.WriteJSON(&inputData)
+					if err != nil {
+						break
+					}
 				}
 			}
 		}
