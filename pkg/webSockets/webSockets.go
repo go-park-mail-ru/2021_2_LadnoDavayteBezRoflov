@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -19,6 +20,7 @@ func SetupWebSocketHandler() {
 	connections = make(map[uint][]*websocket.Conn)
 	mux = &sync.Mutex{}
 	upgrader = websocket.Upgrader{
+		HandshakeTimeout: 10 * time.Microsecond,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
