@@ -72,23 +72,22 @@ func WebSocketsHandler(c *gin.Context) {
 				fmt.Println(err)
 				break
 			}
+		}
 
-			for userID, userConnections := range connections {
-				mux.Lock()
-				for _, connection := range userConnections {
-					if userID == uid {
-						continue
-					}
-
-					err = connection.WriteJSON(&inputData)
-					if err != nil {
-						fmt.Println(err)
-						mux.Unlock()
-						break
-					}
+		for userID, userConnections := range connections {
+			mux.Lock()
+			for _, connection := range userConnections {
+				if userID == uid {
+					continue
 				}
-				mux.Unlock()
+				err = connection.WriteJSON(&inputData)
+				if err != nil {
+					fmt.Println(err)
+					mux.Unlock()
+					break
+				}
 			}
+			mux.Unlock()
 		}
 	}
 }
