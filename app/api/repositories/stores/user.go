@@ -255,14 +255,23 @@ func (userStore *UserStore) FindBoardMembersByLogin(bid uint, text string, amoun
 }
 
 func (userStore *UserStore) FindBoardInvitedMembersByLogin(bid uint, text string, amount int) (users *[]models.PublicUserInfo, err error) {
+	var uids []uint
+	userStore.db.Table("users").
+		Joins("LEFT OUTER JOIN users_teams ON users_teams.user_uid = users.uid").
+		Joins("LEFT OUTER JOIN teams ON users_teams.team_t_id = teams.t_id").
+		Joins("JOIN boards ON teams.t_id = boards.t_id").
+		Where("boards.b_id = ?", bid).Pluck("users.uid", &uids)
+
 	users = new([]models.PublicUserInfo)
 	text = strings.Join([]string{"%", text, "%"}, "")
 
-	err = userStore.db.Table("users").
-		Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
-		Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
-		Where("boards.b_id = ? AND LOWER(users.login) LIKE ?", bid, strings.ToLower(text)).
-		Select("users.uid, users.login, users.avatar").Limit(amount).Find(users).Error
+	err = userStore.db.Model(&models.User{}).Not(uids).Where("LOWER(login) LIKE ?", strings.ToLower(text)).Limit(amount).Find(users).Error
+	//
+	//err = userStore.db.Table("users").
+	//	Joins("LEFT OUTER JOIN users_boards ON users_boards.user_uid = users.uid").
+	//	Joins("LEFT OUTER JOIN boards ON users_boards.board_b_id = boards.b_id").
+	//	Where("boards.b_id = ? AND LOWER(users.login) LIKE ?", bid, strings.ToLower(text)).
+	//	Select("users.uid, users.login, users.avatar").Limit(amount).Find(users).Error
 
 	return
 }
