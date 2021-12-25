@@ -37,10 +37,15 @@ func WebSocketsHandler(c *gin.Context) {
 	if exists {
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("SHIT: ", err)
 			return
 		}
-		defer conn.Close()
+		defer func(conn *websocket.Conn) {
+			err := conn.Close()
+			if err != nil {
+				fmt.Println("SHITx2: ", err)
+			}
+		}(conn)
 
 		{
 			mux.Lock()
@@ -68,24 +73,24 @@ func WebSocketsHandler(c *gin.Context) {
 
 		err = conn.ReadJSON(&inputData)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("HERE: ", err)
 			return
 		}
 
 		for userID, userConnections := range connections {
-			mux.Lock()
 			for _, connection := range userConnections {
 				if userID == uid {
 					continue
 				}
+				mux.Lock()
 				err = connection.WriteJSON(&inputData)
 				if err != nil {
-					fmt.Println(err)
+					fmt.Println("HERE2: ", err)
 					mux.Unlock()
 					break
 				}
+				mux.Unlock()
 			}
-			mux.Unlock()
 		}
 	}
 }
