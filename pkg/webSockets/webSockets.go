@@ -71,11 +71,13 @@ func WebSocketsHandler(c *gin.Context) {
 			}
 		}()
 
+		mux.Lock()
 		err = conn.ReadJSON(&inputData)
 		if err != nil {
 			fmt.Println("HERE: ", err)
 			return
 		}
+		mux.Unlock()
 
 		for userID, userConnections := range connections {
 			for _, connection := range userConnections {
