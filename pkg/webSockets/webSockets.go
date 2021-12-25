@@ -2,6 +2,7 @@ package webSockets
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,11 @@ var (
 func SetupWebSocketHandler() {
 	connections = make(map[uint][]*websocket.Conn)
 	mux = &sync.Mutex{}
+	upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 }
 
 func WebSocketsHandler(c *gin.Context) {
