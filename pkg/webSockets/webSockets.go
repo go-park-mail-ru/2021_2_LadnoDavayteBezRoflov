@@ -1,6 +1,7 @@
 package webSockets
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +29,7 @@ func WebSocketsHandler(c *gin.Context) {
 	if exists {
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 		defer conn.Close()
@@ -37,6 +39,7 @@ func WebSocketsHandler(c *gin.Context) {
 			defer mux.Unlock()
 			for _, elem := range connections[uid] {
 				if elem == conn {
+					fmt.Println("CONFLICT")
 					return
 				}
 			}
@@ -58,6 +61,7 @@ func WebSocketsHandler(c *gin.Context) {
 		for {
 			err := conn.ReadJSON(&inputData)
 			if err != nil {
+				fmt.Println(err)
 				break
 			}
 
@@ -69,6 +73,7 @@ func WebSocketsHandler(c *gin.Context) {
 
 					err = connection.WriteJSON(&inputData)
 					if err != nil {
+						fmt.Println(err)
 						break
 					}
 				}
