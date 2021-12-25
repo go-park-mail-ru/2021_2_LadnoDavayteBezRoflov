@@ -154,6 +154,8 @@ func (server *Server) Run() {
 	monitor.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})
 	monitor.Use(router)
 
+	webSockets.SetupWebSocketHandler()
+
 	// Handlers
 	router.NoRoute(handlers.NoRouteHandler)
 	router.GET("/debug/vars", expvar.Handler())
