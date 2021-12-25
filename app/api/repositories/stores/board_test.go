@@ -1,24 +1,18 @@
 package stores
 
-import (
-	"github.com/DATA-DOG/go-sqlmock"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-)
-
-func createBoardMockDB() (*BoardStore, sqlmock.Sqlmock, error) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		return nil, nil, err
-	}
-	gdb, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
-	if err != nil {
-		_ = db.Close()
-		return nil, nil, err
-	}
-
-	return &BoardStore{db: gdb}, mock, nil
-}
+//func createBoardMockDB() (*BoardStore, sqlmock.Sqlmock, error) {
+//	db, mock, err := sqlmock.New()
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//	gdb, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+//	if err != nil {
+//		_ = db.Close()
+//		return nil, nil, err
+//	}
+//
+//	return &BoardStore{db: gdb}, mock, nil
+//}
 
 //func TestCreateBoard(t *testing.T) {
 //	t.Parallel()

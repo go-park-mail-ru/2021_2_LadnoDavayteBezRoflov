@@ -222,8 +222,7 @@ func (boardUseCase *BoardUseCaseImpl) DeleteBoard(uid, bid uint) (err error) {
 		return customErrors.ErrNoAccess
 	}
 
-	users := new([]models.PublicUserInfo)
-	users, err = boardUseCase.boardRepository.GetBoardInvitedMembers(bid)
+	users, err := boardUseCase.boardRepository.GetBoardInvitedMembers(bid)
 	if err != nil {
 		return
 	}

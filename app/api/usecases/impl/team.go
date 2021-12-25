@@ -84,14 +84,13 @@ func (teamUseCase *TeamUseCaseImpl) DeleteTeam(uid, tid uint) (err error) {
 		return
 	}
 
-	boards := new([]models.Board)
-	boards, err = teamUseCase.teamRepository.GetTeamBoards(tid)
+	boards, err := teamUseCase.teamRepository.GetTeamBoards(tid)
 	if err != nil {
 		return
 	}
 
 	for _, board := range *boards {
-		users := new([]models.PublicUserInfo)
+		var users *[]models.PublicUserInfo
 		users, err = teamUseCase.boardRepository.GetBoardInvitedMembers(board.BID)
 		if err != nil {
 			return
@@ -106,7 +105,7 @@ func (teamUseCase *TeamUseCaseImpl) DeleteTeam(uid, tid uint) (err error) {
 		}
 	}
 
-	users := new([]models.User)
+	var users *[]models.User
 	users, err = teamUseCase.teamRepository.GetTeamMembers(tid)
 	if err != nil {
 		return
