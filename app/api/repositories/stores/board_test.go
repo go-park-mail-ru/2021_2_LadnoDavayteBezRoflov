@@ -1,11 +1,7 @@
 package stores
 
 import (
-	customErrors "backendServer/pkg/errors"
-	"testing"
-
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -75,40 +71,40 @@ func createBoardMockDB() (*BoardStore, sqlmock.Sqlmock, error) {
 //	err = mock.ExpectationsWereMet()
 //	assert.NoError(t, err)
 //}
-
-func TestDeleteBoard(t *testing.T) {
-	t.Parallel()
-
-	repo, mock, err := createBoardMockDB()
-	if err != nil {
-		t.Fatalf("cant create mockDB: %s", err)
-	}
-
-	testBID := uint(1)
-
-	// success
-	mock.ExpectBegin()
-	mock.ExpectExec(`DELETE FROM "boards" WHERE "boards"."b_id"`).WithArgs(
-		testBID,
-	).WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectCommit()
-
-	err = repo.Delete(testBID)
-	assert.NoError(t, err)
-
-	err = mock.ExpectationsWereMet()
-	assert.NoError(t, err)
-
-	// error
-	mock.ExpectBegin()
-	mock.ExpectExec(`DELETE FROM "boards" WHERE "boards"."b_id"`).WithArgs(
-		testBID,
-	).WillReturnError(customErrors.ErrInternal)
-	mock.ExpectRollback()
-
-	err = repo.Delete(testBID)
-	assert.Error(t, err)
-
-	err = mock.ExpectationsWereMet()
-	assert.NoError(t, err)
-}
+//
+//func TestDeleteBoard(t *testing.T) {
+//	t.Parallel()
+//
+//	repo, mock, err := createBoardMockDB()
+//	if err != nil {
+//		t.Fatalf("cant create mockDB: %s", err)
+//	}
+//
+//	testBID := uint(1)
+//
+//	// success
+//	mock.ExpectBegin()
+//	mock.ExpectExec(`DELETE FROM "boards" WHERE "boards"."b_id"`).WithArgs(
+//		testBID,
+//	).WillReturnResult(sqlmock.NewResult(1, 1))
+//	mock.ExpectCommit()
+//
+//	err = repo.Delete(testBID)
+//	assert.NoError(t, err)
+//
+//	err = mock.ExpectationsWereMet()
+//	assert.NoError(t, err)
+//
+//	// error
+//	mock.ExpectBegin()
+//	mock.ExpectExec(`DELETE FROM "boards" WHERE "boards"."b_id"`).WithArgs(
+//		testBID,
+//	).WillReturnError(customErrors.ErrInternal)
+//	mock.ExpectRollback()
+//
+//	err = repo.Delete(testBID)
+//	assert.Error(t, err)
+//
+//	err = mock.ExpectationsWereMet()
+//	assert.NoError(t, err)
+//}
